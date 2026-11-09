@@ -1,0 +1,35 @@
+# Local configuration and secrets
+.env
+.env.*
+!.env.example
+*.secret
+secrets/
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/
+env/
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+coverage/
+htmlcov/
+
+# Node / Angular
+node_modules/
+frontend/dist/
+frontend/.angular/
+
+# Docker and runtime output
+*.log
+docker-compose.override.yml
+
+# Local data and generated files
+*.tmp
+*.swp
+Thumbs.db
+.DS_Store
