@@ -21,7 +21,7 @@ GeoJSON para Angular/Leaflet. Un flujo separado reproduce históricos de 2025 en
 
 **Primary Dependencies**: `aiokafka`, `requests`, `geopandas`, `shapely`,
 `fastapi`, `uvicorn`, `psycopg2`, `asyncpg`, `pydantic`; imágenes
-`python:3.11-slim`, `postgres:15-postgis` y `confluentinc/cp-kafka`
+`python:3.11-slim`, `postgis/postgis:15-3.5` y `confluentinc/cp-kafka`
 
 **Storage**: PostgreSQL 15 + PostGIS; esquema dimensional con `fact_sismos`,
 `dim_geografia`, `dim_tiempo` y `cuarentena`
@@ -141,7 +141,7 @@ para el entorno local.
   CORS a `*` en demo o a una lista configurable de dominios Netlify/ngrok.
 - **Kafka**: `confluentinc/cp-kafka`; topics `terremotos_raw` y
   `terremotos_replay`, con retención suficiente para replay local.
-- **PostgreSQL**: `postgres:15-postgis`; volumen persistente e inicialización
+- **PostgreSQL**: `postgis/postgis:15-3.5`; volumen persistente e inicialización
   idempotente desde `db/init/001_schema.sql`.
 
 ## Phase 0: Outline & Research

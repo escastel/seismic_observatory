@@ -19,10 +19,10 @@ application service starts.
 **Purpose**: Crear la estructura inicial y configuración común sin implementar aún
 las historias de usuario.
 
-- [ ] T001 Crear la estructura raíz `producer/`, `consumer/`, `api/`, `db/init/`, `db/seeds/` y `tests/` según `specs/001-streaming-sismos-etl/plan.md`
-- [ ] T002 [P] Crear `producer/requirements.txt`, `consumer/requirements.txt` y `api/requirements.txt` con las dependencias definidas en `specs/001-streaming-sismos-etl/plan.md`
-- [ ] T003 [P] Crear configuración común por variables de entorno documentada en `producer/app/config.py`, `consumer/app/config.py` y `api/app/config.py`
-- [ ] T004 [P] Crear el esqueleto de entrada `producer/app/main.py`, `consumer/app/main.py` y `api/app/main.py` con logging estructurado
+- [X] T001 Crear la estructura raíz `producer/`, `consumer/`, `api/`, `db/init/`, `db/seeds/` y `tests/` según `specs/001-streaming-sismos-etl/plan.md`
+- [X] T002 [P] Crear `producer/requirements.txt`, `consumer/requirements.txt` y `api/requirements.txt` con las dependencias definidas en `specs/001-streaming-sismos-etl/plan.md`
+- [X] T003 [P] Crear configuración común por variables de entorno documentada en `producer/app/config.py`, `consumer/app/config.py` y `api/app/config.py`
+- [X] T004 [P] Crear el esqueleto de entrada `producer/app/main.py`, `consumer/app/main.py` y `api/app/main.py` con logging estructurado
 
 ---
 
@@ -35,20 +35,20 @@ Consumer o API.
 
 ### Database
 
-- [ ] T005 Crear `db/init/001_schema.sql` con `dim_geografia`, `dim_tiempo`, `fact_sismos` y `cuarentena` conforme a `specs/001-streaming-sismos-etl/data-model.md`
-- [ ] T006 Añadir a `db/init/001_schema.sql` las restricciones: `external_id` único y no nulo, FK obligatorias, `country = 'Sin país asignado'` para eventos marítimos y `quality_dimension` limitada a Completitud, Validez, Exactitud, Consistencia, Oportunidad o Unicidad
-- [ ] T007 Añadir a `db/init/001_schema.sql` los índices B-Tree sobre `dim_geografia.country`, `fact_sismos.event_time`, `fact_sismos.geografia_key`, `fact_sismos.magnitude` y `fact_sismos.external_id`
-- [ ] T008 [P] Añadir datos mínimos reproducibles de calendario y catálogo geográfico en `db/init/002_seed_dimensions.sql`, sin reemplazar datos existentes al reiniciar PostgreSQL
+- [X] T005 Crear `db/init/001_schema.sql` con `dim_geografia`, `dim_tiempo`, `fact_sismos` y `cuarentena` conforme a `specs/001-streaming-sismos-etl/data-model.md`
+- [X] T006 Añadir a `db/init/001_schema.sql` las restricciones: `external_id` único y no nulo, FK obligatorias, `country = 'Sin país asignado'` para eventos marítimos y `quality_dimension` limitada a Completitud, Validez, Exactitud, Consistencia, Oportunidad o Unicidad
+- [X] T007 Añadir a `db/init/001_schema.sql` los índices B-Tree sobre `dim_geografia.country`, `fact_sismos.event_time`, `fact_sismos.geografia_key`, `fact_sismos.magnitude` y `fact_sismos.external_id`
+- [X] T008 [P] Añadir datos mínimos reproducibles de calendario y catálogo geográfico en `db/init/002_seed_dimensions.sql`, sin reemplazar datos existentes al reiniciar PostgreSQL
 
 ### Kafka
 
-- [ ] T009 Crear `compose.yaml` con el servicio `kafka` basado en `confluentinc/cp-kafka`, configuración KRaft local, healthcheck y topics `terremotos_raw` y `terremotos_replay`
+- [X] T009 Crear `compose.yaml` con el servicio `kafka` basado en `confluentinc/cp-kafka`, configuración KRaft local, healthcheck y topics `terremotos_raw` y `terremotos_replay`
 
 ### Docker
 
-- [ ] T010 Añadir el servicio `postgres` basado en `postgres:15-postgis` a `compose.yaml`, volumen persistente, credenciales por variables de entorno y montaje de `db/init/`
-- [ ] T011 Configurar en `compose.yaml` red interna, healthchecks y reintentos de conexión para que PostgreSQL y Kafka sean dependencias saludables, no solo dependencias de arranque
-- [ ] T012 Verificar que `docker compose up --build -d` levanta únicamente los cinco servicios locales `postgres`, `kafka`, `producer`, `consumer` y `api` definidos por la constitución
+- [X] T010 Añadir el servicio `postgres` basado en `postgis/postgis:15-3.5` a `compose.yaml`, volumen persistente, credenciales por variables de entorno y montaje de `db/init/`
+- [X] T011 Configurar en `compose.yaml` red interna, healthchecks y reintentos de conexión para que PostgreSQL y Kafka sean dependencias saludables, no solo dependencias de arranque
+- [X] T012 Verificar que `docker compose up --build -d` levanta únicamente los cinco servicios locales `postgres`, `kafka`, `producer`, `consumer` y `api` definidos por la constitución
 
 **Checkpoint**: PostgreSQL y Kafka están disponibles, el esquema es repetible y los
 topics existen; las historias pueden implementarse sin cambiar sus contratos base.
@@ -87,9 +87,9 @@ confirmación Kafka antes del commit PostgreSQL.
 
 ### Docker
 
-- [ ] T025 [US1] Crear `producer/Dockerfile` con `python:3.11-slim`, instalación de `producer/requirements.txt` y ejecución de `producer/app/main.py`
-- [ ] T026 [US1] Crear `consumer/Dockerfile` con `python:3.11-slim`, dependencias GeoPandas/`shapely`, montaje de `paises.geojson` y ejecución de `consumer/app/main.py`
-- [ ] T027 [US1] Añadir `producer` y `consumer` a `compose.yaml` con `depends_on` saludable para Kafka/PostgreSQL, variables de topics y volumen de datos espaciales
+- [X] T025 [US1] Crear `producer/Dockerfile` con `python:3.11-slim`, instalación de `producer/requirements.txt` y ejecución de `producer/app/main.py`
+- [X] T026 [US1] Crear `consumer/Dockerfile` con `python:3.11-slim`, dependencias GeoPandas/`shapely`, montaje de `paises.geojson` y ejecución de `consumer/app/main.py`
+- [X] T027 [US1] Añadir `producer` y `consumer` a `compose.yaml` con `depends_on` saludable para Kafka/PostgreSQL, variables de topics y volumen de datos espaciales
 
 **Checkpoint**: La historia P1 funciona de extremo a extremo desde USGS hasta
 PostgreSQL/cuarentena y puede demostrarse sin API.
@@ -117,8 +117,8 @@ combinables, respuestas vacías, errores de parámetros y las tres respuestas RE
 
 ### Docker
 
-- [ ] T036 [US2] Crear `api/Dockerfile` con `python:3.11-slim`, instalación de `api/requirements.txt` y ejecución de `uvicorn api.app.main:app`
-- [ ] T037 [US2] Añadir `api` a `compose.yaml` con dependencia saludable de PostgreSQL, puerto local documentado y variables `DATABASE_URL` y `CORS_ORIGINS`
+- [X] T036 [US2] Crear `api/Dockerfile` con `python:3.11-slim`, instalación de `api/requirements.txt` y ejecución de `uvicorn api.app.main:app`
+- [X] T037 [US2] Añadir `api` a `compose.yaml` con dependencia saludable de PostgreSQL, puerto local documentado y variables `DATABASE_URL` y `CORS_ORIGINS`
 
 ### Frontend
 
