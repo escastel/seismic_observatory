@@ -54,8 +54,16 @@ de navegador.
 
 ## Validar replay de 2025
 
-1. Publicar el JSONL histórico en `terremotos_replay` usando la herramienta de
-   replay con una tasa al menos 10 veces superior a un evento por 60 segundos.
+1. Publicar el JSONL histórico en `terremotos_replay` usando el publicador
+   integrado del contenedor Productor:
+
+   ```powershell
+   docker compose run --rm producer python -m app.replay `
+     --path /data/seeds/historical_2025.jsonl --rate 10
+   ```
+
+   La tasa por defecto de 10 eventos/segundo es al menos diez veces superior al
+   ciclo normal de un evento cada 60 segundos.
 2. Registrar el número de mensajes publicados, persistidos y puestos en cuarentena.
 3. Consultar la API y verificar que los conteos son trazables al lote y que una
    segunda ejecución no crea duplicados.

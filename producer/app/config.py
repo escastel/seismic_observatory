@@ -15,5 +15,6 @@ def _required_env(name: str) -> str:
 class ProducerConfig:
     kafka_bootstrap_servers: str = _required_env("KAFKA_BOOTSTRAP_SERVERS")
     raw_topic: str = _required_env("KAFKA_RAW_TOPIC")
+    replay_topic: str = _required_env("KAFKA_REPLAY_TOPIC")
     feed_url: str = _required_env("USGS_FEED_URL")
     interval_seconds: int = int(_required_env("PRODUCER_INTERVAL_SECONDS"))

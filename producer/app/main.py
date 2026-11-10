@@ -49,6 +49,7 @@ async def publish_cycle(config: ProducerConfig, producer: AIOKafkaProducer) -> i
 
 async def run(config: ProducerConfig) -> None:
     producer = AIOKafkaProducer(bootstrap_servers=config.kafka_bootstrap_servers)
+    retries = 0
     while True:
         try:
             await producer.start()
@@ -56,7 +57,9 @@ async def run(config: ProducerConfig) -> None:
             await producer.stop()
             await asyncio.sleep(config.interval_seconds)
         except (FeedError, OSError, RuntimeError) as exc:
+            retries += 1
             logger.exception("Producer cycle failed; retrying: %s", exc)
+            logger.info("Producer metrics retries=%d", retries)
             try:
                 await producer.stop()
             except RuntimeError:

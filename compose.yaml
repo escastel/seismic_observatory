@@ -58,6 +58,8 @@ services:
     depends_on:
       kafka:
         condition: service_healthy
+    volumes:
+      - ./db/seeds:/data/seeds:ro
     networks:
       - observatorio
 
@@ -74,6 +76,7 @@ services:
         condition: service_healthy
     volumes:
       - ./frontend/public/datos/paises.geojson:/data/paises.geojson:ro
+      - ./db/seeds:/data/seeds:ro
     networks:
       - observatorio
 

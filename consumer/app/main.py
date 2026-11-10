@@ -8,6 +8,7 @@ import logging
 from typing import Any
 
 from aiokafka import AIOKafkaConsumer
+from aiokafka.structs import TopicPartition
 
 from .config import ConsumerConfig
 from .persistence import persist_event, persist_quarantine, persist_quarantines
@@ -29,7 +30,7 @@ async def process_message(
     message: Any,
     config: ConsumerConfig,
     spatial: SpatialEnricher,
-) -> None:
+) -> bool:
     source_topic = message.topic
     payload = _quarantine_payload(message.value)
     try:
@@ -39,7 +40,7 @@ async def process_message(
             config.database_dsn, payload, None, source_topic, message.partition, message.offset,
             "Validez", "malformed_json", "Kafka message is not valid JSON",
         )
-        return
+        return True
 
     event, failures = validate_event(decoded)
     if failures:
@@ -60,7 +61,7 @@ async def process_message(
                 for failure in failures
             ],
         )
-        return
+        return True
 
     geography = spatial.lookup(event.longitude, event.latitude)
     persist_event(config.database_dsn, event, geography, source_topic)
@@ -68,24 +69,42 @@ async def process_message(
         "Persisted event source_topic=%s kafka_partition=%s kafka_offset=%s external_id=%s updated=%s",
         source_topic, message.partition, message.offset, event.external_id, event.updated.isoformat(),
     )
+    return False
 
 
 async def run(config: ConsumerConfig) -> None:
     consumer = AIOKafkaConsumer(
         config.raw_topic,
+        config.replay_topic,
         bootstrap_servers=config.kafka_bootstrap_servers,
         group_id=config.kafka_group_id,
         enable_auto_commit=False,
         value_deserializer=None,
     )
     spatial = SpatialEnricher(config.countries_path)
+    processed = 0
+    quarantined = 0
+    failures = 0
     await consumer.start()
     try:
         async for message in consumer:
             try:
-                await process_message(message, config, spatial)
+                was_quarantined = await process_message(message, config, spatial)
                 await consumer.commit()
+                processed += 1
+                topic_partition = TopicPartition(message.topic, message.partition)
+                position = await consumer.position(topic_partition)
+                highwater = consumer.highwater(topic_partition)
+                lag = max(0, highwater - position) if highwater is not None else -1
+                quarantined += int(was_quarantined)
+                logger.info(
+                    "Consumer metrics processed=%d quarantined=%d failures=%d lag=%d "
+                    "source_topic=%s kafka_partition=%s kafka_offset=%s",
+                    processed, quarantined, failures, lag,
+                    message.topic, message.partition, message.offset,
+                )
             except Exception:
+                failures += 1
                 logger.exception(
                     "Message processing failed; offset remains uncommitted "
                     "source_topic=%s kafka_partition=%s kafka_offset=%s",

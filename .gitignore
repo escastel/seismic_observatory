@@ -18,6 +18,7 @@ env/
 .ruff_cache/
 coverage/
 htmlcov/
+.coverage*
 
 # Node / Angular
 node_modules/
@@ -31,6 +32,9 @@ docker-compose.override.yml
 # Local data and generated files
 *.tmp
 *.swp
+*.db
+*.sqlite
+*.sqlite3
 Thumbs.db
 .DS_Store
 .vscode

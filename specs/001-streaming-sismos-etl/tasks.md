@@ -140,21 +140,21 @@ cuarentena y duplicados.
 
 ### Producer
 
-- [ ] T039 [P] [US3] Crear el publicador de replay en `producer/app/replay.py` que lea `db/seeds/historical_2025.jsonl`, publique cada evento en `terremotos_replay` y acepte una tasa configurable
-- [ ] T040 [US3] Añadir validación de año 2025, contador de mensajes publicados y logging de lote/origen en `producer/app/replay.py`
+- [X] T039 [P] [US3] Crear el publicador de replay en `producer/app/replay.py` que lea `db/seeds/historical_2025.jsonl`, publique cada evento en `terremotos_replay` y acepte una tasa configurable
+- [X] T040 [US3] Añadir validación de año 2025, contador de mensajes publicados y logging de lote/origen en `producer/app/replay.py`
 
 ### Consumer
 
-- [ ] T041 [US3] Extender `consumer/app/main.py` para suscribirse a `terremotos_raw` y `terremotos_replay`, conservando `source_topic` sin mezclar silenciosamente ambos canales
-- [ ] T042 [US3] Verificar que el replay usa exactamente `consumer/app/quality.py`, `consumer/app/spatial.py` y `consumer/app/persistence.py`, incluyendo cuarentena, `Sin país asignado` y upsert por `updated`
+- [X] T041 [US3] Extender `consumer/app/main.py` para suscribirse a `terremotos_raw` y `terremotos_replay`, conservando `source_topic` sin mezclar silenciosamente ambos canales
+- [X] T042 [US3] Verificar que el replay usa exactamente `consumer/app/quality.py`, `consumer/app/spatial.py` y `consumer/app/persistence.py`, incluyendo cuarentena, `Sin país asignado` y upsert por `updated`
 
 ### Database
 
-- [ ] T043 [US3] Preparar `db/seeds/historical_2025.jsonl` con un lote reproducible que incluya eventos válidos, inválidos, marítimos y repetidos para la demostración
+- [X] T043 [US3] Preparar `db/seeds/historical_2025.jsonl` con un lote reproducible que incluya eventos válidos, inválidos, marítimos y repetidos para la demostración
 
 ### Docker
 
-- [ ] T044 [US3] Montar `db/seeds/` y habilitar el comando de replay documentado en `compose.yaml` sin añadir un sexto servicio local
+- [X] T044 [US3] Montar `db/seeds/` y habilitar el comando de replay documentado en `compose.yaml` sin añadir un sexto servicio local
 
 **Checkpoint**: El histórico puede procesarse de forma acelerada, trazable y
 repetible sin alterar la ingesta normal.
@@ -165,11 +165,11 @@ repetible sin alterar la ingesta normal.
 
 **Purpose**: Endurecimiento, documentación y validación transversal.
 
-- [ ] T045 [P] Documentar variables, servicios, topics y troubleshooting en `README.md` enlazando `specs/001-streaming-sismos-etl/quickstart.md`
-- [ ] T046 [P] Añadir logging de métricas de procesados, cuarentena, reintentos y lag en `producer/app/`, `consumer/app/` y `api/app/`
-- [ ] T047 [P] Revisar `compose.yaml`, Dockerfiles y requirements para confirmar ausencia de Spark, Flink, Kubernetes, Streamlit y servicios Cloud
-- [ ] T048 Ejecutar manualmente `docker compose up --build -d` y todos los escenarios de `specs/001-streaming-sismos-etl/quickstart.md`
-- [ ] T049 Verificar manualmente el cumplimiento constitucional y documentar resultados de calidad según la regla 1-10-100, sin generar informe automático
+- [X] T045 [P] Documentar variables, servicios, topics y troubleshooting en `README.md` enlazando `specs/001-streaming-sismos-etl/quickstart.md`
+- [X] T046 [P] Añadir logging de métricas de procesados, cuarentena, reintentos y lag en `producer/app/`, `consumer/app/` y `api/app/`
+- [X] T047 [P] Revisar `compose.yaml`, Dockerfiles y requirements para confirmar ausencia de Spark, Flink, Kubernetes, Streamlit y servicios Cloud
+- [X] T048 Ejecutar manualmente `docker compose up --build -d` y todos los escenarios de `specs/001-streaming-sismos-etl/quickstart.md`
+- [X] T049 Verificar manualmente el cumplimiento constitucional y documentar resultados de calidad según la regla 1-10-100, sin generar informe automático
 
 ---
 

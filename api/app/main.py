@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import logging
+import os
 from contextlib import asynccontextmanager
 from datetime import datetime
 from typing import AsyncIterator, Literal
 
 import asyncpg
+import ngrok
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -30,14 +32,34 @@ config = ApiConfig()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    app.state.ngrok_forwarder = None
     try:
         app.state.db_pool = await asyncpg.create_pool(config.database_dsn, min_size=1, max_size=10)
     except (OSError, asyncpg.PostgresError) as exc:
         logger.error("Database pool initialization failed: %s", exc)
         app.state.db_pool = None
-    yield
-    if app.state.db_pool is not None:
-        await app.state.db_pool.close()
+    if os.getenv("NGROK_AUTHTOKEN"):
+        try:
+            app.state.ngrok_forwarder = await ngrok.forward(
+                8000,
+                authtoken_from_env=True,
+                domain="modular-guidance-daybreak.ngrok-free.dev",
+            )
+        except (OSError, RuntimeError) as exc:
+            logger.error("ngrok tunnel initialization failed: %s", exc)
+        else:
+            logger.info("ngrok tunnel available at: %s", app.state.ngrok_forwarder.url())
+
+    try:
+        yield
+    finally:
+        if app.state.ngrok_forwarder is not None:
+            try:
+                await ngrok.disconnect(app.state.ngrok_forwarder.url())
+            except (OSError, RuntimeError) as exc:
+                logger.error("ngrok tunnel shutdown failed: %s", exc)
+        if app.state.db_pool is not None:
+            await app.state.db_pool.close()
 
 
 app = FastAPI(
@@ -119,6 +141,10 @@ async def events(
         raise database_error(exc) from exc
 
     items = [EventResponse.model_validate(dict(row)) for row in rows]
+    logger.info(
+        "API metrics endpoint=eventos returned=%d total=%d limit=%d offset=%d",
+        len(items), total, filters.limit, filters.offset,
+    )
     if format == "geojson" or request.headers.get("accept") == "application/geo+json":
         features = []
         for item in items:
@@ -145,6 +171,7 @@ async def countries(
         rows = await country_stats(pool, filters)
     except (OSError, asyncpg.PostgresError) as exc:
         raise database_error(exc) from exc
+    logger.info("API metrics endpoint=estadisticas/paises returned=%d", len(rows))
     return CountryStatsResponse(items=[dict(row) for row in rows])
 
 
@@ -159,6 +186,7 @@ async def timeline(
         rows = await timeline_stats(pool, filters, bucket)
     except (OSError, asyncpg.PostgresError) as exc:
         raise database_error(exc) from exc
+    logger.info("API metrics endpoint=estadisticas/timeline bucket=%s returned=%d", bucket, len(rows))
     return TimelineResponse(
         bucket=bucket,
         items=[{"period": row["period"].isoformat(), "count": row["count"]} for row in rows],
