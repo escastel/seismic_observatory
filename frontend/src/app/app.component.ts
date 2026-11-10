@@ -3,7 +3,16 @@ import { LeafletDirective } from '@bluehalo/ngx-leaflet';
 import * as L from 'leaflet';
 import type { FeatureCollection, Point } from 'geojson';
 
-type Properties = { mag: number | null; place: string; time: number; updated: number; country_name?: string | null };
+type Properties = {
+  mag: number | null;
+  place: string;
+  time: number | string;
+  updated: number | string;
+  country?: string | null;
+  continent?: string | null;
+  subregion?: string | null;
+  source_topic?: string;
+};
 type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; mode?: string } };
 type Config = { mode: 'demo' | 'api'; apiUrl: string; refreshMs: number; skipNgrokWarning: boolean };
 
@@ -63,7 +72,7 @@ export class AppComponent implements OnDestroy {
 
   private async refresh(config: Config): Promise<void> {
     try {
-      const url = config.mode === 'demo' ? 'datos/terremotos-demo.geojson' : `${config.apiUrl.replace(/\/$/, '')}/api/eventos`;
+      const url = config.mode === 'demo' ? 'datos/terremotos-demo.geojson' : `${config.apiUrl.replace(/\/$/, '')}/api/eventos?format=geojson`;
       const headers: Record<string, string> = {};
       if (config.mode === 'api' && config.skipNgrokWarning) headers['ngrok-skip-browser-warning'] = '1';
       const data = await this.readJson<Events>(url, headers);
@@ -80,7 +89,7 @@ export class AppComponent implements OnDestroy {
         const depthOk = typeof depth === 'number' && Number.isFinite(depth);
         const color = !depthOk ? '#64748b' : depth < 70 ? '#e8a317' : depth < 300 ? '#e35b37' : '#7b3fb6';
         const popup = document.createElement('div');
-        popup.textContent = `${p.place ?? 'Sin descripción'}\nMagnitud: ${magnitude ?? 'ND'}\nProfundidad: ${depthOk ? depth + ' km' : 'ND'}\nFecha UTC: ${this.date(p.time)}\nPaís: ${p.country_name ?? 'Sin país asignado'}\nID: ${feature.id ?? 'ND'}`;
+        popup.textContent = `${p.place ?? 'Sin descripción'}\nMagnitud: ${magnitude ?? 'ND'}\nProfundidad: ${depthOk ? depth + ' km' : 'ND'}\nFecha UTC: ${this.date(p.time)}\nPaís: ${p.country ?? 'Sin país asignado'}\nContinente: ${p.continent ?? 'Sin continente asignado'}\nSubregión: ${p.subregion ?? 'Sin subregión asignada'}\nID: ${feature.id ?? 'ND'}`;
         L.circleMarker([lat, lon], { radius: magnitude === null ? 4 : Math.max(3, Math.min(18, 3 + (magnitude + 1) * 2)), color, fillColor: color, fillOpacity: .75, weight: 1 }).bindPopup(popup).addTo(next);
         count++;
       }
@@ -96,8 +105,9 @@ export class AppComponent implements OnDestroy {
     }
   }
   private date(value: unknown): string {
-    if (typeof value !== 'number' || !Number.isFinite(value)) return 'ND';
-    const d = new Date(value); return Number.isNaN(d.getTime()) ? 'ND' : d.toISOString();
+    if (typeof value !== 'number' && typeof value !== 'string') return 'ND';
+    const d = new Date(value);
+    return Number.isNaN(d.getTime()) ? 'ND' : d.toISOString();
   }
   ngOnDestroy(): void { this.destroyed = true; clearTimeout(this.timer); this.controller.abort(); }
 }

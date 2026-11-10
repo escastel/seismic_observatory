@@ -1,5 +1,5 @@
 {
-  "mode": "demo",
+  "mode": "api",
   "apiUrl": "https://TU-DOMINIO-NGROK",
   "refreshMs": 60000,
   "skipNgrokWarning": true

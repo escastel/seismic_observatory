@@ -12,6 +12,9 @@ dist/
 build/
 coverage/
 *.log
+*.log*
+Dockerfile*
+coverage/
 specs/
 tests/
 frontend/node_modules/

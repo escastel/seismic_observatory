@@ -66,24 +66,24 @@ confirmación Kafka antes del commit PostgreSQL.
 
 ### Database
 
-- [ ] T013 [US1] Implementar el upsert transaccional condicionado por `updated` en `consumer/app/persistence.py`: actualizar solo cuando `excluded.updated > fact_sismos.updated` y conservar una única fila por `external_id`
-- [ ] T014 [US1] Implementar la inserción auditable en `cuarentena` en `consumer/app/persistence.py`, conservando payload, `source_topic`, partición, offset, dimensión de calidad y motivo concreto
+- [X] T013 [US1] Implementar el upsert transaccional condicionado por `updated` en `consumer/app/persistence.py`: actualizar solo cuando `excluded.updated > fact_sismos.updated` y conservar una única fila por `external_id`
+- [X] T014 [US1] Implementar la inserción auditable en `cuarentena` en `consumer/app/persistence.py`, conservando payload, `source_topic`, partición, offset, dimensión de calidad y motivo concreto
 
 ### Producer
 
-- [ ] T015 [P] [US1] Implementar la descarga del feed GeoJSON `earthquakes_feed.geojson` con `requests` y manejo explícito de feed inaccesible, vacío o malformado en `producer/app/feed.py`
-- [ ] T016 [US1] Implementar el ciclo configurable de 60 segundos en `producer/app/main.py`, extrayendo cada `feature`, conservando atributos/geometría y publicando JSON con clave estable `id` en `terremotos_raw`
-- [ ] T017 [US1] Implementar reintentos observables de conexión/publicación Kafka en `producer/app/main.py` sin descartar features silenciosamente
+- [X] T015 [P] [US1] Implementar la descarga del feed GeoJSON `earthquakes_feed.geojson` con `requests` y manejo explícito de feed inaccesible, vacío o malformado en `producer/app/feed.py`
+- [X] T016 [US1] Implementar el ciclo configurable de 60 segundos en `producer/app/main.py`, extrayendo cada `feature`, conservando atributos/geometría y publicando JSON con clave estable `id` en `terremotos_raw`
+- [X] T017 [US1] Implementar reintentos observables de conexión/publicación Kafka en `producer/app/main.py` sin descartar features silenciosamente
 
 ### Consumer
 
-- [ ] T018 [P] [US1] Implementar validaciones WAF en `consumer/app/quality.py`: magnitud no nula y numérica, `longitude` en `[-180, 180]`, `latitude` en `[-90, 90]`, coordenadas finitas, e `id`/`updated` presentes
-- [ ] T019 [P] [US1] Implementar el mapeo de fallos a las seis dimensiones de calidad en `consumer/app/quality.py`, usando Completitud para nulos, Validez para coordenadas erróneas y códigos estables para cada motivo
-- [ ] T020 [P] [US1] Implementar carga única de `paises.geojson` y cruce Point in Polygon con GeoPandas/`shapely` en `consumer/app/spatial.py`, devolviendo país, continente y subregión
-- [ ] T021 [US1] Garantizar en `consumer/app/spatial.py` que cualquier punto sin polígono terrestre recibe exactamente `Sin país asignado` y nunca el país más cercano
-- [ ] T022 [US1] Implementar el consumidor de `terremotos_raw` con `enable_auto_commit=False` en `consumer/app/main.py`, separando parseo, WAF, enriquecimiento y persistencia
-- [ ] T023 [US1] Coordinar en `consumer/app/main.py` la transacción PostgreSQL y Kafka: commit DB de upsert o cuarentena primero, `consumer.commit()` después, y offset sin confirmar ante cualquier fallo previo
-- [ ] T024 [US1] Conservar `source_topic`, `kafka_partition`, `kafka_offset`, `external_id` y timestamps en los logs del pipeline de `consumer/app/main.py` para auditar reintentos y replay
+- [X] T018 [P] [US1] Implementar validaciones WAF en `consumer/app/quality.py`: magnitud no nula y numérica, `longitude` en `[-180, 180]`, `latitude` en `[-90, 90]`, coordenadas finitas, e `id`/`updated` presentes
+- [X] T019 [P] [US1] Implementar el mapeo de fallos a las seis dimensiones de calidad en `consumer/app/quality.py`, usando Completitud para nulos, Validez para coordenadas erróneas y códigos estables para cada motivo
+- [X] T020 [P] [US1] Implementar carga única de `paises.geojson` y cruce Point in Polygon con GeoPandas/`shapely` en `consumer/app/spatial.py`, devolviendo país, continente y subregión
+- [X] T021 [US1] Garantizar en `consumer/app/spatial.py` que cualquier punto sin polígono terrestre recibe exactamente `Sin país asignado` y nunca el país más cercano
+- [X] T022 [US1] Implementar el consumidor de `terremotos_raw` con `enable_auto_commit=False` en `consumer/app/main.py`, separando parseo, WAF, enriquecimiento y persistencia
+- [X] T023 [US1] Coordinar en `consumer/app/main.py` la transacción PostgreSQL y Kafka: commit DB de upsert o cuarentena primero, `consumer.commit()` después, y offset sin confirmar ante cualquier fallo previo
+- [X] T024 [US1] Conservar `source_topic`, `kafka_partition`, `kafka_offset`, `external_id` y timestamps en los logs del pipeline de `consumer/app/main.py` para auditar reintentos y replay
 
 ### Docker
 
@@ -106,14 +106,14 @@ combinables, respuestas vacías, errores de parámetros y las tres respuestas RE
 
 ### API
 
-- [ ] T028 [P] [US2] Crear modelos de consulta y respuesta en `api/app/schemas.py` para filtros ISO, magnitud, paginación, eventos, conteos y `FeatureCollection`
-- [ ] T029 [P] [US2] Implementar pool `asyncpg` y manejo HTTP 503 en `api/app/db.py` con consultas parametrizadas y cierre limpio
-- [ ] T030 [US2] Implementar `GET /api/eventos` en `api/app/main.py` y `api/app/queries.py` con filtros combinables `country`, `date_from`, `date_to`, `min_magnitude`, `max_magnitude`, `limit` y `offset`
-- [ ] T031 [US2] Implementar la serialización GeoJSON `FeatureCollection` de `GET /api/eventos` en `api/app/main.py`, usando geometrías Point `[longitude, latitude, depth_km]` y propiedades geográficas
-- [ ] T032 [US2] Implementar `GET /api/estadisticas/paises` en `api/app/main.py` y `api/app/queries.py` con filtros de fecha/magnitud y conteo de `Sin país asignado`
-- [ ] T033 [US2] Implementar `GET /api/estadisticas/timeline` en `api/app/main.py` y `api/app/queries.py` con buckets `day`, `week` y `month`
-- [ ] T034 [US2] Validar rangos y fechas incompatibles en `api/app/schemas.py`, devolviendo errores claros HTTP 400/422 y colecciones vacías válidas
-- [ ] T035 [US2] Instalar middleware CORS en `api/app/main.py` con `CORS_ORIGINS`, wildcard para demo sin credenciales o lista explícita de Netlify/ngrok
+- [X] T028 [P] [US2] Crear modelos de consulta y respuesta en `api/app/schemas.py` para filtros ISO, magnitud, paginación, eventos, conteos y `FeatureCollection`
+- [X] T029 [P] [US2] Implementar pool `asyncpg` y manejo HTTP 503 en `api/app/db.py` con consultas parametrizadas y cierre limpio
+- [X] T030 [US2] Implementar `GET /api/eventos` en `api/app/main.py` y `api/app/queries.py` con filtros combinables `country`, `date_from`, `date_to`, `min_magnitude`, `max_magnitude`, `limit` y `offset`
+- [X] T031 [US2] Implementar la serialización GeoJSON `FeatureCollection` de `GET /api/eventos` en `api/app/main.py`, usando geometrías Point `[longitude, latitude, depth_km]` y propiedades geográficas
+- [X] T032 [US2] Implementar `GET /api/estadisticas/paises` en `api/app/main.py` y `api/app/queries.py` con filtros de fecha/magnitud y conteo de `Sin país asignado`
+- [X] T033 [US2] Implementar `GET /api/estadisticas/timeline` en `api/app/main.py` y `api/app/queries.py` con buckets `day`, `week` y `month`
+- [X] T034 [US2] Validar rangos y fechas incompatibles en `api/app/schemas.py`, devolviendo errores claros HTTP 400/422 y colecciones vacías válidas
+- [X] T035 [US2] Instalar middleware CORS en `api/app/main.py` con `CORS_ORIGINS`, wildcard para demo sin credenciales o lista explícita de Netlify/ngrok
 
 ### Docker
 
@@ -122,7 +122,7 @@ combinables, respuestas vacías, errores de parámetros y las tres respuestas RE
 
 ### Frontend
 
-- [ ] T038 [US2] Adaptar `frontend/src/app/app.component.ts` y `frontend/public/config.json` para consumir `/api/eventos` GeoJSON, conservar el header ngrok y mostrar país/continente/subregión cuando estén disponibles
+- [X] T038 [US2] Adaptar `frontend/src/app/app.component.ts` y `frontend/public/config.json` para consumir `/api/eventos` GeoJSON, conservar el header ngrok y mostrar país/continente/subregión cuando estén disponibles
 
 **Checkpoint**: P1 y P2 funcionan conjuntamente; el frontend puede consultar el
 backend remoto sin bloqueo CORS.
