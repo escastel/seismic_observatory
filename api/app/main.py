@@ -33,22 +33,25 @@ config = ApiConfig()
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     app.state.ngrok_forwarder = None
+    ngrok_domain = config.ngrok_domain.removeprefix("https://").removeprefix("http://").rstrip("/")
     try:
         app.state.db_pool = await asyncpg.create_pool(config.database_dsn, min_size=1, max_size=10)
     except (OSError, asyncpg.PostgresError) as exc:
         logger.error("Database pool initialization failed: %s", exc)
         app.state.db_pool = None
-    if os.getenv("NGROK_AUTHTOKEN"):
+    if os.getenv("NGROK_AUTHTOKEN") and ngrok_domain:
         try:
             app.state.ngrok_forwarder = await ngrok.forward(
                 8000,
                 authtoken_from_env=True,
-                domain="modular-guidance-daybreak.ngrok-free.dev",
+                domain=ngrok_domain,
             )
-        except (OSError, RuntimeError) as exc:
+        except (OSError, RuntimeError, ValueError) as exc:
             logger.error("ngrok tunnel initialization failed: %s", exc)
         else:
             logger.info("ngrok tunnel available at: %s", app.state.ngrok_forwarder.url())
+    elif os.getenv("NGROK_AUTHTOKEN"):
+        logger.error("NGROK_DOMAIN is required when NGROK_AUTHTOKEN is configured")
 
     try:
         yield

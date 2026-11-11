@@ -8,6 +8,10 @@ from datetime import datetime, timezone
 from typing import Any
 
 
+MIN_MAGNITUDE = 0.0
+MAX_MAGNITUDE = 10.0
+
+
 @dataclass(frozen=True)
 class QualityFailure:
     dimension: str
@@ -31,7 +35,10 @@ def _failure(dimension: str, code: str, detail: str) -> QualityFailure:
     return QualityFailure(dimension, code, detail)
 
 
-def validate_event(payload: Any) -> tuple[ValidatedEvent | None, list[QualityFailure]]:
+def validate_event(
+    payload: Any,
+    seen_ids: set[str] | None = None,
+) -> tuple[ValidatedEvent | None, list[QualityFailure]]:
     if not isinstance(payload, dict):
         return None, [_failure("Consistencia", "event_not_object", "Event must be a JSON object")]
 
@@ -78,6 +85,14 @@ def validate_event(payload: Any) -> tuple[ValidatedEvent | None, list[QualityFai
         magnitude = 0.0
     if not math.isfinite(magnitude):
         failures.append(_failure("Exactitud", "magnitude_not_finite", "mag must be finite"))
+    elif not MIN_MAGNITUDE <= magnitude <= MAX_MAGNITUDE:
+        failures.append(
+            _failure(
+                "Validez",
+                "magnitude_out_of_range",
+                f"mag must be between {MIN_MAGNITUDE} and {MAX_MAGNITUDE}",
+            )
+        )
 
     try:
         longitude = float(coordinates[0])
@@ -101,6 +116,10 @@ def validate_event(payload: Any) -> tuple[ValidatedEvent | None, list[QualityFai
                 failures.append(_failure("Exactitud", "depth_not_finite", "depth must be finite"))
 
     if failures or updated is None or event_time is None:
+        return None, failures
+    if seen_ids is not None and event_id.strip() in seen_ids:
+        failures.append(_failure("Unicidad", "duplicate_id", "id was already observed"))
+    if failures:
         return None, failures
     return (
         ValidatedEvent(

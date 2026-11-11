@@ -31,7 +31,8 @@ calidad auditable e integración espacial:
 | `postgres` | Modelo dimensional y PostGIS | PostgreSQL 15 + PostGIS |
 
 Angular/Leaflet se mantiene como cliente web, no como contenedor adicional del
-backend. Netlify y ngrok son opcionales para una demostración remota.
+backend. El frontend se publica en Netlify y accede obligatoriamente al backend
+mediante el dominio configurado en el túnel ngrok.
 
 ## 3. Decisiones de diseño
 
@@ -90,10 +91,15 @@ Variables principales:
 | `PRODUCER_INTERVAL_SECONDS` | Periodicidad de ingesta |
 | `COUNTRIES_GEOJSON_PATH` | Catálogo Natural Earth montado |
 | `CORS_ORIGINS` | `*` en demo o lista separada por comas |
+| `NGROK_DOMAIN` | Dominio reservado del túnel ngrok para el frontend Netlify |
 
 ## 5. API
 
 Base URL: `http://localhost:8000/api`.
+
+Para acceso externo, el frontend publicado en Netlify debe usar la URL HTTPS
+del dominio `NGROK_DOMAIN`; el túnel se inicia desde el contenedor API cuando
+`NGROK_AUTHTOKEN` y `NGROK_DOMAIN` están configurados.
 
 ```powershell
 curl "http://localhost:8000/api/eventos?format=geojson&min_magnitude=4"
@@ -162,5 +168,4 @@ No usar `docker compose down -v` durante las pruebas de idempotencia o replay.
 ## 8. Límites tecnológicos
 
 El proyecto usa únicamente el stack aprobado: Python, Kafka, PostgreSQL/PostGIS,
-FastAPI, Docker Compose, Angular y Leaflet. No contiene ni requiere Spark,
-Flink, Kubernetes, Streamlit ni servicios Cloud adicionales.
+FastAPI, Docker Compose, Angular y Leaflet.

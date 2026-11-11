@@ -173,6 +173,23 @@ repetible sin alterar la ingesta normal.
 
 ---
 
+## Phase 7: Remediación del Specification Analysis Report
+
+**Purpose**: Resolver los hallazgos C1, A1, U1, G1, G2, U2, I1 e I2 sin alterar
+la arquitectura constitucional de cinco servicios.
+
+- [X] T050 [C1] Actualizar `README.md` para declarar Netlify como publicación del frontend y ngrok como túnel externo requerido, con `NGROK_DOMAIN` documentado.
+- [X] T051 [I2] Leer `NGROK_DOMAIN` desde variables de entorno en `api/app/config.py` y usarlo en el ciclo de vida de `api/app/main.py`, sin dominios codificados.
+- [X] T052 [U1] Crear explícitamente `terremotos_raw` y `terremotos_replay` desde el healthcheck del servicio Kafka, manteniendo exactamente cinco servicios.
+- [X] T053 [I1] Parametrizar el healthcheck de PostgreSQL con `POSTGRES_USER` y `POSTGRES_DB` provenientes de Compose.
+- [X] T054 [A1] Formalizar `MIN_MAGNITUDE=0.0` y `MAX_MAGNITUDE=10.0` en `consumer/app/quality.py`, clasificando el incumplimiento como `Validez`.
+- [X] T055 [G1][U2] Crear pruebas unitarias para las seis dimensiones WAF, límites de magnitud y clasificación marítima `Sin país asignado`.
+- [X] T056 [G1] Crear pruebas contractuales para rutas REST y CORS en `tests/contract/test_api_contract.py`.
+- [X] T057 [G2] Crear `tests/integration/load_test.py` para medir tasa de éxito SC-001, p95 SC-005 y throughput de replay SC-006 con umbrales explícitos.
+- [X] T058 Actualizar `.env.example` y la configuración local ignorada para incluir `NGROK_DOMAIN`, sin versionar credenciales.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies

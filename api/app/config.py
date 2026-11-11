@@ -16,3 +16,4 @@ class ApiConfig:
     database_dsn: str = _required_env("DATABASE_DSN")
     cors_origins: str = _required_env("CORS_ORIGINS")
     api_prefix: str = _required_env("API_PREFIX")
+    ngrok_domain: str = os.getenv("NGROK_DOMAIN", "")
