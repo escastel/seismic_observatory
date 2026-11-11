@@ -3,7 +3,20 @@
 .env.*
 !.env.example
 *.secret
+*.secret.*
+*.secrets
 secrets/
+credentials/
+*credentials*.json
+*credentials*.yaml
+*credentials*.yml
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
 
 # Python
 __pycache__/
@@ -19,6 +32,8 @@ env/
 coverage/
 htmlcov/
 .coverage*
+*.coverage
+pytest-report.xml
 
 # Node / Angular
 node_modules/
@@ -27,7 +42,13 @@ frontend/.angular/
 
 # Docker and runtime output
 *.log
+*.log.*
+*.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
 docker-compose.override.yml
+compose.override.yaml
 
 # Local data and generated files
 *.tmp
@@ -38,3 +59,4 @@ docker-compose.override.yml
 Thumbs.db
 .DS_Store
 .vscode
+.idea/
