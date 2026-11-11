@@ -6,29 +6,50 @@ import argparse
 import asyncio
 import json
 import logging
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from aiokafka import AIOKafkaProducer
 
-from .config import ProducerConfig
+if TYPE_CHECKING:
+    from .config import ProducerConfig
 
 logger = logging.getLogger(__name__)
 
 
+def _resolve_replay_path(path: str | Path) -> Path:
+    source = Path(path)
+    if source.is_file():
+        return source
+    mounted_source = Path("/data/seeds") / source.name
+    if mounted_source.is_file():
+        logger.warning("Replay path %s mapped to mounted path %s", source, mounted_source)
+        return mounted_source
+    raise FileNotFoundError(
+        f"Replay file does not exist: {source}. "
+        f"Inside Docker use /data/seeds/{source.name}"
+    )
+
+
 def _event_year(event: dict[str, Any]) -> int | None:
+    properties = event.get("properties")
     value = event.get("time")
+    if value is None and isinstance(properties, dict):
+        value = properties.get("time")
     try:
-        return datetime.fromtimestamp(float(value) / 1000, tz=timezone.utc).year
+        timestamp = datetime(1970, 1, 1, tzinfo=timezone.utc) + timedelta(milliseconds=float(value))
+        return timestamp.year
     except (TypeError, ValueError, OverflowError, OSError):
         return None
 
 
-def read_replay_events(path: str | Path, topic: str) -> list[dict[str, Any]]:
-    source = Path(path)
-    if not source.is_file():
-        raise FileNotFoundError(f"Replay file does not exist: {source}")
+def read_replay_events(
+    path: str | Path,
+    topic: str,
+    expected_year: int | None = None,
+) -> list[dict[str, Any]]:
+    source = _resolve_replay_path(path)
 
     events: list[dict[str, Any]] = []
     with source.open(encoding="utf-8") as handle:
@@ -41,8 +62,13 @@ def read_replay_events(path: str | Path, topic: str) -> list[dict[str, Any]]:
                 raise ValueError(f"Invalid JSON at {source}:{line_number}: {exc}") from exc
             if not isinstance(event, dict):
                 raise ValueError(f"Replay event at {source}:{line_number} is not an object")
-            if _event_year(event) != 2025:
-                raise ValueError(f"Replay event at {source}:{line_number} is not from 2025")
+            event_year = _event_year(event)
+            if event_year is None:
+                raise ValueError(f"Replay event at {source}:{line_number} has no valid year")
+            if expected_year is not None and event_year != expected_year:
+                raise ValueError(
+                    f"Replay event at {source}:{line_number} is not from {expected_year}"
+                )
             event["source_topic"] = topic
             events.append(event)
     if not events:
@@ -54,10 +80,15 @@ async def publish_replay(
     config: ProducerConfig,
     path: str | Path,
     rate: float,
+    expected_year: int | None = None,
 ) -> int:
     if rate <= 0:
         raise ValueError("Replay rate must be greater than zero")
-    events = read_replay_events(path, config.replay_topic)
+    from .config import ProducerConfig
+
+    if not isinstance(config, ProducerConfig):
+        raise TypeError("config must be a ProducerConfig")
+    events = read_replay_events(path, config.replay_topic, expected_year)
     producer = AIOKafkaProducer(bootstrap_servers=config.kafka_bootstrap_servers)
     published = 0
     delay = 1 / rate
@@ -87,7 +118,9 @@ async def publish_replay(
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Publish the 2025 seismic history to Kafka")
+    from .config import ProducerConfig
+
+    parser = argparse.ArgumentParser(description="Publish a historical seismic batch to Kafka")
     parser.add_argument(
         "--path",
         default="/data/seeds/historical_2025.jsonl",
@@ -99,12 +132,18 @@ def main() -> None:
         default=10.0,
         help="Target events per second (default: 10)",
     )
+    parser.add_argument(
+        "--year",
+        type=int,
+        default=None,
+        help="Require every event to belong to this year; omit to infer from the file",
+    )
     args = parser.parse_args()
     logging.basicConfig(
         level=logging.INFO,
         format="%(asctime)s %(levelname)s %(name)s %(message)s",
     )
-    asyncio.run(publish_replay(ProducerConfig(), args.path, args.rate))
+    asyncio.run(publish_replay(ProducerConfig(), args.path, args.rate, args.year))
 
 
 if __name__ == "__main__":

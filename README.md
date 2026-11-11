@@ -138,9 +138,22 @@ docker compose run --rm producer python -m app.replay `
   --path /data/seeds/historical_2025.jsonl --rate 10
 ```
 
-El script rechaza eventos que no pertenezcan a 2025, conserva
+El script valida opcionalmente el año indicado con `--year`, conserva
 `source_topic=terremotos_replay` y registra el contador de publicación. El
 consumidor procesa ambos topics mediante el mismo WAF, cruce espacial y upsert.
+
+También se puede reproducir el año completo más antiguo disponible en USGS
+(1900), descargado en [`db/seeds/historical_1900.jsonl`](db/seeds/historical_1900.jsonl):
+
+```powershell
+docker compose run --rm producer python -m app.replay `
+  --path /data/seeds/historical_1900.jsonl --year 1900 --rate 10
+```
+
+La ruta del argumento es siempre interna al contenedor (`/data/seeds/...`).
+Si se ejecuta desde Git Bash en Windows y transforma la ruta en
+`C:/Program Files/Git/data/seeds/...`, el replay reconoce el nombre del archivo
+y lo resuelve contra el volumen montado.
 
 ## 7. Validación reproducible
 
