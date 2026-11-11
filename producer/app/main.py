@@ -7,6 +7,7 @@ import json
 import logging
 
 from aiokafka import AIOKafkaProducer
+from aiokafka.errors import KafkaError
 
 from .config import ProducerConfig
 from .feed import FeedError, fetch_feed
@@ -17,6 +18,7 @@ logger = logging.getLogger(__name__)
 
 async def publish_cycle(config: ProducerConfig, producer: AIOKafkaProducer) -> int:
     feed = fetch_feed(config.feed_url)
+    logger.info("Fetched %d events from %s", len(feed["features"]), config.feed_url)
     published = 0
     for feature in feed["features"]:
         if not isinstance(feature, dict):
@@ -48,23 +50,35 @@ async def publish_cycle(config: ProducerConfig, producer: AIOKafkaProducer) -> i
 
 
 async def run(config: ProducerConfig) -> None:
-    producer = AIOKafkaProducer(bootstrap_servers=config.kafka_bootstrap_servers)
     retries = 0
     while True:
+        producer: AIOKafkaProducer | None = None
+        cycle_succeeded = False
         try:
+            producer = AIOKafkaProducer(bootstrap_servers=config.kafka_bootstrap_servers)
             await producer.start()
             await publish_cycle(config, producer)
-            await producer.stop()
-            await asyncio.sleep(config.interval_seconds)
+            cycle_succeeded = True
+        except KafkaError as exc:
+            retries += 1
+            logger.exception("Kafka failure in producer cycle; retrying: %s", exc)
+            logger.info("Producer metrics retries=%d", retries)
         except (FeedError, OSError, RuntimeError) as exc:
             retries += 1
             logger.exception("Producer cycle failed; retrying: %s", exc)
             logger.info("Producer metrics retries=%d", retries)
-            try:
-                await producer.stop()
-            except RuntimeError:
-                logger.exception("Producer shutdown failed")
-            await asyncio.sleep(min(config.interval_seconds, 30))
+        except Exception as exc:
+            retries += 1
+            logger.exception("Unexpected producer failure; retrying: %s", exc)
+            logger.info("Producer metrics retries=%d", retries)
+        finally:
+            if producer is not None:
+                try:
+                    await producer.stop()
+                except Exception:
+                    logger.exception("Producer shutdown failed")
+
+        await asyncio.sleep(config.interval_seconds if cycle_succeeded else 10)
 
 
 def main() -> None:
