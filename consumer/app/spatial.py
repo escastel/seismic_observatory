@@ -20,6 +20,7 @@ class Geography:
     subregion: str
     source_dataset: str
     geometry_hash: str
+    country_id: str | None = None
 
 
 class SpatialEnricher:
@@ -39,12 +40,14 @@ class SpatialEnricher:
                 "Sin subregión asignada",
                 self._source_dataset,
                 self._geometry_hash,
+                None,
             )
         row = matches.iloc[0]
         return Geography(
-            str(row.get("NAME") or row.get("ADMIN") or UNASSIGNED_COUNTRY),
+            str(row.get("NAME_ES") or row.get("NAME") or row.get("ADMIN") or UNASSIGNED_COUNTRY),
             str(row.get("CONTINENT") or "Sin continente asignado"),
             str(row.get("SUBREGION") or "Sin subregión asignada"),
             self._source_dataset,
             self._geometry_hash,
+            str(row.get("ADM0_A3")) if row.get("ADM0_A3") else None,
         )

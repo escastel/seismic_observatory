@@ -8,6 +8,8 @@ dim_geografia 1 ───< fact_sismos >─── 1 dim_tiempo
                          └── external_id UNIQUE
 
 cuarentena (independiente; conserva payload y motivo de calidad)
+event_versions (historial inmutable por external_id y updated)
+ingestion_state (última versión publicada por el Productor)
 ```
 
 ## Entidades y campos
@@ -20,13 +22,16 @@ Representa la clasificación espacial estable de un punto.
 |---|---|---|
 | `geografia_key` | entero | clave sustituta, primaria |
 | `country` | texto | país Natural Earth o `Sin país asignado`; no nulo |
+| `country_id` | texto | identificador estable `ADM0_A3` de Natural Earth; nulo solo para mar |
 | `continent` | texto | continente o valor explícito no asignado |
 | `subregion` | texto | subregión o valor explícito no asignado |
 | `source_dataset` | texto | versión/origen de Natural Earth |
 | `geometry_hash` | texto | identifica la referencia espacial usada |
 
 Debe existir una clave única sobre la combinación de clasificación y dataset. Debe
-existir un índice B-Tree sobre `country` para filtros de API.
+existir un índice B-Tree sobre `country` para filtros de API. Las coincidencias
+fronterizas se resuelven con la primera geometría determinista del catálogo; los
+puntos sin intersección conservan `country_id` nulo y no se imputan.
 
 ### `dim_tiempo`
 
@@ -83,6 +88,13 @@ Conserva todo evento que no puede pasar el WAF.
 | `payload` | JSON | evento original |
 | `kafka_partition` | entero | trazabilidad |
 | `kafka_offset` | entero | trazabilidad |
+
+### Estado e historial
+
+`ingestion_state` contiene una fila por `external_id` con el último `updated`
+publicado, para que los reinicios no republiquen versiones sin cambios.
+`event_versions` conserva cada combinación `(external_id, updated)` y el payload
+original; `fact_sismos` sigue siendo exclusivamente el estado actual consultable.
 
 ## Reglas y transiciones
 

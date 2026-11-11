@@ -11,6 +11,25 @@ from .quality import ValidatedEvent
 from .spatial import Geography
 
 
+def ensure_schema(dsn: str) -> None:
+    with psycopg2.connect(dsn) as connection:
+        with connection.cursor() as cursor:
+            cursor.execute("ALTER TABLE fact_sismos ADD COLUMN IF NOT EXISTS mag_type TEXT")
+            cursor.execute(
+                """
+                CREATE TABLE IF NOT EXISTS event_versions (
+                    version_key BIGSERIAL PRIMARY KEY,
+                    external_id TEXT NOT NULL,
+                    updated TIMESTAMPTZ NOT NULL,
+                    source_topic TEXT NOT NULL,
+                    payload JSONB NOT NULL,
+                    received_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                    UNIQUE (external_id, updated)
+                )
+                """
+            )
+
+
 def persist_event(
     dsn: str,
     event: ValidatedEvent,
@@ -22,16 +41,19 @@ def persist_event(
             cursor.execute(
                 """
                 INSERT INTO dim_geografia
-                    (country, continent, subregion, source_dataset, geometry_hash)
-                VALUES (%s, %s, %s, %s, %s)
+                    (country, continent, subregion, country_id, source_dataset, geometry_hash)
+                VALUES (%s, %s, %s, %s, %s, %s)
                 ON CONFLICT (country, continent, subregion, source_dataset, geometry_hash)
-                DO UPDATE SET country = EXCLUDED.country
+                DO UPDATE SET
+                    country = EXCLUDED.country,
+                    country_id = EXCLUDED.country_id
                 RETURNING geografia_key
                 """,
                 (
                     geography.country,
                     geography.continent,
                     geography.subregion,
+                    geography.country_id,
                     geography.source_dataset,
                     geography.geometry_hash,
                 ),
@@ -53,12 +75,13 @@ def persist_event(
                 """
                 INSERT INTO fact_sismos
                     (external_id, updated, event_time, magnitude, longitude, latitude,
-                     depth_km, place, geografia_key, tiempo_key, source_topic)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
+                     depth_km, place, mag_type, geografia_key, tiempo_key, source_topic)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 ON CONFLICT (external_id) DO UPDATE
                 SET updated = EXCLUDED.updated,
                     event_time = EXCLUDED.event_time,
                     magnitude = EXCLUDED.magnitude,
+                    mag_type = EXCLUDED.mag_type,
                     longitude = EXCLUDED.longitude,
                     latitude = EXCLUDED.latitude,
                     depth_km = EXCLUDED.depth_km,
@@ -78,10 +101,20 @@ def persist_event(
                     event.latitude,
                     event.depth_km,
                     event.place,
+                    event.mag_type,
                     geography_key,
                     tiempo_key,
                     source_topic,
                 ),
+            )
+            cursor.execute(
+                """
+                INSERT INTO event_versions
+                    (external_id, updated, source_topic, payload)
+                VALUES (%s, %s, %s, %s)
+                ON CONFLICT (external_id, updated) DO NOTHING
+                """,
+                (event.external_id, event.updated, source_topic, Json(event.original_payload)),
             )
 
 

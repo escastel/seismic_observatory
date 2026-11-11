@@ -19,12 +19,19 @@ Query parameters:
 |---|---|---|
 | `country` | string | exact country, including `Sin país asignado` |
 | `date_from` | ISO date/time | inclusive lower bound |
-| `date_to` | ISO date/time | inclusive upper bound |
+| `date_to` | ISO date/time | inclusive upper bound (legacy compatibility) |
+| `start` | ISO8601 | inclusive lower bound |
+| `end` | ISO8601 | exclusive upper bound |
+| `min_mag` | number | inclusive lower bound |
+| `country_id` | string | Natural Earth `ADM0_A3` |
 | `min_magnitude` | number | inclusive lower bound |
 | `max_magnitude` | number | inclusive upper bound |
 | `format` | `json`/`geojson` | response shape; default `json` |
 | `limit` | integer | 1-10000; default 1000 |
 | `offset` | integer | non-negative; default 0 |
+
+Without an explicit `start`/`date_from`, `/eventos` defaults to the previous
+24 hours. Statistics use the same explicitly supplied filters.
 
 JSON response:
 
@@ -40,7 +47,10 @@ JSON response:
       "longitude": -70.1,
       "latitude": 10.2,
       "depth_km": 12.0,
+      "magType": "ml",
       "country": "Chile",
+      "country_name": "Chile",
+      "country_id": "CHL",
       "continent": "South America",
       "subregion": "South America",
       "source_topic": "terremotos_raw"

@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS dim_geografia (
     country TEXT NOT NULL,
     continent TEXT NOT NULL,
     subregion TEXT NOT NULL,
+    country_id TEXT,
     source_dataset TEXT NOT NULL,
     geometry_hash TEXT NOT NULL,
     CONSTRAINT uq_dim_geografia_classification
@@ -27,6 +28,7 @@ CREATE TABLE IF NOT EXISTS fact_sismos (
     updated TIMESTAMPTZ NOT NULL,
     event_time TIMESTAMPTZ NOT NULL,
     magnitude NUMERIC NOT NULL,
+    mag_type TEXT,
     longitude DOUBLE PRECISION NOT NULL CHECK (longitude BETWEEN -180 AND 180),
     latitude DOUBLE PRECISION NOT NULL CHECK (latitude BETWEEN -90 AND 90),
     depth_km DOUBLE PRECISION,

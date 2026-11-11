@@ -9,9 +9,10 @@ from typing import Any
 
 from aiokafka import AIOKafkaConsumer
 from aiokafka.structs import TopicPartition
+import psycopg2
 
 from .config import ConsumerConfig
-from .persistence import persist_event, persist_quarantine, persist_quarantines
+from .persistence import ensure_schema, persist_event, persist_quarantine, persist_quarantines
 from .quality import validate_event
 from .spatial import SpatialEnricher
 
@@ -73,6 +74,13 @@ async def process_message(
 
 
 async def run(config: ConsumerConfig) -> None:
+    while True:
+        try:
+            ensure_schema(config.database_dsn)
+            break
+        except (OSError, psycopg2.Error):
+            logger.exception("Consumer database schema unavailable; retrying in 10 seconds")
+            await asyncio.sleep(10)
     consumer = AIOKafkaConsumer(
         config.raw_topic,
         config.replay_topic,

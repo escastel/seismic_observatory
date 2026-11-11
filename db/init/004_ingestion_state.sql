@@ -1,0 +1,5 @@
+CREATE TABLE IF NOT EXISTS ingestion_state (
+    external_id TEXT PRIMARY KEY,
+    updated TIMESTAMPTZ NOT NULL,
+    published_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);

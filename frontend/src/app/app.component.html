@@ -1,6 +1,20 @@
 <main>
   <header><p class="eyebrow">BIG DATA · PROYECTO DE AULA</p><h1>Observatorio de actividad sísmica</h1><p>Mapa base, fronteras y eventos en capas independientes.</p></header>
-  <section class="info" aria-live="polite"><strong>{{ mode() }}</strong><p>{{ status() }}</p><p>{{ countriesStatus() }} · {{ count() }} eventos dibujados · {{ omitted() }} omitidos por coordenadas inválidas</p><small>Última lectura UTC: {{ lastRead() }}<br>Generación de la respuesta UTC: {{ generated() }}</small></section>
+  <section class="info" aria-live="polite"><strong>{{ mode() }}</strong><p>{{ status() }}</p><p>{{ countriesStatus() }} · {{ count() }} eventos dibujados · {{ omitted() }} omitidos por coordenadas inválidas</p><small>Última lectura UTC: {{ lastRead() }}<br>Última ingesta UTC: {{ lastIngestion() }}<br>Generación de la respuesta UTC: {{ generated() }}<br>{{ truncated() ? 'La respuesta está truncada; las estadísticas usan el filtro completo.' : 'Respuesta completa' }}</small></section>
+  <form class="filters" (ngSubmit)="applyFilters()">
+    <label>País <input name="country" [ngModel]="countryFilter()" (ngModelChange)="countryFilter.set($event)" placeholder="España"></label>
+    <label>Desde <input name="start" type="datetime-local" [ngModel]="startFilter()" (ngModelChange)="startFilter.set($event)"></label>
+    <label>Hasta <input name="end" type="datetime-local" [ngModel]="endFilter()" (ngModelChange)="endFilter.set($event)"></label>
+    <label>Magnitud mínima <input name="minMagnitude" type="number" step="0.1" [ngModel]="minMagnitudeFilter()" (ngModelChange)="minMagnitudeFilter.set($event)"></label>
+    <button type="submit">Aplicar filtros</button>
+  </form>
   <div class="map" leaflet [leafletOptions]="options" (leafletMapReady)="onMapReady($event)" aria-label="Mapa interactivo de terremotos"></div>
+  <section class="dashboard">
+    <div><h2>Eventos por país</h2><ul><li *ngFor="let item of statistics().countries">{{ item.country }}: {{ item.count }}</li></ul></div>
+    <div><h2>Timeline UTC</h2><ul><li *ngFor="let item of statistics().timeline">{{ item.period }}: {{ item.count }}</li></ul></div>
+    <div><h2>Distribución de magnitud</h2><ul><li *ngFor="let item of statistics().magnitude_distribution">{{ item.bucket }}: {{ item.count }}</li></ul></div>
+    <div><h2>Distribución de profundidad</h2><ul><li *ngFor="let item of statistics().depth_distribution">{{ item.bucket }}: {{ item.count }}</li></ul><p>Media diaria 2025: {{ statistics().daily_average_2025 | number:'1.1-2' }}</p></div>
+  </section>
+  <section class="table-wrap"><h2>Eventos consultados</h2><table><thead><tr><th>ID</th><th>Magnitud</th><th>País</th><th>Hora UTC</th></tr></thead><tbody><tr *ngFor="let feature of tableFeatures()"><td>{{ feature.id }}</td><td>{{ feature.properties.mag ?? 'ND' }}</td><td>{{ feature.properties.country_name ?? feature.properties.country ?? 'Sin país asignado' }}</td><td>{{ feature.properties.time | date:'medium':'UTC' }}</td></tr></tbody></table></section>
   <footer><strong>Profundidad</strong><span>🟡 Menos de 70 km</span><span>🟠 70–299,99 km</span><span>🟣 300 km o más</span><span>⚪ No disponible</span><p>Tamaño: escala visual creciente con la magnitud; no representa energía ni área afectada. Sin magnitud: radio mínimo. El mapa base puede desactivarse en el selector de capas.</p><p>Base proporcionada: añade filtros, gráficos, tabla accesible y conclusiones para completar el proyecto.</p></footer>
 </main>

@@ -10,12 +10,14 @@ from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 class EventFilters(BaseModel):
     country: str | None = None
+    country_id: str | None = None
     date_from: datetime | None = None
     date_to: datetime | None = None
     min_magnitude: float | None = None
     max_magnitude: float | None = None
     limit: int = Field(default=1000, ge=1, le=10000)
     offset: int = Field(default=0, ge=0)
+    end_exclusive: bool = False
 
     @model_validator(mode="after")
     def validate_ranges(self) -> "EventFilters":
@@ -28,20 +30,27 @@ class EventFilters(BaseModel):
 
 
 class EventResponse(BaseModel):
-    model_config = ConfigDict(from_attributes=True)
+    model_config = ConfigDict(from_attributes=True, serialize_by_alias=True)
 
     id: str
     updated: datetime
     time: datetime
     mag: float
+    mag_type: str | None = Field(
+        default=None,
+        validation_alias="mag_type",
+        serialization_alias="magType",
+    )
     place: str
     longitude: float
     latitude: float
     depth_km: float | None
     country: str
+    country_name: str | None = None
     continent: str
     subregion: str
     source_topic: str
+    country_id: str | None = None
 
 
 class EventsResponse(BaseModel):
@@ -72,4 +81,5 @@ class TimelineResponse(BaseModel):
 
 class GeoJSONFeatureCollection(BaseModel):
     type: Literal["FeatureCollection"] = "FeatureCollection"
+    metadata: dict[str, Any] = Field(default_factory=dict)
     features: list[dict[str, Any]]

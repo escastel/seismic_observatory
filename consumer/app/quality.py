@@ -27,10 +27,12 @@ class ValidatedEvent:
     updated: datetime
     event_time: datetime
     magnitude: float
+    mag_type: str | None
     longitude: float
     latitude: float
     depth_km: float | None
     place: str
+    original_payload: Any
 
 
 def _failure(dimension: str, code: str, detail: str) -> QualityFailure:
@@ -150,10 +152,12 @@ def validate_event(
             updated=updated,
             event_time=event_time,
             magnitude=magnitude,
+            mag_type=str((payload.get("properties") or {}).get("magType") or payload.get("magType") or "") or None,
             longitude=longitude,
             latitude=latitude,
             depth_km=depth_km,
             place=str(payload.get("place") or ""),
+            original_payload=payload,
         ),
         [],
     )

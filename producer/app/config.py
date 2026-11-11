@@ -18,3 +18,4 @@ class ProducerConfig:
     replay_topic: str = _required_env("KAFKA_REPLAY_TOPIC")
     feed_url: str = _required_env("USGS_FEED_URL")
     interval_seconds: int = int(_required_env("PRODUCER_INTERVAL_SECONDS"))
+    database_dsn: str = _required_env("DATABASE_DSN")

@@ -1,4 +1,6 @@
+import { CommonModule } from '@angular/common';
 import { Component, OnDestroy, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { LeafletDirective } from '@bluehalo/ngx-leaflet';
 import * as L from 'leaflet';
 import type { FeatureCollection, Point } from 'geojson';
@@ -9,15 +11,25 @@ type Properties = {
   time: number | string;
   updated: number | string;
   country?: string | null;
+  country_id?: string | null;
+  country_name?: string | null;
   continent?: string | null;
   subregion?: string | null;
   source_topic?: string;
+  magType?: string | null;
 };
-type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; mode?: string } };
+type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; last_ingestion?: number; mode?: string; count?: number; total?: number; truncated?: boolean } };
 type Config = { mode: 'demo' | 'api'; apiUrl: string; refreshMs: number; skipNgrokWarning: boolean };
+type Statistics = {
+  countries: Array<{ country: string; count: number }>;
+  timeline: Array<{ period: string; count: number }>;
+  magnitude_distribution?: Array<{ bucket: string; count: number }>;
+  depth_distribution?: Array<{ bucket: string; count: number }>;
+  daily_average_2025?: number;
+};
 
 @Component({
-  selector: 'app-root', standalone: true, imports: [LeafletDirective],
+  selector: 'app-root', standalone: true, imports: [CommonModule, FormsModule, LeafletDirective],
   templateUrl: './app.component.html', styleUrl: './app.component.css'
 })
 export class AppComponent implements OnDestroy {
@@ -25,9 +37,18 @@ export class AppComponent implements OnDestroy {
   readonly status = signal('Preparando el mapa…');
   readonly lastRead = signal('Sin lectura');
   readonly generated = signal('Sin información');
+  readonly lastIngestion = signal('Sin información');
   readonly count = signal(0);
   readonly omitted = signal(0);
   readonly countriesStatus = signal('Cargando catálogo');
+  readonly countryFilter = signal('');
+  readonly startFilter = signal('');
+  readonly endFilter = signal('');
+  readonly minMagnitudeFilter = signal('');
+  readonly truncated = signal(false);
+  readonly statistics = signal<Statistics>({ countries: [], timeline: [], magnitude_distribution: [], depth_distribution: [], daily_average_2025: 0 });
+  readonly tableFeatures = signal<Array<FeatureCollection<Point, Properties>['features'][number]>>([]);
+  private activeConfig?: Config;
   readonly options: L.MapOptions = { center: L.latLng(18, 0), zoom: 2, minZoom: 2, maxZoom: 8, preferCanvas: true, worldCopyJump: false };
   private map?: L.Map;
   private events = L.layerGroup();
@@ -59,6 +80,7 @@ export class AppComponent implements OnDestroy {
       const config = await this.readJson<Config>('config.json');
       if (!['demo', 'api'].includes(config.mode)) throw new Error('Modo inválido');
       this.mode.set(config.mode === 'demo' ? 'DEMOSTRACIÓN · datos ficticios' : 'API · datos del backend');
+      this.activeConfig = config;
       await this.refresh(config);
     } catch { this.status.set('Error: revisa public/config.json'); }
   }
@@ -70,9 +92,18 @@ export class AppComponent implements OnDestroy {
     return response.json() as Promise<T>;
   }
 
+  async applyFilters(): Promise<void> {
+    if (this.activeConfig) await this.refresh(this.activeConfig);
+  }
+
   private async refresh(config: Config): Promise<void> {
     try {
-      const url = config.mode === 'demo' ? 'datos/terremotos-demo.geojson' : `${config.apiUrl.replace(/\/$/, '')}/api/eventos?format=geojson`;
+      const params = new URLSearchParams({ format: 'geojson', limit: '1000' });
+      if (this.countryFilter()) params.set('country', this.countryFilter());
+      if (this.startFilter()) params.set('start', new Date(this.startFilter()).toISOString());
+      if (this.endFilter()) params.set('end', new Date(this.endFilter()).toISOString());
+      if (this.minMagnitudeFilter()) params.set('min_mag', this.minMagnitudeFilter());
+      const url = config.mode === 'demo' ? 'datos/terremotos-demo.geojson' : `${config.apiUrl.replace(/\/$/, '')}/api/eventos?${params}`;
       const headers: Record<string, string> = {};
       if (config.mode === 'api' && config.skipNgrokWarning) headers['ngrok-skip-browser-warning'] = '1';
       const data = await this.readJson<Events>(url, headers);
@@ -95,8 +126,15 @@ export class AppComponent implements OnDestroy {
       }
       this.events.clearLayers(); this.events.addLayer(next);
       this.count.set(count); this.omitted.set(omitted);
+      this.tableFeatures.set(data.features.slice(0, 100));
+      this.truncated.set(Boolean(data.metadata?.truncated));
       this.lastRead.set(new Date().toISOString());
       this.generated.set(this.date(data.metadata?.generated));
+      this.lastIngestion.set(this.date(data.metadata?.last_ingestion));
+      if (config.mode === 'api') {
+        const stats = await this.readJson<Statistics>(`${config.apiUrl.replace(/\/$/, '')}/api/estadisticas?${params}`, headers);
+        this.statistics.set(stats);
+      }
       this.status.set(config.mode === 'demo' ? 'Ejemplo estático: no representa actividad real' : 'API accesible · consulta completada');
     } catch {
       if (!this.destroyed) this.status.set('No se pudo actualizar: se conserva la última lectura. Revisa API, túnel y CORS.');

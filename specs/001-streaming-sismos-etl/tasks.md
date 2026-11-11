@@ -197,6 +197,43 @@ cuantitativas se ejecutaron con el stack Compose activo.
 
 ---
 
+## Phase 8: Cobertura integral del enunciado y materiales anexados
+
+**Purpose**: Resolver los hallazgos de la auditoría de `enunciadoProyecto` y
+alinear implementación, contratos, evidencias y frontend con el 100% de los
+requisitos académicos, sin modificar la arquitectura constitucional de cinco
+servicios.
+
+### US1 — Ingesta, publicación y modelo histórico
+
+- [X] T063 [US1] Alinear `USGS_FEED_URL` con `all_day.geojson`, filtrar `properties.type == "earthquake"` y publicar el envelope con `source`, `ingested_at`, `mode`, `id`, `updated` y el evento original en `producer/app/config.py`, `producer/app/feed.py`, `producer/app/main.py` y `.env.example`; añadir pruebas en `tests/unit/test_feed.py`
+- [X] T064 [US1] Implementar estado persistente de versiones publicadas por `(external_id, updated)` en `db/init/004_ingestion_state.sql`, `producer/app/persistence.py` y `producer/app/main.py`, de modo que se publiquen solo eventos nuevos o revisiones posteriores y el estado sobreviva a reinicios; cubrirlo en `tests/integration/test_producer_state.py`
+- [X] T065 [US1] Añadir historial inmutable de versiones por `(external_id, updated)` y conservar el payload original en `db/init/005_event_versions.sql` y `consumer/app/persistence.py`, manteniendo `fact_sismos` como estado actual y el commit PostgreSQL antes del offset Kafka; probar revisiones, repetición antigua y reinicio en `tests/integration/test_version_history.py`
+- [X] T066 [P] [US1] Persistir y exponer `ADM0_A3`/`country_id` de Natural Earth, comprobar su unicidad y documentar la regla para fronteras o múltiples coincidencias en `consumer/app/spatial.py`, `db/init/001_schema.sql`, `consumer/app/persistence.py` y `specs/001-streaming-sismos-etl/data-model.md`; añadir casos marítimos y fronterizos en `tests/unit/test_spatial.py`
+- [X] T067 [P] [US1] Implementar timeout, HTTP 429/5xx, errores JSON y reintentos con espera progresiva en `producer/app/feed.py`, conservar la última ingesta válida y documentar la recuperación tras una parada superior a 24 horas en `README.md` y `specs/001-streaming-sismos-etl/quickstart.md`
+
+### US2 — Contrato API y frontend académico
+
+- [X] T068 [US2] Alinear `api/app/main.py`, `api/app/schemas.py`, `api/app/queries.py` y `api/app/db.py` con `enunciadoProyecto/CONTRATO-API.md`: exponer `/api/salud`, `/api/estadisticas`, aceptar `start`, `end`, `min_mag` y `country_id`, devolver `metadata.generated`, `metadata.last_ingestion`, `mode`, `count`, `total` y `truncated`, y devolver errores explícitos de base de datos
+- [X] T069 [P] [US2] Crear pruebas contractuales para el contrato anexado en `tests/contract/test_enunciado_api_contract.py`, incluyendo FeatureCollection vacía, paginación/truncado, fechas ISO inclusivas/exclusivas, valores nulos, filtros equivalentes en estadísticas, CORS exacto de Netlify y cabecera `ngrok-skip-browser-warning`
+- [X] T070 [US2] Implementar en `frontend/src/app/app.component.ts`, `frontend/src/app/app.component.html` y estilos asociados filtros sincronizados de fecha/magnitud/país, tabla accesible, recuentos por país/subregión y hora UTC, distribuciones de magnitud/profundidad, comparación con la media diaria de 2025 y estado visible de API/última ingesta/truncado
+- [X] T071 [P] [US2] Añadir datos de `magType`, `country_id`, `country_name`, `last_ingestion`, `mode` y registros sin valor al modelo GeoJSON del frontend y validar su representación en `tests/contract/test_frontend_contract.py` y `frontend/src/app/app.component.ts`
+
+### US3 — Replay, calidad, rendimiento y evaluación
+
+- [X] T072 [US3] Documentar en `db/seeds/README.md` el alcance del fixture 2025, la consulta reproducible del histórico completo, fecha/filtros/conteos esperados y verificar que `producer/app/replay.py` no trunca resultados
+- [X] T073 [P] [US3] Ampliar `tests/integration/load_test.py` y `tests/integration/benchmark_scaling.py` para medir al menos tres tamaños de entrada, memoria, latencia, throughput, búsqueda secuencial frente a diccionario y consulta indexada opcional, separando datos sintéticos de los reales
+- [X] T074 [P] [US3] Crear el apartado manual de calidad en `docs/calidad.md` o el notebook equivalente, con consultas/código, fuente, periodo, denominadores, resultados antes/después, completitud, unicidad, validez, consistencia, actualidad y exactitud, aplicando la regla 1-10-100 sin generar un informe automático
+- [X] T075 [P] [US3] Crear `docs/evaluacion-financiera.md` con supuestos, flujos de caja, horizonte, tasa de descuento, NPV, IRR y WACC; declarar viabilidad únicamente si `NPV > 0` e `IRR > WACC`, sin usar ROI simple como criterio principal
+- [X] T076 Ejecutar la validación final de `enunciadoProyecto` en `tests/test_enunciado_compliance.py`, `specs/001-streaming-sismos-etl/quickstart.md` y `README.md`: Compose con cinco servicios, all_day, contrato API, replay documentado, historial, ADM0_A3, frontend, benchmarks, evidencia manual y ausencia de tecnologías prohibidas
+
+**Checkpoint**: El proyecto cubre el enunciado base, el contrato API anexo, la
+rúbrica de frontend, la trazabilidad histórica, la evidencia manual de calidad y
+la evaluación financiera constitucional; la entrega solo puede declararse lista
+cuando T063–T076 estén marcadas `[X]` y sus pruebas pasen.
+
+---
+
 ## Dependencies & Execution Order
 
 ### Phase Dependencies
@@ -209,6 +246,9 @@ cuantitativas se ejecutaron con el stack Compose activo.
 - **Phase 5 US3**: depende del consumidor de US1 y de los topics fundacionales; puede
   ejecutarse después de US1 y en paralelo con parte de US2.
 - **Phase 6 Polish**: depende de las historias objetivo completadas.
+- **Phase 8 Cobertura integral**: depende de Phase 6 y de las remediaciones T050–T062;
+  T063–T067 deben completarse antes de T068–T071, y T072–T076 requieren el pipeline
+  y el contrato API alineados.
 
 ### User Story Dependencies
 
@@ -227,6 +267,9 @@ cuantitativas se ejecutaron con el stack Compose activo.
   contratos y T035 es paralelo a las consultas.
 - En US3: T039 y T043 pueden ejecutarse en paralelo; T041-T042 esperan T039 y US1.
 - En Polish: T045-T047 son paralelizables; T048-T049 requieren el sistema completo.
+- En Phase 8: T066-T067, T069, T071, T073-T075 pueden ejecutarse en paralelo una
+  vez disponibles sus contratos y datos; T064-T065, T068 y T070 son secuenciales
+  por modificar estado, persistencia y contrato compartido.
 
 ## Parallel Example: User Story 1
 
@@ -264,6 +307,8 @@ T034 -> T036 -> T037 -> T038
 3. **Incremento de demostración**: completar US3 con replay aislado de 2025.
 4. **Cierre**: ejecutar quickstart, revisión constitucional y documentación manual
    de calidad.
+5. **Cobertura del enunciado**: completar Phase 8, ejecutar la matriz de
+   cumplimiento y no emitir el veredicto final hasta validar T076.
 
 ### Task Format Validation
 

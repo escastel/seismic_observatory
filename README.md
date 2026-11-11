@@ -93,6 +93,11 @@ Variables principales:
 | `CORS_ORIGINS` | `*` en demo o lista separada por comas |
 | `NGROK_DOMAIN` | Dominio reservado del túnel ngrok para el frontend Netlify |
 
+El productor usa `all_day.geojson`, filtra exclusivamente features cuyo tipo sea
+`earthquake` y conserva el estado de publicación en PostgreSQL. Los reintentos
+HTTP para 429/5xx usan backoff progresivo; una caída superior a 24 horas se
+recupera iniciando de nuevo el ciclo y comparando `updated`.
+
 El listener interno de Kafka usa `kafka:9092`; las pruebas E2E desde el host usan
 el listener externo `localhost:29092`.
 
@@ -111,7 +116,8 @@ curl "http://localhost:8000/api/estadisticas/timeline?bucket=month"
 ```
 
 `/eventos` acepta `country`, `date_from`, `date_to`, `min_magnitude`,
-`max_magnitude`, `limit` y `offset`. Con `format=geojson` o
+`max_magnitude`, `start`, `end`, `min_mag`, `country_id`, `limit` y `offset`.
+También están disponibles `/salud` y `/estadisticas`. Con `format=geojson` o
 `Accept: application/geo+json` devuelve un `FeatureCollection` con puntos
 `[longitude, latitude, depth_km]`.
 
@@ -159,6 +165,12 @@ La revisión de calidad aplica la regla 1-10-100 de forma manual: prevenir
 errores mediante contratos y validación temprana, detectarlos en el WAF antes de
 persistir y reservar la corrección costosa para los eventos ya observados en
 producción. No se generan informes automáticos de calidad.
+
+La evidencia manual ampliada está en
+[`docs/calidad.md`](docs/calidad.md), y la evaluación financiera constitucional
+en [`docs/evaluacion-financiera.md`](docs/evaluacion-financiera.md). El contrato
+anexo añade filtros `start`, `end`, `min_mag` y `country_id`, además de
+distribuciones en `/api/estadisticas`.
 
 La política de frescura rechaza timestamps futuros con más de 300 segundos de
 tolerancia. La ingesta `terremotos_raw` rechaza eventos con más de 7 días; el

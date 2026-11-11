@@ -32,6 +32,9 @@ estén activos. Este es el único comando de arranque backend admitido.
    `updated` nuevo. Verificar una sola fila y que prevalece la fecha nueva.
 6. Detener temporalmente PostgreSQL, procesar un evento y verificar que el offset
    no se confirma; al recuperar PostgreSQL el evento se reintenta.
+7. Detener el productor durante más de 24 horas y reiniciarlo. El estado
+   `ingestion_state` evita republicar versiones sin cambios y permite publicar
+   revisiones posteriores sin perder el ciclo siguiente.
 
 ## Validar API
 

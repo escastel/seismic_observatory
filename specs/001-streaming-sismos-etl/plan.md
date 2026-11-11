@@ -24,7 +24,8 @@ GeoJSON para Angular/Leaflet. Un flujo separado reproduce históricos de 2025 en
 `python:3.11-slim`, `postgis/postgis:15-3.5` y `confluentinc/cp-kafka`
 
 **Storage**: PostgreSQL 15 + PostGIS; esquema dimensional con `fact_sismos`,
-`dim_geografia`, `dim_tiempo` y `cuarentena`
+`dim_geografia`, `dim_tiempo`, `cuarentena`, `ingestion_state` y
+`event_versions`
 
 **Testing**: pytest, pruebas unitarias de validación/enriquecimiento, pruebas de
 contrato FastAPI, pruebas de integración con Docker Compose y replay acelerado
@@ -85,7 +86,10 @@ specs/001-streaming-sismos-etl/
 compose.yaml
 db/
 ├── init/
-│   └── 001_schema.sql
+│   ├── 001_schema.sql
+│   ├── 004_ingestion_state.sql
+│   ├── 005_event_versions.sql
+│   └── 006_mag_type.sql
 └── seeds/
     └── historical_2025.jsonl
 producer/
@@ -95,6 +99,7 @@ producer/
     ├── __init__.py
     ├── config.py
     ├── feed.py
+    ├── persistence.py
     └── main.py
 consumer/
 ├── Dockerfile
@@ -153,7 +158,7 @@ GeoJSON/CORS. Las decisiones consolidadas están en [research.md](./research.md)
 ## Phase 1: Design & Contracts
 
 - [data-model.md](./data-model.md) define dimensiones, hechos, cuarentena, claves,
-  validaciones, relaciones e índices B-Tree.
+  validaciones, relaciones, historial de versiones e índices B-Tree.
 - [contracts/api.md](./contracts/api.md) define endpoints, filtros, errores, CORS y
   GeoJSON.
 - [contracts/events.md](./contracts/events.md) define el evento Kafka, topics,

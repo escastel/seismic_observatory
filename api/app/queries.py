@@ -20,10 +20,15 @@ def _event_conditions(filters: EventFilters) -> tuple[list[str], list[Any]]:
 
     if filters.country is not None:
         add("g.country = ?", filters.country)
+    if filters.country_id is not None:
+        add("g.country_id = ?", filters.country_id)
     if filters.date_from is not None:
         add("f.event_time >= ?", filters.date_from)
     if filters.date_to is not None:
-        add("f.event_time <= ?", filters.date_to)
+        add(
+            "f.event_time < ?" if filters.end_exclusive else "f.event_time <= ?",
+            filters.date_to,
+        )
     if filters.min_magnitude is not None:
         add("f.magnitude >= ?", filters.min_magnitude)
     if filters.max_magnitude is not None:
@@ -40,8 +45,9 @@ async def fetch_events(pool: asyncpg.Pool, filters: EventFilters) -> list[asyncp
     return await pool.fetch(
         f"""
         SELECT f.external_id AS id, f.updated, f.event_time AS time,
-               f.magnitude AS mag, f.place, f.longitude, f.latitude, f.depth_km,
-               g.country, g.continent, g.subregion, f.source_topic
+               f.magnitude AS mag, f.mag_type, f.place, f.longitude, f.latitude, f.depth_km,
+               g.country, g.country AS country_name, g.continent, g.subregion, g.country_id,
+               f.source_topic
         FROM fact_sismos f
         JOIN dim_geografia g ON g.geografia_key = f.geografia_key
         {where}
