@@ -65,7 +65,8 @@ CREATE TABLE IF NOT EXISTS cuarentena (
             'Exactitud',
             'Consistencia',
             'Oportunidad',
-            'Unicidad'
+            'Unicidad',
+            'Frescura'
         )
     ),
     reason_code TEXT NOT NULL,

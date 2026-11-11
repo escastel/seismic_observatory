@@ -42,7 +42,7 @@ async def process_message(
         )
         return True
 
-    event, failures = validate_event(decoded)
+    event, failures = validate_event(decoded, source_topic=source_topic)
     if failures:
         external_id = decoded.get("id") if isinstance(decoded, dict) else None
         persist_quarantines(

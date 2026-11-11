@@ -163,6 +163,14 @@ persistencia, cuarentena e idempotencia.
   sistema y sin dependencias de servicios Cloud.
 - **FR-017**: La solución MUST respetar los límites constitucionales: no usar Spark,
   Flink, Kubernetes, Streamlit ni generar informes automáticos de calidad.
+- **FR-018**: El WAF MUST clasificar como `Frescura` y enviar a cuarentena todo
+  evento cuyo `time` supere el instante actual en más de 300 segundos. Para
+  `terremotos_raw`, también MUST rechazar eventos con más de 7 días de antigüedad;
+  `terremotos_replay` MUST aceptar históricos de 2025, manteniendo el rechazo de
+  timestamps futuros.
+- **FR-019**: La suite de integración MUST incluir una prueba E2E real que publique
+  simultáneamente en `terremotos_raw` y `terremotos_replay`, consulte la API HTTP
+  real y verifique GeoJSON y ambas respuestas estadísticas.
 
 ### Key Entities *(include if feature involves data)*
 
@@ -199,6 +207,11 @@ persistencia, cuarentena e idempotencia.
 - **SC-007**: Una persona que use el frontend puede aplicar país, fecha y magnitud,
   interpretar el resultado geográfico y consultar ambas estadísticas sin asistencia
   técnica en una prueba de aceptación.
+- **SC-008**: Con el stack local activo, la prueba E2E real obtiene HTTP 200 para
+  GeoJSON, países y timeline, y encuentra eventos procesados desde ambos topics.
+
+**Estado de verificación E2E: [OK PASS]** con el stack local activo; la prueba real
+confirma ambos topics, GeoJSON y las dos respuestas estadísticas.
 
 ## Assumptions
 

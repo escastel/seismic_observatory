@@ -77,7 +77,7 @@ Conserva todo evento que no puede pasar el WAF.
 | `external_id` | texto nullable | si pudo extraerse |
 | `received_at` | timestamp | no nulo |
 | `source_topic` | texto | origen |
-| `quality_dimension` | enum/texto | Completitud, Validez, Exactitud, Consistencia, Oportunidad o Unicidad |
+| `quality_dimension` | enum/texto | Una de las 7 dimensiones: Completitud, Validez, Exactitud, Consistencia, Oportunidad, Unicidad o Frescura |
 | `reason_code` | texto | código estable |
 | `reason_detail` | texto | explicación concreta |
 | `payload` | JSON | evento original |
@@ -100,8 +100,9 @@ Conserva todo evento que no puede pasar el WAF.
 - Coordenadas fuera de rango o no numéricas: **Fallo de Validez**.
 - Valor imposible o geometría no interpretable: **Fallo de Exactitud**.
 - Tipos/fechas incompatibles entre campos: **Fallo de Consistencia**.
-- Evento con `updated` inválido o demasiado antiguo según la política: **Fallo de
-  Oportunidad**.
+- Evento con `updated` inválido: **Fallo de Oportunidad**.
+- `time` futuro más de 300 segundos o evento raw con más de 7 días: **Fallo de
+  Frescura**.
 - Identificador repetido con versión no posterior: **Fallo de Unicidad** cuando se
   registre como rechazo; el upsert debe conservar el dato vigente.
 

@@ -1,10 +1,10 @@
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 
 from consumer.app.quality import validate_event
 
 
 def valid_payload() -> dict:
-    timestamp = int(datetime(2025, 1, 1, tzinfo=timezone.utc).timestamp() * 1000)
+    timestamp = int(datetime.now(timezone.utc).timestamp() * 1000)
     return {
         "id": "event-1",
         "updated": timestamp,
@@ -95,3 +95,42 @@ def test_quality_rejects_non_finite_magnitude() -> None:
 
     assert event is None
     assert failures[0].dimension == "Exactitud"
+
+
+def test_quality_rejects_future_event_time_beyond_tolerance() -> None:
+    now = datetime(2026, 11, 11, 15, 0, tzinfo=timezone.utc)
+    payload = valid_payload()
+    future = now + timedelta(seconds=301)
+    payload["time"] = int(future.timestamp() * 1000)
+
+    event, failures = validate_event(payload, now=now)
+
+    assert event is None
+    assert [(failure.dimension, failure.reason_code) for failure in failures] == [
+        ("Frescura", "future_timestamp")
+    ]
+
+
+def test_quality_rejects_stale_raw_event() -> None:
+    now = datetime(2026, 11, 11, 15, 0, tzinfo=timezone.utc)
+    payload = valid_payload()
+    stale = now - timedelta(days=7, seconds=1)
+    payload["time"] = int(stale.timestamp() * 1000)
+
+    event, failures = validate_event(payload, now=now, source_topic="terremotos_raw")
+
+    assert event is None
+    assert failures[0].reason_code == "event_too_old"
+    assert failures[0].dimension == "Frescura"
+
+
+def test_quality_allows_historical_replay_event() -> None:
+    now = datetime(2026, 11, 11, 15, 0, tzinfo=timezone.utc)
+    payload = valid_payload()
+    historical = datetime(2025, 1, 1, tzinfo=timezone.utc)
+    payload["time"] = int(historical.timestamp() * 1000)
+
+    event, failures = validate_event(payload, now=now, source_topic="terremotos_replay")
+
+    assert event is not None
+    assert failures == []

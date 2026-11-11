@@ -30,6 +30,10 @@ Both topics use the same event schema. The topic name is persisted as
 Coordinates are longitude, latitude, optional depth. Unknown original properties
 must remain available for audit.
 
+The `Frescura` rule rejects `time` values more than 300 seconds in the future.
+For `terremotos_raw`, events older than 7 days are also quarantined; valid
+historical dates remain allowed on `terremotos_replay`.
+
 ## Processing contract
 
 1. Consumer parses JSON; malformed JSON is quarantined as a Validez failure.

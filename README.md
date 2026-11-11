@@ -39,7 +39,7 @@ mediante el dominio configurado en el túnel ngrok.
 ### WAF de calidad y cuarentena
 
 Cada evento atraviesa validaciones de completitud, validez, exactitud,
-consistencia, oportunidad y unicidad. Los fallos se insertan en `cuarentena`
+consistencia, oportunidad, unicidad y frescura. Los fallos se insertan en `cuarentena`
 con payload original, topic, partición, offset, código estable, detalle y
 timestamp. Por ejemplo, un `mag` nulo es un fallo de **Completitud** y una
 latitud fuera de `[-90, 90]` es un fallo de **Validez**.
@@ -92,6 +92,9 @@ Variables principales:
 | `COUNTRIES_GEOJSON_PATH` | Catálogo Natural Earth montado |
 | `CORS_ORIGINS` | `*` en demo o lista separada por comas |
 | `NGROK_DOMAIN` | Dominio reservado del túnel ngrok para el frontend Netlify |
+
+El listener interno de Kafka usa `kafka:9092`; las pruebas E2E desde el host usan
+el listener externo `localhost:29092`.
 
 ## 5. API
 
@@ -156,6 +159,10 @@ La revisión de calidad aplica la regla 1-10-100 de forma manual: prevenir
 errores mediante contratos y validación temprana, detectarlos en el WAF antes de
 persistir y reservar la corrección costosa para los eventos ya observados en
 producción. No se generan informes automáticos de calidad.
+
+La política de frescura rechaza timestamps futuros con más de 300 segundos de
+tolerancia. La ingesta `terremotos_raw` rechaza eventos con más de 7 días; el
+topic `terremotos_replay` permite históricos válidos de 2025.
 
 Para detener servicios sin borrar evidencia:
 

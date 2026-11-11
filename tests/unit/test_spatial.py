@@ -3,6 +3,8 @@ import pytest
 
 pytest.importorskip("geopandas")
 
+from shapely.geometry import Point
+
 from consumer.app.spatial import SpatialEnricher, UNASSIGNED_COUNTRY
 
 
@@ -11,7 +13,7 @@ class EmptyMatches:
 
 
 class EmptyCountries:
-    geometry = object()
+    geometry = Point(0.0, 0.0)
 
     def __getitem__(self, key: object) -> EmptyMatches:
         return EmptyMatches()

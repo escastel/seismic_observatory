@@ -167,7 +167,7 @@ GeoJSON/CORS. Las decisiones consolidadas están en [research.md](./research.md)
 |---|---|---|
 | Reproducibilidad | PASS | quickstart usa exclusivamente `docker compose up --build -d` |
 | Transaccionalidad | PASS | events.md exige commit PostgreSQL antes de `consumer.commit()` |
-| Cuarentena | PASS | data-model.md tipa seis dimensiones de calidad y motivo |
+| Cuarentena | PASS | data-model.md tipa siete dimensiones de calidad y motivo |
 | Integración espacial | PASS | `dim_geografia` conserva país/continente/subregión y regla marítima |
 | Consultas | PASS | índices B-Tree para fecha y país documentados |
 | CORS | PASS | api.md especifica middleware y orígenes configurables |

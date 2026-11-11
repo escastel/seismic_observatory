@@ -4,12 +4,14 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 
 MIN_MAGNITUDE = 0.0
 MAX_MAGNITUDE = 10.0
+FUTURE_TIMESTAMP_TOLERANCE = timedelta(seconds=300)
+RAW_EVENT_MAX_AGE = timedelta(days=7)
 
 
 @dataclass(frozen=True)
@@ -38,6 +40,8 @@ def _failure(dimension: str, code: str, detail: str) -> QualityFailure:
 def validate_event(
     payload: Any,
     seen_ids: set[str] | None = None,
+    source_topic: str = "terremotos_raw",
+    now: datetime | None = None,
 ) -> tuple[ValidatedEvent | None, list[QualityFailure]]:
     if not isinstance(payload, dict):
         return None, [_failure("Consistencia", "event_not_object", "Event must be a JSON object")]
@@ -77,6 +81,25 @@ def validate_event(
     except (TypeError, ValueError, OverflowError, OSError):
         failures.append(_failure("Consistencia", "time_invalid", "time must be a Unix timestamp in milliseconds"))
         event_time = None
+
+    reference_time = now or datetime.now(timezone.utc)
+    if event_time is not None:
+        if event_time > reference_time + FUTURE_TIMESTAMP_TOLERANCE:
+            failures.append(
+                _failure(
+                    "Frescura",
+                    "future_timestamp",
+                    "event time cannot be more than 300 seconds in the future",
+                )
+            )
+        elif source_topic == "terremotos_raw" and reference_time - event_time > RAW_EVENT_MAX_AGE:
+            failures.append(
+                _failure(
+                    "Frescura",
+                    "event_too_old",
+                    "raw events cannot be older than 7 days",
+                )
+            )
 
     try:
         magnitude = float(magnitude_raw)

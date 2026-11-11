@@ -24,11 +24,11 @@
   potencial; una transacción distribuida se rechaza por complejidad y por no ser
   necesaria para el modelo idempotente local.
 
-## Decisión 3: validación WAF y seis dimensiones de calidad
+## Decisión 3: validación WAF y siete dimensiones de calidad
 
 - **Decision**: Cada rechazo registra una dimensión normalizada: Completitud,
-  Validez, Exactitud, Consistencia, Oportunidad o Unicidad, además del motivo y
-  payload.
+  Validez, Exactitud, Consistencia, Oportunidad, Unicidad o Frescura, además del
+  motivo y payload.
 - **Rationale**: Hace auditable la calidad y permite agrupar fallos sin descartar
   silenciosamente. Nulos se etiquetan como Completitud; coordenadas inválidas como
   Validez; duplicados obsoletos como Unicidad.

@@ -36,7 +36,7 @@ Consumer o API.
 ### Database
 
 - [X] T005 Crear `db/init/001_schema.sql` con `dim_geografia`, `dim_tiempo`, `fact_sismos` y `cuarentena` conforme a `specs/001-streaming-sismos-etl/data-model.md`
-- [X] T006 Añadir a `db/init/001_schema.sql` las restricciones: `external_id` único y no nulo, FK obligatorias, `country = 'Sin país asignado'` para eventos marítimos y `quality_dimension` limitada a Completitud, Validez, Exactitud, Consistencia, Oportunidad o Unicidad
+- [X] T006 Añadir a `db/init/001_schema.sql` las restricciones: `external_id` único y no nulo, FK obligatorias, `country = 'Sin país asignado'` para eventos marítimos y `quality_dimension` limitada a las 7 dimensiones: Completitud, Validez, Exactitud, Consistencia, Oportunidad, Unicidad o Frescura
 - [X] T007 Añadir a `db/init/001_schema.sql` los índices B-Tree sobre `dim_geografia.country`, `fact_sismos.event_time`, `fact_sismos.geografia_key`, `fact_sismos.magnitude` y `fact_sismos.external_id`
 - [X] T008 [P] Añadir datos mínimos reproducibles de calendario y catálogo geográfico en `db/init/002_seed_dimensions.sql`, sin reemplazar datos existentes al reiniciar PostgreSQL
 
@@ -78,7 +78,7 @@ confirmación Kafka antes del commit PostgreSQL.
 ### Consumer
 
 - [X] T018 [P] [US1] Implementar validaciones WAF en `consumer/app/quality.py`: magnitud no nula y numérica, `longitude` en `[-180, 180]`, `latitude` en `[-90, 90]`, coordenadas finitas, e `id`/`updated` presentes
-- [X] T019 [P] [US1] Implementar el mapeo de fallos a las seis dimensiones de calidad en `consumer/app/quality.py`, usando Completitud para nulos, Validez para coordenadas erróneas y códigos estables para cada motivo
+- [X] T019 [P] [US1] Implementar el mapeo de fallos a las 7 dimensiones de calidad en `consumer/app/quality.py`, usando Completitud para nulos, Validez para coordenadas erróneas, Frescura para timestamps no permitidos y códigos estables para cada motivo
 - [X] T020 [P] [US1] Implementar carga única de `paises.geojson` y cruce Point in Polygon con GeoPandas/`shapely` en `consumer/app/spatial.py`, devolviendo país, continente y subregión
 - [X] T021 [US1] Garantizar en `consumer/app/spatial.py` que cualquier punto sin polígono terrestre recibe exactamente `Sin país asignado` y nunca el país más cercano
 - [X] T022 [US1] Implementar el consumidor de `terremotos_raw` con `enable_auto_commit=False` en `consumer/app/main.py`, separando parseo, WAF, enriquecimiento y persistencia
@@ -183,10 +183,17 @@ la arquitectura constitucional de cinco servicios.
 - [X] T052 [U1] Crear explícitamente `terremotos_raw` y `terremotos_replay` desde el healthcheck del servicio Kafka, manteniendo exactamente cinco servicios.
 - [X] T053 [I1] Parametrizar el healthcheck de PostgreSQL con `POSTGRES_USER` y `POSTGRES_DB` provenientes de Compose.
 - [X] T054 [A1] Formalizar `MIN_MAGNITUDE=0.0` y `MAX_MAGNITUDE=10.0` en `consumer/app/quality.py`, clasificando el incumplimiento como `Validez`.
-- [X] T055 [G1][U2] Crear pruebas unitarias para las seis dimensiones WAF, límites de magnitud y clasificación marítima `Sin país asignado`.
+- [X] T055 [G1][U2] Crear pruebas unitarias para las 7 dimensiones WAF, límites de magnitud y clasificación marítima `Sin país asignado`.
 - [X] T056 [G1] Crear pruebas contractuales para rutas REST y CORS en `tests/contract/test_api_contract.py`.
 - [X] T057 [G2] Crear `tests/integration/load_test.py` para medir tasa de éxito SC-001, p95 SC-005 y throughput de replay SC-006 con umbrales explícitos.
 - [X] T058 Actualizar `.env.example` y la configuración local ignorada para incluir `NGROK_DOMAIN`, sin versionar credenciales.
+- [X] T059 Implementar en `consumer/app/quality.py` la dimensión `Frescura`: rechazar `future_timestamp` más allá de 300 segundos y eventos raw con más de 7 días, permitiendo históricos replay.
+- [X] T060 Propagar el topic Kafka al WAF desde `consumer/app/main.py` y ampliar el esquema SQL para auditar la dimensión `Frescura` en `cuarentena`.
+- [X] T061 Crear `tests/test_e2e_real.py` para publicar simultáneamente en ambos topics y verificar mediante HTTP real GeoJSON, estadísticas por país y timeline.
+- [X] T062 Configurar un listener externo `localhost:29092` en Kafka para que la prueba E2E real del host pueda publicar mientras Producer y Consumer usan `kafka:9092`.
+
+**Resultado global de remediación: [OK PASS]**. La prueba E2E real y las métricas
+cuantitativas se ejecutaron con el stack Compose activo.
 
 ---
 
