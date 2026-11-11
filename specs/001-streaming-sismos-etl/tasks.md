@@ -227,6 +227,8 @@ servicios.
 - [X] T075 [P] [US3] Crear `docs/evaluacion-financiera.md` con supuestos, flujos de caja, horizonte, tasa de descuento, NPV, IRR y WACC; declarar viabilidad únicamente si `NPV > 0` e `IRR > WACC`, sin usar ROI simple como criterio principal
 - [X] T076 Ejecutar la validación final de `enunciadoProyecto` en `tests/test_enunciado_compliance.py`, `specs/001-streaming-sismos-etl/quickstart.md` y `README.md`: Compose con cinco servicios, all_day, contrato API, replay documentado, historial, ADM0_A3, frontend, benchmarks, evidencia manual y ausencia de tecnologías prohibidas
 - [X] T077 [US3] Descargar y documentar el año completo más antiguo disponible en USGS mediante `producer/app/history.py`, generar `db/seeds/historical_1900.jsonl` y permitir replay de años históricos mediante `producer/app/replay.py --year`
+- [X] T078 [US2] Aplicar los filtros de fecha, país y magnitud a todas las distribuciones y métricas de `/api/estadisticas`, con regresión en `tests/unit/test_statistics_filters.py`
+- [X] T079 [US3] Ampliar la extracción histórica a intervalos inclusivos de años con un archivo JSONL por año y documentar la persistencia reproducible mediante replay
 
 **Checkpoint**: El proyecto cubre el enunciado base, el contrato API anexo, la
 rúbrica de frontend, la trazabilidad histórica, la evidencia manual de calidad y

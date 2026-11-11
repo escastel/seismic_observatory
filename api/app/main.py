@@ -16,7 +16,16 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from .config import ApiConfig
 from .db import database_error
-from .queries import count_events, country_stats, fetch_events, timeline_stats
+from .queries import (
+    count_events,
+    country_stats,
+    daily_average_2025,
+    depth_stats,
+    fetch_events,
+    magnitude_stats,
+    missing_magnitude,
+    timeline_stats,
+)
 from .schemas import (
     CountryStatsResponse,
     EventFilters,
@@ -251,23 +260,10 @@ async def statistics(
     try:
         countries_rows = await country_stats(pool, filters)
         timeline_rows = await timeline_stats(pool, filters, "day")
-        magnitude_rows = await pool.fetch(
-            "SELECT COALESCE(f.magnitude::text, 'null') AS bucket, COUNT(*)::int AS count "
-            "FROM fact_sismos f JOIN dim_geografia g ON g.geografia_key=f.geografia_key "
-            "GROUP BY bucket ORDER BY bucket"
-        )
-        depth_rows = await pool.fetch(
-            "SELECT CASE WHEN f.depth_km IS NULL THEN 'unknown' "
-            "WHEN f.depth_km < 70 THEN 'shallow' WHEN f.depth_km < 300 THEN 'intermediate' "
-            "ELSE 'deep' END AS bucket, COUNT(*)::int AS count "
-            "FROM fact_sismos f GROUP BY bucket ORDER BY bucket"
-        )
-        historical_average = await pool.fetchval(
-            "SELECT COALESCE(AVG(day_count), 0) FROM ("
-            "SELECT DATE_TRUNC('day', event_time), COUNT(*)::numeric AS day_count "
-            "FROM fact_sismos WHERE EXTRACT(YEAR FROM event_time) = 2025 "
-            "GROUP BY DATE_TRUNC('day', event_time)) daily"
-        )
+        magnitude_rows = await magnitude_stats(pool, filters)
+        depth_rows = await depth_stats(pool, filters)
+        historical_average = await daily_average_2025(pool, filters)
+        missing_magnitude_count = await missing_magnitude(pool, filters)
     except (OSError, asyncpg.PostgresError) as exc:
         raise database_error(exc) from exc
     return {
@@ -277,11 +273,6 @@ async def statistics(
         "timeline": [{"period": row["period"].isoformat(), "count": row["count"]} for row in timeline_rows],
         "magnitude_distribution": [dict(row) for row in magnitude_rows],
         "depth_distribution": [dict(row) for row in depth_rows],
-        "daily_average_2025": float(historical_average or 0),
-        "missing_magnitude": int(
-            await pool.fetchval(
-                "SELECT COUNT(*) FROM fact_sismos f JOIN dim_geografia g ON g.geografia_key=f.geografia_key "
-                "WHERE f.magnitude IS NULL"
-            )
-        ),
+        "daily_average_2025": historical_average,
+        "missing_magnitude": missing_magnitude_count,
     }

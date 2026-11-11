@@ -150,6 +150,24 @@ docker compose run --rm producer python -m app.replay `
   --path /data/seeds/historical_1900.jsonl --year 1900 --rate 10
 ```
 
+Para obtener y persistir todos los registros disponibles de un intervalo
+histórico, el descargador crea un archivo por año. Por ejemplo, para todo el
+catálogo consultable desde 1900 hasta 2026:
+
+```powershell
+python -m producer.app.history --start-year 1900 --end-year 2026 `
+  --output-dir db/seeds
+```
+
+Después se reproduce cada archivo generado en `terremotos_replay`. Los lotes se
+mantienen separados por año para permitir reanudar la extracción o la
+persistencia sin repetir todo el catálogo:
+
+```powershell
+docker compose run --rm producer python -m app.replay `
+  --path /data/seeds/historical_2026.jsonl --year 2026 --rate 100
+```
+
 La ruta del argumento es siempre interna al contenedor (`/data/seeds/...`).
 Si se ejecuta desde Git Bash en Windows y transforma la ruta en
 `C:/Program Files/Git/data/seeds/...`, el replay reconoce el nombre del archivo

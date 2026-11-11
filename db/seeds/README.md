@@ -19,6 +19,14 @@ API USGS al momento de la extracción. USGS comienza su catálogo consultable en
 Extracción realizada el 2026-11-11 UTC; SHA-256:
 `95F0BE1FC5D23ECDAE67D885DA75BCF6EFDB110A44BC11BE842C26BD99163927`.
 
+`historical_2026.jsonl` contiene la extracción completa de USGS para el año
+2026, incluyendo los registros de febrero y marzo que se usan para validar el
+filtro del frontend. Contiene 121.619 líneas y ocupa aproximadamente 98 MB.
+SHA-256:
+`CAE97A0DC8FF484FDBE1B1134CFC7BC0F1880BBA5D142BA9F89BB60773470086`.
+Se publicó en `terremotos_replay` el 2026-11-11 a 1.000 eventos por segundo;
+el consumidor aplica las reglas WAF y persiste los eventos aceptados.
+
 ## Procedimiento para generar el histórico completo
 
 La fuente reproducible es la API GeoJSON de USGS, consultada por meses para no
@@ -27,6 +35,20 @@ truncar resultados. El descargador ejecutable es:
 ```powershell
 python -m producer.app.history --year 1900 --output db/seeds/historical_1900.jsonl
 ```
+
+Para descargar todos los años disponibles en un intervalo, se genera un archivo
+independiente por año. La extracción consulta cada mes y pagina en bloques de
+20.000 eventos, por lo que no trunca meses con alta actividad:
+
+```powershell
+python -m producer.app.history --start-year 1900 --end-year 2026 `
+  --output-dir db/seeds
+```
+
+Los archivos `historical_YYYY.jsonl` pueden reproducirse individualmente para
+mantener el consumo y la persistencia controlables. El proceso de extracción es
+reanudable a nivel de año: los archivos ya generados pueden conservarse y no es
+necesario volver a descargarlos.
 
 ```text
 https://earthquake.usgs.gov/fdsnws/event/1/query

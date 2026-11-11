@@ -1,4 +1,4 @@
-"""Download complete USGS earthquake history for a calendar year."""
+"""Download complete USGS earthquake history for one or more calendar years."""
 
 from __future__ import annotations
 
@@ -53,6 +53,22 @@ def fetch_year(year: int, timeout: int = 60) -> list[dict[str, Any]]:
     return sorted(events.values(), key=lambda event: (event.get("properties", {}).get("time", 0), event["id"]))
 
 
+def fetch_years(
+    start_year: int,
+    end_year: int,
+    timeout: int = 60,
+) -> dict[int, list[dict[str, Any]]]:
+    """Fetch every available event for each inclusive calendar year."""
+    if start_year < 1900:
+        raise ValueError("USGS history starts at 1900")
+    if end_year < start_year:
+        raise ValueError("end_year must be greater than or equal to start_year")
+    return {
+        year: fetch_year(year, timeout=timeout)
+        for year in range(start_year, end_year + 1)
+    }
+
+
 def write_jsonl(events: list[dict[str, Any]], output: str | Path) -> int:
     destination = Path(output)
     destination.parent.mkdir(parents=True, exist_ok=True)
@@ -75,16 +91,37 @@ def write_jsonl(events: list[dict[str, Any]], output: str | Path) -> int:
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Download a complete USGS earthquake year")
-    parser.add_argument("--year", type=int, required=True, help="Calendar year to download")
-    parser.add_argument("--output", type=Path, required=True, help="Destination JSONL path")
+    parser = argparse.ArgumentParser(description="Download complete USGS earthquake history")
+    year_group = parser.add_mutually_exclusive_group(required=True)
+    year_group.add_argument("--year", type=int, help="Calendar year to download")
+    year_group.add_argument("--start-year", type=int, help="First calendar year, inclusive")
+    parser.add_argument("--end-year", type=int, help="Last calendar year, inclusive")
+    parser.add_argument("--output", type=Path, help="Destination JSONL path for one year")
+    parser.add_argument(
+        "--output-dir",
+        type=Path,
+        help="Directory for one historical_YYYY.jsonl file per year",
+    )
+    parser.add_argument("--timeout", type=int, default=60, help="HTTP timeout in seconds")
     args = parser.parse_args()
-    if args.year < 1900:
-        raise ValueError("USGS history starts at 1900")
+    if args.year is not None:
+        if args.year < 1900:
+            raise ValueError("USGS history starts at 1900")
+        if args.output is None:
+            raise ValueError("--output is required with --year")
+        events = fetch_year(args.year, timeout=args.timeout)
+        count = write_jsonl(events, args.output)
+        LOGGER.info("History complete year=%d output=%s events=%d", args.year, args.output, count)
+        return
+
+    if args.end_year is None or args.output_dir is None:
+        raise ValueError("--start-year requires --end-year and --output-dir")
+    histories = fetch_years(args.start_year, args.end_year, timeout=args.timeout)
     logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(message)s")
-    events = fetch_year(args.year)
-    count = write_jsonl(events, args.output)
-    LOGGER.info("History complete year=%d output=%s events=%d", args.year, args.output, count)
+    for year, events in histories.items():
+        output = args.output_dir / f"historical_{year}.jsonl"
+        count = write_jsonl(events, output)
+        LOGGER.info("History complete year=%d output=%s events=%d", year, output, count)
 
 
 if __name__ == "__main__":

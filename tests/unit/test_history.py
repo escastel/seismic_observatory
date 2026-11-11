@@ -1,4 +1,4 @@
-from producer.app.history import write_jsonl
+from producer.app.history import fetch_years, write_jsonl
 from producer.app.replay import read_replay_events
 
 
@@ -24,3 +24,18 @@ def test_replay_year_validation_is_optional(tmp_path) -> None:
         encoding="utf-8",
     )
     assert read_replay_events(path, "terremotos_replay", expected_year=1900)
+
+
+def test_fetch_years_retrieves_an_inclusive_range(monkeypatch) -> None:
+    requested: list[int] = []
+
+    def fake_fetch_year(year: int, timeout: int = 60) -> list[dict]:
+        requested.append(year)
+        return [{"id": f"historic-{year}"}]
+
+    monkeypatch.setattr("producer.app.history.fetch_year", fake_fetch_year)
+
+    result = fetch_years(2024, 2026)
+
+    assert requested == [2024, 2025, 2026]
+    assert list(result) == [2024, 2025, 2026]

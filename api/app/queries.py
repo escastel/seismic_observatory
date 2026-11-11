@@ -113,3 +113,86 @@ async def timeline_stats(
         """,
         *values,
     )
+
+
+async def magnitude_stats(
+    pool: asyncpg.Pool,
+    filters: EventFilters,
+) -> list[asyncpg.Record]:
+    conditions, values = _event_conditions(filters)
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    return await pool.fetch(
+        f"""
+        SELECT COALESCE(f.magnitude::text, 'null') AS bucket, COUNT(*)::int AS count
+        FROM fact_sismos f
+        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        {where}
+        GROUP BY bucket
+        ORDER BY bucket
+        """,
+        *values,
+    )
+
+
+async def depth_stats(
+    pool: asyncpg.Pool,
+    filters: EventFilters,
+) -> list[asyncpg.Record]:
+    conditions, values = _event_conditions(filters)
+    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
+    return await pool.fetch(
+        f"""
+        SELECT CASE WHEN f.depth_km IS NULL THEN 'unknown'
+               WHEN f.depth_km < 70 THEN 'shallow'
+               WHEN f.depth_km < 300 THEN 'intermediate'
+               ELSE 'deep' END AS bucket, COUNT(*)::int AS count
+        FROM fact_sismos f
+        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        {where}
+        GROUP BY bucket
+        ORDER BY bucket
+        """,
+        *values,
+    )
+
+
+async def daily_average_2025(
+    pool: asyncpg.Pool,
+    filters: EventFilters,
+) -> float:
+    conditions, values = _event_conditions(filters)
+    conditions.append("EXTRACT(YEAR FROM f.event_time) = 2025")
+    where = f"WHERE {' AND '.join(conditions)}"
+    value = await pool.fetchval(
+        f"""
+        SELECT COALESCE(AVG(day_count), 0) FROM (
+            SELECT DATE_TRUNC('day', f.event_time), COUNT(*)::numeric AS day_count
+            FROM fact_sismos f
+            JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+            {where}
+            GROUP BY DATE_TRUNC('day', f.event_time)
+        ) daily
+        """,
+        *values,
+    )
+    return float(value or 0)
+
+
+async def missing_magnitude(
+    pool: asyncpg.Pool,
+    filters: EventFilters,
+) -> int:
+    conditions, values = _event_conditions(filters)
+    conditions.append("f.magnitude IS NULL")
+    where = f"WHERE {' AND '.join(conditions)}"
+    return int(
+        await pool.fetchval(
+            f"""
+            SELECT COUNT(*)
+            FROM fact_sismos f
+            JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+            {where}
+            """,
+            *values,
+        )
+    )
