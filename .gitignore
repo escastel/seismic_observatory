@@ -83,7 +83,6 @@ pgdata/
 # Teacher-provided material. Only the API contract and the source, licence and
 # validation notes of the support package are published; the assignment
 # statement, FAQ, deliverables guide and the starter frontend copy stay local.
-enunciado.md
 resources/*
 !resources/observatorio-sismico/
 resources/observatorio-sismico/*
