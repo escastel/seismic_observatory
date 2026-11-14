@@ -299,7 +299,7 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
   y no se migra.
 - El histórico de 2025 (mundial, magnitud ≥ 4, tipo terremoto) se almacena en el espacio real,
   distinguido por su procedencia; es dato real, no reproducción.
-- Retención por defecto: 7 días para los mensajes de Kafka y 30 días para los originales del
+- Retención por defecto: 7 días para los mensajes de Kafka y 7 días para los originales del
   feed; los originales del catálogo histórico se conservan como ficheros fuera de Git.
 - El fichero `db/seeds/historical_2026.jsonl` (99 MB) se ha eliminado del historial de Git con
   aprobación expresa (2026-11-14); queda en local, ignorado. Los nuevos conjuntos descargados
