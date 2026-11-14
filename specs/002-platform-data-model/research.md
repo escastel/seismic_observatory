@@ -135,10 +135,13 @@ marcadas como **verificado** se comprobaron el 2026-11-14 en un contenedor desec
   | parcial sobre `extraction(requested_at)` con resultado correcto | `last_ingestion` | candidato |
 
 - **Razón**: el índice redundante `ix_event_versions_external_id` del modelo anterior duplicaba
-  la restricción única; no se repite el error. Lo que no mejore en el tamaño mayor se retira y
-  se documenta.
+  la restricción única; no se repite el error. Un índice se conserva si su consulta es al menos
+  2 veces más rápida en mediana en el tamaño mayor; el resto se retira y se documenta.
 - **Medición**: datos sintéticos en `bench` con 10.000, 100.000 y 1.000.000 de filas,
-  `EXPLAIN (ANALYZE, BUFFERS)` sin y con índice, mediana de 5 ejecuciones, tamaño del índice.
+  `EXPLAIN (ANALYZE, BUFFERS)` sin y con índice, mediana de 5 ejecuciones, búferes leídos y
+  tamaño del índice. Para las versiones por identificador, cuyo índice es la clave primaria, se
+  compara contra una copia de la tabla sin clave. La memoria de estructuras Python (lista frente
+  a diccionario) se mide en la spec 008, no aquí.
 
 ## R12. Privilegios mínimos
 
@@ -216,3 +219,38 @@ marcadas como **verificado** se comprobaron el 2026-11-14 en un contenedor desec
 - **Razón**: principio IX. Las pruebas del modelo ejercitan las restricciones reales y no tocan
   los datos del observatorio; el fichero de desarrollo mantiene `compose.yaml` con los cinco
   servicios y el túnel opcional, nada más.
+
+## R19. Registro de mensajes procesados
+
+- **Decisión**: tabla `message_log` en `core` y en `replay`, una fila por mensaje de Kafka, con
+  el resultado (`new`, `revised`, `stale`, `duplicate`, `quarantined`), el momento de
+  publicación y el de proceso. Se escribe en la misma transacción que el evento o la cuarentena.
+- **Razón**: una repetición no deja rastro en ninguna otra tabla, y la guía de entregables
+  (§2.4) pide indicar el denominador de cada comprobación de calidad: mensajes recibidos,
+  versiones distintas o terremotos actuales. El enunciado (§6) pide además contar cuántos
+  registros afecta cada transformación. Sin esta tabla, la dimensión de unicidad no tendría
+  «antes».
+- **Compatibilidad con el principio VII**: es una auditoría de la ingesta. Ningún recuento de
+  terremotos se obtiene de ella; la analítica sigue saliendo del estado actual.
+- **Alternativas**: contar en los logs del consumidor (se pierden al recrear el contenedor y no
+  se pueden consultar con SQL); contadores acumulados (prohibidos por el principio VII y no
+  idempotentes).
+
+## R20. Garantías de offset adelantadas a esta funcionalidad
+
+- **Decisión**: al adaptar el consumidor se corrigen ya dos fallos del código actual: el grupo
+  empieza por el principio del topic cuando no tiene offsets, y un fallo de procesamiento
+  reintenta el mismo mensaje sin confirmar offsets posteriores.
+- **Razón**: son obligaciones del principio II. Con una base y un grupo nuevos, el código actual
+  se salta los mensajes publicados antes de que el consumidor se una (observado el 2026-11-14:
+  24 versiones publicadas, 16 persistidas), lo que invalidaría el punto de control de extremo a
+  extremo. El resto de la lógica del consumidor sigue en la spec 004.
+
+## R21. Orden de los ficheros SQL
+
+- **Decisión**: `010_roles_schemas`, `020_dimensions`, `030_extraction`, `040_event_tables`
+  (plantilla), `050_schema_rules`, `060_indexes` (plantilla), `070_grants`.
+- **Razón**: `excluded_event` referencia `core.extraction` desde ambos esquemas, así que la
+  extracción debe existir antes de aplicar la plantilla. Las reglas que difieren entre esquemas
+  (`replayed_at`, `replay.reset`) viven en un fichero SQL propio y no en el script de shell, para
+  que `db/sql/` sea la única fuente del modelo.

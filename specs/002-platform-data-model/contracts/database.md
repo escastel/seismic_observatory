@@ -57,10 +57,35 @@ Garantías:
 `INSERT ... ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING`. Reprocesar un
 mensaje no crea otra fila.
 
+## Registro de mensajes
+
+`INSERT INTO message_log ... ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING`
+en la misma transacción que `apply_event_version` o que la fila de cuarentena. `outcome` toma el
+valor devuelto por la función, o `quarantined`. `produced_at` es el `ingested_at` del mensaje.
+
+## Transacción del consumidor por mensaje
+
+1. Abrir la transacción con el `search_path` del topic.
+2. Llamar a `apply_event_version` o insertar en `quarantine`.
+3. Insertar en `message_log`.
+4. Confirmar la transacción.
+5. Confirmar el offset en Kafka.
+
+Si algún paso de 1 a 4 falla, el offset no se confirma y el mismo mensaje se reintenta con
+espera; el consumidor no pasa al siguiente. Un grupo de consumo sin offsets confirmados empieza
+por el principio del topic.
+
 ## Estado de publicación
 
 `INSERT ... ON CONFLICT (event_id) DO UPDATE ... WHERE EXCLUDED.updated_at > publish_state.updated_at`.
 Se escribe solo después de la confirmación de Kafka.
+
+## Funciones de mantenimiento
+
+- `replay.reset()`: vacía las tablas de eventos de `replay`. No existe equivalente en `core`.
+- `core.purge_raw_payload(retention_days integer) RETURNS integer`: elimina los cuerpos de
+  `raw_payload` más antiguos que la retención y devuelve cuántos; no toca los registros de
+  fichero ni `extraction`.
 
 ## Lecturas de la API
 

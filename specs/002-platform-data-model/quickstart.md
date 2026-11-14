@@ -25,8 +25,9 @@ docker compose ps
 ```
 
 Esperado: cinco servicios (`postgres`, `kafka`, `producer`, `consumer`, `api`) en estado
-`healthy` en menos de tres minutos; ningún servicio `tunnel`. Repetir diez veces con
-`docker compose down -v` entre medias y anotar el tiempo de cada arranque.
+`healthy` en menos de tres minutos con las imágenes ya construidas; ningún servicio `tunnel`.
+Repetir diez veces con `docker compose down -v` entre medias y anotar el tiempo de cada
+arranque.
 
 ## V2. Superficie expuesta (US1 · SC-008)
 
@@ -45,7 +46,7 @@ docker compose exec postgres psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -Atc \
   "select count(*) from core.dim_country; select min(date_id), max(date_id), count(*) from core.dim_date;"
 ```
 
-Esperado: las tablas de [data-model.md](data-model.md) en `core`; las cinco tablas de eventos en
+Esperado: las tablas de [data-model.md](data-model.md) en `core`; las seis tablas de eventos en
 `replay`; 177 países; fechas de 1900-01-01 a 2035-12-31 sin huecos (49.673 filas).
 
 ## V4. Secuencia de duplicados y revisiones (US2 · SC-003)
@@ -58,7 +59,7 @@ docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/d
 ```
 
 Esperado: resultados `new`, `duplicate`, `revised`, `duplicate`, `new`; 2 eventos actuales, 3
-versiones, E1 con la magnitud revisada. La misma prueba cubre magnitud y profundidad nulas,
+versiones, 5 mensajes registrados, E1 con la magnitud revisada. La misma prueba cubre magnitud y profundidad nulas,
 profundidad negativa aceptada, evento sin país y coordenadas fuera de rango rechazadas.
 
 ## V5. Idempotencia masiva (US2 · SC-004)
@@ -88,7 +89,9 @@ docker compose down && docker compose up -d
 ```
 
 Esperado: el mismo recuento después de reiniciar, y el productor no vuelve a publicar versiones
-ya publicadas.
+ya publicadas. Tras un arranque desde cero, todo `event_id` de
+`core.publish_state` aparece en `core.message_log`: el consumidor no ha perdido los mensajes
+publicados antes de unirse al grupo.
 
 ## V9. Reintentos (US1)
 
@@ -117,7 +120,8 @@ docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python -m test
 
 Esperado: tabla con tiempo sin y con cada índice candidato para 10.000, 100.000 y 1.000.000 de
 filas sintéticas en el esquema `bench`, y el esquema eliminado al terminar. Anotar equipo y
-fecha. Los índices sin mejora en el tamaño mayor se retiran del SQL.
+fecha. Se conservan los índices cuya consulta es al menos 2 veces más rápida en mediana en el
+tamaño mayor; el resto se retira del SQL y se documenta.
 
 ## V12. Higiene del repositorio (US1 · SC-009)
 

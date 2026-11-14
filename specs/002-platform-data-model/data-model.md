@@ -17,6 +17,7 @@ erDiagram
     EXTRACTION ||--o{ EXCLUDED_EVENT : "descartó"
     PUBLISH_STATE ||--o| EVENT_CURRENT : "mismo identificador"
     QUARANTINE }o--o| EVENT_CURRENT : "puede referirse a"
+    MESSAGE_LOG }o--o| EVENT_VERSION : "trajo"
 ```
 
 - Un **terremoto** (`EVENT_CURRENT`) es la versión más reciente conocida de un evento de USGS.
@@ -27,6 +28,8 @@ erDiagram
   descartado elementos que no son terremotos.
 - El **estado de publicación** recuerda qué versión de cada evento envió el productor a Kafka.
 - La **cuarentena** guarda los mensajes que no se pudieron tratar.
+- El **registro de mensajes** anota cada mensaje que el consumidor procesó y su resultado. Es
+  una auditoría de la ingesta, no una fuente de recuentos de terremotos.
 
 ## 2. Modelo lógico
 
@@ -43,6 +46,7 @@ erDiagram
 | `core`, `replay` | `quarantine` | Un mensaje rechazado | `quarantine_id`; único `(kafka_topic, kafka_partition, kafka_offset)` |
 | `core`, `replay` | `excluded_event` | Una versión de un elemento que no es un terremoto | `(event_id, updated_at)` |
 | `core`, `replay` | `publish_state` | La última versión publicada de un evento | `event_id` |
+| `core`, `replay` | `message_log` | Un mensaje procesado por el consumidor | `(kafka_topic, kafka_partition, kafka_offset)` |
 
 `replay` usa las dimensiones de `core`. El esquema `bench` solo existe mientras se mide.
 
@@ -51,7 +55,10 @@ erDiagram
 - `event_current.country_id` → `core.dim_country.country_id` (opcional).
 - `event_current.event_date` → `core.dim_date.date_id` (obligatoria, derivada de `event_time`).
 - `event_version.event_id` → `event_current.event_id` del mismo esquema (borrado en cascada).
-- `excluded_event.extraction_id` → `core.extraction.extraction_id` (opcional).
+- `excluded_event.extraction_id` → `core.extraction.extraction_id` (opcional), también desde
+  `replay`.
+- `message_log` no tiene clave foránea: un mensaje en cuarentena no corresponde a ninguna
+  versión válida.
 - `extraction.content_sha256` se relaciona con `raw_payload` por valor, sin clave foránea: la
   extracción sobrevive a la purga del original.
 - `publish_state` y `quarantine` no tienen clave foránea a `event_current`: un evento puede
@@ -157,6 +164,22 @@ Restricción: al menos uno de `payload` o `raw_text` está presente.
 | `updated_at` | `timestamptz` | no | Última versión confirmada por Kafka |
 | `published_at` | `timestamptz` | no | Momento de la confirmación |
 
+### `message_log` (en `core` y en `replay`)
+
+| Columna | Tipo | Nulo | Significado |
+|---|---|---|---|
+| `kafka_topic`, `kafka_partition`, `kafka_offset` | `text`, `integer`, `bigint` | no | Posición del mensaje; PK conjunta |
+| `event_id` | `text` | sí | Evento al que se refiere, si se pudo leer |
+| `updated_at` | `timestamptz` | sí | Versión a la que se refiere, si se pudo leer |
+| `outcome` | `text` | no | `new`, `revised`, `stale`, `duplicate` o `quarantined` |
+| `produced_at` | `timestamptz` | sí | `ingested_at` del mensaje: cuándo lo obtuvo el productor |
+| `processed_at` | `timestamptz` | no | Cuándo lo procesó el consumidor |
+
+Denominadores que permite: mensajes recibidos (filas), versiones distintas (`event_version`),
+terremotos actuales (`event_current`), repeticiones (`outcome = 'duplicate'`) y rechazos
+(`outcome = 'quarantined'`). La diferencia `processed_at − produced_at` mide el retraso del
+transporte.
+
 ### `core.extraction`
 
 | Columna | Tipo | Nulo | Significado |
@@ -205,21 +228,25 @@ anterior a `RAW_PAYLOAD_RETENTION_DAYS` (7 por defecto); los registros de ficher
 | `updated_at` anterior y no visto antes | Sin cambios | Se añade | `stale` |
 
 Recuentos esperados para la secuencia de la FAQ 12: `new`, `duplicate`, `revised`, `duplicate`,
-`new` → 2 eventos actuales, 3 versiones.
+`new` → 2 eventos actuales, 3 versiones y 5 mensajes en `message_log`.
+
+El consumidor escribe en la misma transacción el resultado de `apply_event_version` (o la fila
+de cuarentena) y la fila de `message_log`.
 
 ## 5. Índices
 
 Solo las claves primarias y las restricciones únicas son definitivas. Los índices secundarios de
 [research.md](research.md) §R11 son candidatos: la medición de esta funcionalidad decide cuáles
 se quedan, y el resultado se documenta en `docs/report.md` con la consulta que justifica cada
-uno.
+uno. Un índice se conserva si su consulta es al menos 2 veces más rápida en mediana con
+1.000.000 de filas.
 
 ## 6. Roles
 
 | Rol | Usado por | Privilegios |
 |---|---|---|
 | propietario (`POSTGRES_USER`) | inicialización, pruebas y mediciones | todos |
-| `observatory_writer` | productor y consumidor | lectura y escritura en `core` y `replay`; ejecutar `apply_event_version`; sin DDL |
+| `observatory_writer` | productor y consumidor | lectura y escritura en `core` y `replay`; ejecutar `apply_event_version`, `replay.reset` y `core.purge_raw_payload`; sin DDL |
 | `observatory_reader` | API | solo lectura en `core` y `replay` |
 
 ## 7. Qué se elimina del modelo anterior

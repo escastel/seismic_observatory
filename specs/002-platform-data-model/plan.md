@@ -55,17 +55,22 @@ de filas; el modelo no debe impedir cargar el catálogo completo desde 1900
 | Principio | Evaluación previa | Evaluación tras el diseño |
 |---|---|---|
 | I. Arquitectura reproducible y superficie mínima | Cumple: cinco servicios, salud, reintentos, volúmenes, retención, sin puertos de Kafka ni PostgreSQL | Cumple ([contracts/runtime.md](contracts/runtime.md)) |
-| II. Al menos una vez, idempotente y versionada | Cumple en el modelo: claves únicas y escritura condicionada | Cumple: `apply_event_version` verificada. Las garantías de offset del consumidor quedan para la spec 004 |
-| III. Calidad: conservar, señalar o cuarentena | Cumple en el modelo: magnitud y profundidad anulables, sin mínimos, `quality_flags`, cuarentena con original | Cumple |
+| II. Al menos una vez, idempotente y versionada | Cumple en el modelo: claves únicas y escritura condicionada | Cumple: `apply_event_version` verificada; las garantías de offset (empezar por el principio, no avanzar tras un fallo) se corrigen en esta funcionalidad (R20) |
+| III. Calidad: conservar, señalar o cuarentena | Cumple en el modelo: magnitud y profundidad anulables, sin mínimos, `quality_flags`, cuarentena con original | Cumple en el modelo. Desviación temporal: las reglas del consumidor no cambian hasta la spec 004 |
 | IV. Integración espacial | Cumple: `dim_country` con clave `ADM0_A3`, país anulable | Cumple: 177 entidades, 5 sin ISO |
 | V. Original y procedencia | Cumple: `extraction`, `raw_payload` con huella y retención, `payload` en cada versión | Cumple; retención ajustada a 7 días por estimación de volumen |
 | VI. Aislamiento de la reproducción | Cumple: esquema `replay` propio, misma plantilla | Cumple, verificado |
-| VII. Analítica desde el estado actual | Cumple: no hay tablas de contadores; `dim_date` aporta los días sin eventos | Cumple |
+| VII. Analítica desde el estado actual | Cumple: no hay tablas de contadores; `dim_date` aporta los días sin eventos | Cumple: `message_log` es auditoría de ingesta, no fuente de recuentos (R19) |
 | VIII. Contrato de la API | Fuera de alcance salvo `last_ingestion`, que el modelo soporta | Cumple en lo que afecta al modelo |
 | IX. Evidencia ejecutada | Cumple: pruebas de comportamiento, medición con tres tamaños | Cumple ([quickstart.md](quickstart.md)) |
 | Idioma y repositorio público | Cumple: identificadores en inglés, documentos en español, datos fuera de Git | Cumple |
 
-Sin violaciones. Dos elementos añaden complejidad y se justifican en *Complexity Tracking*.
+Sin violaciones en lo que esta funcionalidad construye. Dos elementos añaden complejidad y se
+justifican en *Complexity Tracking*.
+
+**Desviación temporal conocida**: al terminar la 002 el consumidor todavía envía la magnitud nula
+a cuarentena (principio III). No la introduce esta funcionalidad, el modelo ya admite el nulo y
+la cierra la spec 004. Mientras exista, la rama no se fusiona en `main`.
 
 ## Project Structure
 
@@ -95,15 +100,17 @@ compose.dev.yaml                 # NUEVO: servicio tests para pruebas y medicion
 
 db/
 ├── init/
-│   └── 00-init.sh               # NUEVO: único punto de entrada de la inicialización
+│   └── 00-init.sh               # NUEVO: punto de entrada; llama a sql/apply.sh
 ├── sql/                         # NUEVO: fuente única del modelo
+│   ├── apply.sh                 # aplica los ficheros en orden a la base indicada
 │   ├── 010_roles_schemas.sql
 │   ├── 020_dimensions.sql       # dim_country desde el GeoJSON, dim_date
-│   ├── 030_event_tables.sql     # plantilla por esquema + apply_event_version
-│   ├── 040_extraction.sql       # extraction, raw_payload
-│   ├── 050_indexes.sql          # índices que superen la medición
-│   └── 060_grants.sql
-└── seeds/                       # se mantiene; su contenido lo redefinen 003 y 005
+│   ├── 030_extraction.sql       # extraction, raw_payload, purge_raw_payload
+│   ├── 040_event_tables.sql     # PLANTILLA por esquema + apply_event_version
+│   ├── 050_schema_rules.sql     # reglas de replayed_at y replay.reset()
+│   ├── 060_indexes.sql          # PLANTILLA: índices que superen la medición
+│   └── 070_grants.sql
+└── seeds/                       # se mantiene; README actualizado; contenido en 003 y 005
 
 common/                          # NUEVO: código compartido por los tres servicios
 ├── settings.py                  # lectura y validación de variables
@@ -125,10 +132,14 @@ api/
 └── app/                         # ADAPTAR queries.py, db.py; quitar ngrok de main.py
 
 tests/
+├── Dockerfile                   # NUEVO: imagen de pruebas con cliente psql
 ├── db/                          # NUEVO: secuencia FAQ 12, nulos, rangos, aislamiento, roles
 ├── benchmark/
 │   └── index_benchmark.py       # NUEVO: medición sin/con índice en tres tamaños
-├── unit/                        # se conservan las que prueban comportamiento
+├── startup/
+│   └── cold_start.sh            # NUEVO: diez arranques desde cero cronometrados
+├── integration/                 # benchmark_scaling.py y load_test.py se conservan para la 008
+├── unit/                        # se conservan las que prueban comportamiento; nuevas de common/
 └── contract/, test_enunciado_compliance.py   # ELIMINAR las que buscan texto en el código
 
 docs/
@@ -149,8 +160,9 @@ las imágenes: solo el consumidor necesita las bibliotecas geoespaciales.
 
 ## Orden de implementación
 
-1. **Modelo**: `db/sql/` y `db/init/00-init.sh`; pruebas de `tests/db` en rojo y después en
-   verde (V3 a V7 de [quickstart.md](quickstart.md)).
+1. **Modelo**: configuración local, recreación del volumen (con confirmación), `db/sql/` y
+   `db/init/00-init.sh`; pruebas de `tests/db` en rojo y después en verde (V3 a V7 de
+   [quickstart.md](quickstart.md)).
 2. **Plataforma**: `compose.yaml`, `.env.example`, Dockerfiles, dependencias fijadas, `common/`
    (V1, V2, V9, V10).
 3. **Continuidad**: adaptación mínima de productor, consumidor y API al modelo nuevo; un evento
@@ -164,7 +176,8 @@ las imágenes: solo el consumidor necesita las bibliotecas geoespaciales.
 | Riesgo | Mitigación |
 |---|---|
 | El volumen local guarda el modelo anterior y la inicialización no se vuelve a ejecutar | Procedimiento explícito de recreación en README y quickstart; la base actual solo tiene datos de prueba |
-| La adaptación mínima de los servicios crece hasta invadir las specs 003, 004 y 006 | Límite: solo cambian las capas de persistencia y el arranque; ninguna regla de validación ni endpoint nuevo |
+| La adaptación mínima de los servicios crece hasta invadir las specs 003, 004 y 006 | Límite: solo cambian las capas de persistencia, el arranque y las dos garantías de offset de R20; ninguna regla de validación ni endpoint nuevo |
+| `postgres:16.4` no arranca sobre el volumen actual de PostgreSQL 15 | La recreación del volumen es una tarea explícita de la fase 2, antes de la primera prueba, y pide confirmación |
 | Sin puertos publicados, las pruebas desde el equipo dejan de funcionar | `compose.dev.yaml` ejecuta las pruebas dentro de la red |
 | La sintaxis del agente de ngrok cambia entre versiones | Imagen fijada y comprobación V10 antes de documentar la orden |
 | El panel publicado en Netlify deja de recibir datos mientras dura el rehacer | El trabajo va en ramas; `main` solo se actualiza cuando la API vuelve a cumplir el contrato |

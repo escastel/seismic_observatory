@@ -41,6 +41,10 @@ las herramientas se ejecutan con `docker compose exec` o con `compose.dev.yaml`.
 Clave del mensaje: `event_id`. Los topics los crean productor y consumidor al arrancar; la
 creación automática del broker está desactivada.
 
+Consumo: confirmación automática desactivada; un grupo sin offsets confirmados empieza por el
+principio del topic; tras un fallo de procesamiento se reintenta el mismo mensaje y no se
+confirma ningún offset posterior.
+
 ## Variables de entorno
 
 | Variable | Usada por | Significado |
@@ -57,7 +61,7 @@ creación automática del broker está desactivada.
 | `PRODUCER_INTERVAL_SECONDS` | productor | 60 por defecto |
 | `RAW_PAYLOAD_RETENTION_DAYS` | productor | 7 por defecto |
 | `COUNTRIES_GEOJSON_PATH` | consumidor | Ruta del catálogo dentro del contenedor |
-| `CORS_ORIGINS` | API | Lista de orígenes exactos separados por comas; sin comodín |
+| `CORS_ORIGINS` | API | Lista de orígenes exactos separados por comas (el de Netlify y `http://localhost:4200`); sin comodín |
 | `NGROK_AUTHTOKEN`, `NGROK_DOMAIN` | `tunnel` | Solo en `.env` local, nunca en Git |
 
 `.env.example` contiene todas con valores de ejemplo no secretos. Un servicio que no encuentra
