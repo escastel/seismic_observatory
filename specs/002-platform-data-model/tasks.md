@@ -34,10 +34,10 @@ de offset de [research.md](research.md) §R20, que se corrigen en T037.
 
 **Purpose**: retirar lo que el modelo nuevo sustituye y preparar la estructura
 
-- [ ] T001 Eliminar con `git rm` los ficheros del modelo anterior `db/init/001_schema.sql`, `db/init/002_seed_dimensions.sql`, `db/init/003_freshness_quarantine.sql`, `db/init/004_ingestion_state.sql`, `db/init/005_event_versions.sql`, `db/init/006_mag_type.sql` y las pruebas que solo buscan texto en el código: `tests/contract/test_enunciado_api_contract.py`, `tests/contract/test_frontend_contract.py`, `tests/test_enunciado_compliance.py`
-- [ ] T002 [P] Crear la estructura vacía: `db/sql/`, `common/__init__.py`, `tests/db/__init__.py`, `tests/benchmark/__init__.py`, `tests/startup/`, `docs/evidence/002/.gitkeep`
-- [ ] T003 [P] Ampliar `.dockerignore` con `data/`, `resources/`, `docs/`, `db/seeds/*.jsonl` y `*.md`, de modo que ninguna imagen incluya conjuntos de datos ni documentación
-- [ ] T004 [P] Crear `producer/requirements.in` (aiokafka==0.12.0, asyncpg==0.30.0, requests==2.32.3), `consumer/requirements.in` (aiokafka==0.12.0, asyncpg==0.30.0, geopandas==1.0.1, shapely==2.0.6), `api/requirements.in` (fastapi==0.115.6, uvicorn[standard]==0.34.0, pydantic==2.10.4, asyncpg==0.30.0) y `tests/requirements.in` (pytest, psycopg[binary], más las de los tres servicios); generar cada `requirements.txt` con todas las transitivas fijadas ejecutando `pip-compile` dentro de `python:3.11.10-slim-bookworm`. No deben quedar `psycopg2-binary`, `pydantic-settings`, `geoalchemy2` ni `ngrok`
+- [X] T001 Eliminar con `git rm` los ficheros del modelo anterior `db/init/001_schema.sql`, `db/init/002_seed_dimensions.sql`, `db/init/003_freshness_quarantine.sql`, `db/init/004_ingestion_state.sql`, `db/init/005_event_versions.sql`, `db/init/006_mag_type.sql` y las pruebas que solo buscan texto en el código: `tests/contract/test_enunciado_api_contract.py`, `tests/contract/test_frontend_contract.py`, `tests/test_enunciado_compliance.py`
+- [X] T002 [P] Crear la estructura vacía: `db/sql/`, `common/__init__.py`, `tests/db/__init__.py`, `tests/benchmark/__init__.py`, `tests/startup/`, `docs/evidence/002/.gitkeep`
+- [X] T003 [P] Ampliar `.dockerignore` con `data/`, `resources/`, `docs/`, `db/seeds/*.jsonl` y `*.md`, de modo que ninguna imagen incluya conjuntos de datos ni documentación
+- [X] T004 [P] Crear `producer/requirements.in` (aiokafka==0.12.0, asyncpg==0.30.0, requests==2.32.3), `consumer/requirements.in` (aiokafka==0.12.0, asyncpg==0.30.0, geopandas==1.0.1, shapely==2.0.6), `api/requirements.in` (fastapi==0.115.6, uvicorn[standard]==0.34.0, pydantic==2.10.4, asyncpg==0.30.0) y `tests/requirements.in` (pytest, psycopg[binary], más las de los tres servicios); generar cada `requirements.txt` con todas las transitivas fijadas ejecutando `pip-compile` dentro de `python:3.11.10-slim-bookworm`. No deben quedar `psycopg2-binary`, `pydantic-settings`, `geoalchemy2` ni `ngrok`
 
 ---
 

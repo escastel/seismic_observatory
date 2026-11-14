@@ -1,0 +1,8 @@
+# Test runner dependencies plus those of every service, so tests can import
+# producer, consumer and API code. Regenerate requirements.txt with the
+# pip-compile command recorded in its header.
+-r ../producer/requirements.in
+-r ../consumer/requirements.in
+-r ../api/requirements.in
+pytest==8.3.4
+psycopg[binary]==3.2.3
