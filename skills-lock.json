@@ -1,0 +1,155 @@
+{
+  "version": 1,
+  "skills": {
+    "expose-localhost": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/expose-localhost/SKILL.md",
+      "computedHash": "5328f4c789cf4d0d951bf9e8879d1f3f5d7177886843f1bb1011f01ef7996824"
+    },
+    "netlify-access-control": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-access-control/SKILL.md",
+      "computedHash": "71d0cca5dba2e0a44fd8f77211f820b117e6927b34252e2a048163957259bd08"
+    },
+    "netlify-agent-runner": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-agent-runner/SKILL.md",
+      "computedHash": "d93520d2900d894f16733ebc5b9600bac561f9ed6a5c937ac78b84dfe941a9c7"
+    },
+    "netlify-ai-gateway": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-ai-gateway/SKILL.md",
+      "computedHash": "b2ce33d99f5db472a880c12a01ce5c21ff409c41ffed7df974d8939808cf1079"
+    },
+    "netlify-blobs": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-blobs/SKILL.md",
+      "computedHash": "f1ceb47417ac8acca716aa166f564c55f88f9a8c81638db9ff06def2917d5877"
+    },
+    "netlify-caching": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-caching/SKILL.md",
+      "computedHash": "b44f397c9225594a221654d6486a010aeaeb9ea7e4d93d8efa30782ad51139db"
+    },
+    "netlify-config": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-config/SKILL.md",
+      "computedHash": "4e24297de4a99c93d91db005c4440698f31622cf4e71dc3c6eadcbb656e0456d"
+    },
+    "netlify-database": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-database/SKILL.md",
+      "computedHash": "c586f8920ee16568a640daec4aafed64c286130c850e3233173b17712cc6fec2"
+    },
+    "netlify-deploy": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-deploy/SKILL.md",
+      "computedHash": "ccf6a9cab730312cbba4490ee8825e8999b9ccd1e9364c06750199a08f3aeeb4"
+    },
+    "netlify-edge-functions": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-edge-functions/SKILL.md",
+      "computedHash": "043bfbfdf6f1de1209531b01fa74b3a473f59ba9dd4721c8464155caf3da22f9"
+    },
+    "netlify-forms": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-forms/SKILL.md",
+      "computedHash": "340988562b5e7aa97415e7e3a8ef1f5da34c1dafb631cbf47e51601e60b2ed0d"
+    },
+    "netlify-frameworks": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-frameworks/SKILL.md",
+      "computedHash": "c0561a5a35e43e0d65af9046b7ded0256de762d6b12fb0b216b3ac34aceb120c"
+    },
+    "netlify-functions": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-functions/SKILL.md",
+      "computedHash": "8626d1e5721f4a550db6464cf16abe845569d7ce47b015944c35d175ed55661d"
+    },
+    "netlify-identity": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-identity/SKILL.md",
+      "computedHash": "93204c7e4de3d0c17f8e19ef54b3702cc4067784a663214804f97415d869a009"
+    },
+    "netlify-image-cdn": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-image-cdn/SKILL.md",
+      "computedHash": "27d5d81468600c30e873eece941f01886e6872693aea2fd32e515c473b58b9c5"
+    },
+    "netlify-mcp-servers": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-mcp-servers/SKILL.md",
+      "computedHash": "bdc499ac79d871eb13209157f4be08a7cdeda2c0f0d690422bb07d311abc4832"
+    },
+    "netlify-server": {
+      "source": "netlify/context-and-tools",
+      "sourceType": "github",
+      "skillPath": "skills/netlify-server/SKILL.md",
+      "computedHash": "b31b7e664c3cfcb11315706a6db4575a2233a7a254f4789b816f724fa9a23062"
+    },
+    "ngrok-engine": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ngrok-engine/SKILL.md",
+      "computedHash": "e0e851906268565d3eb3d7b1d2f173cbe125d329c77e1272e16ba3ee751eb512"
+    },
+    "ngrok-setup": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ngrok-setup/SKILL.md",
+      "computedHash": "cfb0abecac0719f94377febf47234986e40da1139de591adda37fa49e8c5bba1"
+    },
+    "ngrok-surfaces": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/ngrok-surfaces/SKILL.md",
+      "computedHash": "0dd4b3af17c42609e4cd7eb3fe6aa60a4983c0f82d5279089d1dd35b6c970fb6"
+    },
+    "provision-sandbox-access": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/provision-sandbox-access/SKILL.md",
+      "computedHash": "85fb5fa498f7e3af566b4a6ef1eefd839d43c14defd5a4e05c9002d403c7c6af"
+    },
+    "receive-webhooks": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/receive-webhooks/SKILL.md",
+      "computedHash": "d55711d81c676b4afa0923cbbd592c9f97c957167862e657ac88358c082714ff"
+    },
+    "run-mcp-gateway": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/run-mcp-gateway/SKILL.md",
+      "computedHash": "b287fd6c85f8e7e9f45a6b103cac5571021b7fa2f2955d433e3139840108fa85"
+    },
+    "secure-endpoint": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/secure-endpoint/SKILL.md",
+      "computedHash": "a57a28ad6a7fdf922d3a6eba32cb56e6d983b38593f40d6a6468994cd0ab658f"
+    },
+    "troubleshoot-ngrok": {
+      "source": "ngrok/skills",
+      "sourceType": "github",
+      "skillPath": "skills/troubleshoot-ngrok/SKILL.md",
+      "computedHash": "ac0a56e74b3e752476f4fae2dc81692cd09add6c0e1e1a16793bb3511c1e9a98"
+    }
+  }
+}
