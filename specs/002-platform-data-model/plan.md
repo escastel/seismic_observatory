@@ -68,9 +68,15 @@ de filas; el modelo no debe impedir cargar el catálogo completo desde 1900
 Sin violaciones en lo que esta funcionalidad construye. Dos elementos añaden complejidad y se
 justifican en *Complexity Tracking*.
 
-**Desviación temporal conocida**: al terminar la 002 el consumidor todavía envía la magnitud nula
-a cuarentena (principio III). No la introduce esta funcionalidad, el modelo ya admite el nulo y
-la cierra la spec 004. Mientras exista, la rama no se fusiona en `main`.
+**Desviaciones temporales conocidas**: al terminar la 002 siguen sin cumplirse tres principios
+en el comportamiento heredado de los servicios. Ninguna la introduce esta funcionalidad y el
+modelo ya da soporte a las tres. Mientras existan, la rama no se fusiona en `main`.
+
+| Principio | Qué sigue sin cumplirse | La cierra |
+|---|---|---|
+| III | El consumidor envía la magnitud nula a cuarentena y rechaza la negativa | spec 004 |
+| V | El productor no registra las extracciones ni guarda el original, y no purga `raw_payload` | spec 003 |
+| VIII | La API devuelve un formato propio por defecto, tiempos en ISO y un `last_ingestion` que no es la última consulta correcta a USGS | spec 006 |
 
 ## Project Structure
 
@@ -163,7 +169,7 @@ las imágenes: solo el consumidor necesita las bibliotecas geoespaciales.
 1. **Modelo**: configuración local, recreación del volumen (con confirmación), `db/sql/` y
    `db/init/00-init.sh`; pruebas de `tests/db` en rojo y después en verde (V3 a V7 de
    [quickstart.md](quickstart.md)).
-2. **Plataforma**: `compose.yaml`, `.env.example`, Dockerfiles, dependencias fijadas, `common/`
+2. **Plataforma**: `compose.yaml`, Dockerfiles, dependencias fijadas, `common/`
    (V1, V2, V9, V10).
 3. **Continuidad**: adaptación mínima de productor, consumidor y API al modelo nuevo; un evento
    real llega de USGS al mapa (V8).
