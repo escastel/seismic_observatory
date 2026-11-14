@@ -1,0 +1,6 @@
+# Direct dependencies of the API. Regenerate requirements.txt with the
+# pip-compile command recorded in its header.
+fastapi==0.115.6
+uvicorn[standard]==0.34.0
+pydantic==2.10.4
+asyncpg==0.30.0

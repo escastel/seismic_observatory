@@ -34,7 +34,8 @@ contiene todos los objetos del modelo sin intervención manual.
 
 1. **Given** un clon limpio y un `.env` creado desde `.env.example`, **When** se ejecuta
    `docker compose up --build -d`, **Then** productor, Kafka, consumidor, PostgreSQL y API
-   alcanzan el estado saludable en menos de tres minutos.
+   alcanzan el estado saludable en menos de tres minutos, medidos con las imágenes ya
+   construidas; la primera construcción queda cubierta por SC-001.
 2. **Given** el sistema arrancado, **When** se inspeccionan los puertos del equipo, **Then** solo
    la API es accesible y únicamente desde el propio equipo; Kafka y PostgreSQL no lo son.
 3. **Given** que PostgreSQL o Kafka tardan en estar disponibles, **When** arrancan los servicios
@@ -123,6 +124,9 @@ que hay tres extracciones registradas y solo dos originales almacenados.
    motivo, el momento y una referencia al original.
 4. **Given** un elemento excluido por no ser un terremoto, **When** se consulta, **Then** consta
    su tipo y el motivo de exclusión.
+5. **Given** cinco mensajes recibidos de los que uno es una repetición, **When** se consulta el
+   registro de mensajes, **Then** constan los cinco con su resultado, de modo que se pueden
+   contar mensajes recibidos, versiones distintas y eventos actuales por separado.
 
 ---
 
@@ -226,12 +230,18 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
   MUST almacenar una sola vez los originales idénticos, con una retención definida.
 - **FR-022**: Cada fila de estado actual y de historial MUST indicar su procedencia (feed
   reciente o catálogo histórico).
+- **FR-031**: El modelo MUST registrar una vez cada mensaje procesado por el consumidor, con su
+  posición en el transporte, el evento y la versión a los que se refiere, el resultado obtenido
+  (nuevo, revisión, repetición, versión atrasada o cuarentena), el momento en que el productor lo
+  publicó y el momento en que se procesó. Reprocesar un mensaje MUST NOT añadir otro registro.
+  Este registro es una auditoría de la ingesta: los recuentos de terremotos MUST seguir
+  calculándose desde el estado actual.
 
 **Aislamiento**
 
 - **FR-023**: La reproducción MUST disponer de un espacio separado con la misma estructura de
-  estado actual, historial, cuarentena, exclusiones y estado de publicación, de forma que el
-  mismo identificador pueda existir en ambos espacios sin interferir.
+  estado actual, historial, cuarentena, exclusiones, estado de publicación y registro de
+  mensajes, de forma que el mismo identificador pueda existir en ambos espacios sin interferir.
 - **FR-024**: El espacio de reproducción MUST registrar además el instante de reproducción de
   cada evento y MUST poder vaciarse sin afectar a los datos reales.
 - **FR-025**: Los datos sintéticos de las mediciones MUST almacenarse fuera de los espacios real
@@ -239,12 +249,13 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
 
 **Optimización y documentación**
 
-- **FR-026**: El modelo MUST incluir índices para las consultas previstas: intervalo de tiempo
-  de ocurrencia, país, magnitud mínima y versiones por identificador; cada índice MUST
-  justificarse por la consulta que resuelve.
+- **FR-026**: El modelo MUST evaluar un índice para cada consulta prevista (intervalo de tiempo
+  de ocurrencia, país, magnitud mínima y versiones por identificador) e incluir los que superen
+  la medición de FR-027; cada índice incluido MUST justificarse por la consulta que resuelve y
+  cada índice descartado MUST quedar documentado con su medición.
 - **FR-027**: La entrega MUST incluir una medición reproducible de tiempo sin y con índice en al
   menos tres tamaños de entrada, indicando equipo y procedimiento, y MUST retirar los índices
-  que no aporten mejora medible.
+  cuya consulta no sea al menos 2 veces más rápida en mediana en el tamaño mayor.
 - **FR-028**: La entrega MUST incluir el modelo conceptual, lógico y físico, explicando qué
   representa una fila de cada tabla, las claves, las relaciones y las restricciones.
 - **FR-029**: La entrega MUST incluir un diccionario de datos con significado, tipo o unidad,
@@ -264,11 +275,13 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
 - **Cuarentena**: registro no tratable, con motivo y original.
 - **Exclusión**: elemento de la fuente que no es un terremoto, con su tipo y motivo.
 - **Estado de publicación**: última versión de cada evento que el productor ha publicado.
+- **Mensaje procesado**: un mensaje recibido por el consumidor y lo que ocurrió con él; es el
+  denominador «mensajes recibidos» del apartado de calidad.
 - **Extracción**: una consulta a la fuente con sus metadatos y resultado.
 - **Original almacenado**: contenido íntegro de una respuesta, guardado una vez por contenido
   distinto.
 - **Espacio de reproducción**: réplica estructural de evento actual, versión, cuarentena,
-  exclusión y estado de publicación para datos reproducidos.
+  exclusión, estado de publicación y mensaje procesado para datos reproducidos.
 
 ## Success Criteria *(mandatory)*
 
@@ -286,8 +299,8 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
   recuentos y valores de los datos reales.
 - **SC-006**: El 100 % de los campos del modelo aparece en el diccionario de datos con
   significado, unidad y tratamiento de ausencias.
-- **SC-007**: Cada índice conservado muestra una mejora medida en la consulta que lo justifica
-  en el mayor de los tres tamaños probados.
+- **SC-007**: Cada índice conservado hace su consulta al menos 2 veces más rápida en mediana en
+  el mayor de los tres tamaños probados.
 - **SC-008**: Un análisis de puertos desde otro dispositivo de la red no encuentra accesibles ni
   la base de datos ni el broker.
 - **SC-009**: El repositorio entregado no contiene ningún fichero de datos mayor de 5 MB salvo
@@ -299,7 +312,7 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
   y no se migra.
 - El histórico de 2025 (mundial, magnitud ≥ 4, tipo terremoto) se almacena en el espacio real,
   distinguido por su procedencia; es dato real, no reproducción.
-- Retención por defecto: 7 días para los mensajes de Kafka y 30 días para los originales del
+- Retención por defecto: 7 días para los mensajes de Kafka y 7 días para los originales del
   feed; los originales del catálogo histórico se conservan como ficheros fuera de Git.
 - El fichero `db/seeds/historical_2026.jsonl` (99 MB) se ha eliminado del historial de Git con
   aprobación expresa (2026-11-14); queda en local, ignorado. Los nuevos conjuntos descargados
@@ -314,6 +327,11 @@ conjunto sintético etiquetado, obteniendo la misma conclusión documentada.
   geoespaciales propias.
 - La lógica de ingesta, validación, API y panel se especifica en funcionalidades posteriores
   (003–008); en esta, los servicios existentes solo deben seguir arrancando contra el modelo
-  nuevo, aunque su comportamiento todavía no cumpla el enunciado.
+  nuevo, aunque su comportamiento todavía no cumpla el enunciado. Excepción: las dos garantías
+  de offset del principio II (empezar desde el principio del topic y no avanzar tras un fallo)
+  se corrigen aquí, porque sin ellas el recorrido de extremo a extremo no es fiable.
+- Desviación temporal conocida: hasta la spec 004 el consumidor sigue enviando la magnitud nula
+  a cuarentena, en contra del principio III. El modelo ya la admite; la rama no llega a `main`
+  antes de corregirlo.
 - El espacio de reproducción comparte las dimensiones de país y fecha con el espacio real por
   ser datos de referencia inmutables.

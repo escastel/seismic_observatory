@@ -1,32 +1,3 @@
-<!--
-Sync Impact Report
-- Version change: 1.0.0 → 2.1.0
-  - 2.0.0 (MAJOR): se redefinen de forma incompatible los principios III y V y se añaden cuatro
-    principios para alinear la constitución con el enunciado revisión 2.
-  - 2.1.0 (MINOR): se añade la subsección «Idioma y repositorio público» y las rutas pasan de
-    recursos/ a resources/ y a nombres de fichero en inglés.
-- Modified principles:
-  - I. Arquitectura local reproducible → I. Arquitectura local reproducible y superficie mínima
-  - II. Entrega de eventos idempotente y transaccional → II. Al menos una vez con escritura
-    idempotente y versionada
-  - III. Consumidor como WAF y cuarentena auditable → III. Calidad con reglas explícitas:
-    conservar, señalar o poner en cuarentena (REDEFINIDO: la magnitud nula ya no se rechaza)
-  - IV. Integración espacial verificable → IV. Integración espacial verificable (clave ADM0_A3)
-  - V. Calidad y viabilidad financiera medibles → IX. Evidencia ejecutada y costes sin beneficios
-    inventados (REDEFINIDO: se elimina NPV/IRR/WACC obligatorio y la regla 1-10-100)
-- Added principles: V. Conservación del original y procedencia; VI. Aislamiento estricto de la
-  reproducción; VII. Analítica derivada del estado actual y comparación equivalente; VIII. El
-  contrato de la API es la fuente de verdad
-- Added sections: Idioma y repositorio público (en Stack Tecnológico y Límites); fuentes
-  normativas (en Governance)
-- Removed sections: ninguna
-- Artefactos que quedan obsoletos y se sustituyen mediante specs nuevas:
-  specs/001-streaming-sismos-etl (FR-004, FR-005, FR-018, SC-002 contradicen III),
-  docs/evaluacion-financiera.md (contradice IX), docs/calidad.md (regla 1-10-100)
-- Follow-up TODOs: ninguno. Fecha de ratificación tomada del commit que introdujo la
-  constitución (2026-11-09).
--->
-
 # Observatorio Sísmico Constitution
 
 ## Core Principles

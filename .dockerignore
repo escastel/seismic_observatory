@@ -36,3 +36,17 @@ tests/
 frontend/node_modules/
 frontend/dist/
 frontend/.angular/
+
+# Datasets, documentation and tooling never belong in an image:
+# datasets are mounted at runtime from data/ and db/seeds/.
+data/
+db/seeds/*.jsonl
+resources/
+docs/
+**/*.md
+.claude/
+.specify/
+
+# The test image only needs its dependency list; test code is mounted.
+!tests/requirements.in
+!tests/requirements.txt
