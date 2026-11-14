@@ -1,0 +1,22 @@
+# Line endings are fixed in the repository so a clone behaves the same on
+# Windows (core.autocrlf=true) and Linux. Shell scripts, SQL and Dockerfiles
+# run inside Linux containers and break with CRLF.
+* text=auto eol=lf
+
+# Windows-only scripts keep CRLF.
+*.bat text eol=crlf
+*.cmd text eol=crlf
+
+# Binary files: never convert.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.gif binary
+*.ico binary
+*.webp binary
+*.pdf binary
+*.gz binary
+*.zip binary
+*.parquet binary
+*.woff binary
+*.woff2 binary
