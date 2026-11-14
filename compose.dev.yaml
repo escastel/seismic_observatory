@@ -1,0 +1,34 @@
+# Development overlay: adds the test runner on the same network as postgres.
+#
+#   docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/db -v
+#
+# The "test" profile keeps it out of `docker compose up`.
+services:
+  tests:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    depends_on:
+      postgres:
+        condition: service_healthy
+    environment:
+      # Owner connection, used to create observatory_test and apply the model.
+      PGHOST: ${DB_HOST:-postgres}
+      PGPORT: ${DB_PORT:-5432}
+      PGUSER: ${POSTGRES_USER:?set POSTGRES_USER in .env}
+      PGPASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      DB_READER_PASSWORD: ${DB_READER_PASSWORD:?set DB_READER_PASSWORD in .env}
+      # Path of the catalog on the database server, read by pg_read_file.
+      CATALOG_PATH: /catalog/paises.geojson
+      TEST_DATABASE: observatory_test
+      PYTHONPATH: /repo
+      # The repository is mounted read only: no pytest cache, no bytecode.
+      PYTEST_ADDOPTS: "-p no:cacheprovider"
+    volumes:
+      - .:/repo:ro
+      - ./docs/evidence:/repo/docs/evidence
+    networks:
+      - observatorio
