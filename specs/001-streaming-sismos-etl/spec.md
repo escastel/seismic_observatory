@@ -4,7 +4,7 @@
 
 **Created**: 2026-11-09
 
-**Status**: Draft
+**Status**: Obsoleta — sustituida por las specs 002 y siguientes (constitución v2.1.0)
 
 **Input**: User description: "Basado en la constitución actual, genera el documento de especificación funcional (spec). Enlaza la lógica de negocio con nuestra arquitectura de contenedores Docker detallando el productor, el consumidor ETL, la API FastAPI y la reproducción de históricos de 2025."
 
