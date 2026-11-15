@@ -127,6 +127,31 @@ def cors_origins(env: Mapping[str, str] | None = None) -> list[str]:
     return [origin.rstrip("/") for origin in origins]
 
 
+DEFAULT_CATALOG_URL = "https://earthquake.usgs.gov/fdsnws/event/1"
+DEFAULT_USER_AGENT = "seismic-observatory/1.0"
+
+
+@dataclass(frozen=True)
+class UsgsSettings:
+    """How the services talk to USGS (contracts/runtime.md of spec 003)."""
+
+    feed_url: str | None          # required by the producer only
+    catalog_url: str              # FDSN event service base, no trailing slash
+    timeout_seconds: int
+    max_attempts: int             # requests per query, counting the first one
+    user_agent: str
+
+
+def usgs(env: Mapping[str, str] | None = None, *, require_feed: bool = True) -> UsgsSettings:
+    return UsgsSettings(
+        feed_url=required("USGS_FEED_URL", env) if require_feed else optional("USGS_FEED_URL", "", env) or None,
+        catalog_url=optional("USGS_CATALOG_URL", DEFAULT_CATALOG_URL, env).rstrip("/"),
+        timeout_seconds=positive_int("USGS_TIMEOUT_SECONDS", 30, env),
+        max_attempts=positive_int("USGS_MAX_ATTEMPTS", 4, env),
+        user_agent=optional("USGS_USER_AGENT", DEFAULT_USER_AGENT, env),
+    )
+
+
 @dataclass(frozen=True)
 class ProducerSettings:
     database: DatabaseSettings
@@ -134,15 +159,41 @@ class ProducerSettings:
     feed_url: str
     interval_seconds: int
     raw_payload_retention_days: int
+    usgs: UsgsSettings
+    gap_margin_minutes: int
 
 
 def producer(env: Mapping[str, str] | None = None) -> ProducerSettings:
+    source = usgs(env, require_feed=True)
+    assert source.feed_url is not None
     return ProducerSettings(
         database=database("writer", env),
         kafka=kafka(env),
-        feed_url=required("USGS_FEED_URL", env),
+        feed_url=source.feed_url,
         interval_seconds=positive_int("PRODUCER_INTERVAL_SECONDS", 60, env),
         raw_payload_retention_days=positive_int("RAW_PAYLOAD_RETENTION_DAYS", 7, env),
+        usgs=source,
+        gap_margin_minutes=positive_int("GAP_MARGIN_MINUTES", 60, env),
+    )
+
+
+@dataclass(frozen=True)
+class CatalogLoaderSettings:
+    database: DatabaseSettings
+    kafka: KafkaSettings
+    usgs: UsgsSettings
+    gap_margin_minutes: int
+    data_dir: str
+
+
+def catalog_loader(env: Mapping[str, str] | None = None) -> CatalogLoaderSettings:
+    """Settings of the manual catalog load; it never needs the live feed URL."""
+    return CatalogLoaderSettings(
+        database=database("writer", env),
+        kafka=kafka(env),
+        usgs=usgs(env, require_feed=False),
+        gap_margin_minutes=positive_int("GAP_MARGIN_MINUTES", 60, env),
+        data_dir=optional("DATA_DIR", "/data", env),
     )
 
 

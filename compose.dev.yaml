@@ -32,3 +32,19 @@ services:
       - ./docs/evidence:/repo/docs/evidence
     networks:
       - observatorio
+
+  # Fake USGS source for the failure scenarios of spec 003 (quickstart V3):
+  #   docker compose -f compose.yaml -f compose.dev.yaml --profile test up -d usgs-stub
+  # Reachable only inside the compose network, at http://usgs-stub:8080.
+  usgs-stub:
+    profiles: ["test"]
+    build:
+      context: .
+      dockerfile: tests/Dockerfile
+    command: ["python", "-m", "tests.support.usgs_stub", "--port", "8080"]
+    environment:
+      PYTHONPATH: /repo
+    volumes:
+      - .:/repo:ro
+    networks:
+      - observatorio

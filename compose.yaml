@@ -83,6 +83,11 @@ services:
       USGS_FEED_URL: ${USGS_FEED_URL:?set USGS_FEED_URL in .env}
       PRODUCER_INTERVAL_SECONDS: ${PRODUCER_INTERVAL_SECONDS:-60}
       RAW_PAYLOAD_RETENTION_DAYS: ${RAW_PAYLOAD_RETENTION_DAYS:-7}
+      USGS_CATALOG_URL: ${USGS_CATALOG_URL:-https://earthquake.usgs.gov/fdsnws/event/1}
+      USGS_TIMEOUT_SECONDS: ${USGS_TIMEOUT_SECONDS:-30}
+      USGS_MAX_ATTEMPTS: ${USGS_MAX_ATTEMPTS:-4}
+      USGS_USER_AGENT: ${USGS_USER_AGENT:-seismic-observatory/1.0}
+      GAP_MARGIN_MINUTES: ${GAP_MARGIN_MINUTES:-60}
     depends_on:
       kafka:
         condition: service_healthy

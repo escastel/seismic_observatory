@@ -96,3 +96,33 @@ def test_numeric_variables_are_validated() -> None:
 def test_topics_must_be_different() -> None:
     with pytest.raises(SettingsError, match="different"):
         settings.consumer({**BASE, "KAFKA_TOPIC_REPLAY": "earthquakes.live"})
+
+
+def test_usgs_defaults() -> None:
+    source = settings.producer(BASE).usgs
+    assert source.feed_url == BASE["USGS_FEED_URL"]
+    assert source.catalog_url == "https://earthquake.usgs.gov/fdsnws/event/1"
+    assert (source.timeout_seconds, source.max_attempts) == (30, 4)
+    assert source.user_agent == "seismic-observatory/1.0"
+    assert settings.producer(BASE).gap_margin_minutes == 60
+
+
+def test_catalog_url_loses_its_trailing_slash() -> None:
+    env = {**BASE, "USGS_CATALOG_URL": "http://usgs-stub:8080/fdsnws/event/1/"}
+    assert settings.producer(env).usgs.catalog_url == "http://usgs-stub:8080/fdsnws/event/1"
+
+
+@pytest.mark.parametrize("variable", ["USGS_TIMEOUT_SECONDS", "USGS_MAX_ATTEMPTS", "GAP_MARGIN_MINUTES"])
+@pytest.mark.parametrize("value", ["0", "-3", "soon"])
+def test_usgs_numbers_must_be_positive_integers(variable: str, value: str) -> None:
+    with pytest.raises(SettingsError, match=variable):
+        settings.producer({**BASE, variable: value})
+
+
+def test_catalog_loader_does_not_need_the_feed_url() -> None:
+    env = {key: value for key, value in BASE.items() if key != "USGS_FEED_URL"}
+    loader = settings.catalog_loader(env)
+    assert loader.usgs.feed_url is None
+    assert loader.data_dir == "/data"
+    assert loader.database.user == "observatory_writer"
+    assert loader.gap_margin_minutes == 60
