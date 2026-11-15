@@ -24,8 +24,10 @@ enunciado) no se guardan aquí ni en ningún otro lugar del repositorio:
   en `core.raw_payload` (con `encoding = 'file'`), de modo que se puede comprobar que el
   fichero usado es el mismo que se descargó.
 
-El procedimiento de descarga, la regeneración de los ficheros y su registro en la base se
-definen en la spec 003. El renombrado de `historical_2025.jsonl`, que hoy contiene eventos
+El procedimiento de descarga, la regeneración de los ficheros y su registro en la base están
+en el apartado «Cargar el histórico» del [README](../../README.md#cargar-el-histórico) y en
+[contracts/catalog-loader.md](../../specs/003-usgs-ingestion/contracts/catalog-loader.md)
+(spec 003): `docker compose run --rm catalog-loader`. El renombrado de `historical_2025.jsonl`, que hoy contiene eventos
 ficticios, y el marcado de los casos sintéticos se deciden en la spec 005.
 
 Ninguna copia (`*.bak`, `*.orig`) debe quedar en esta carpeta.

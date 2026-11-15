@@ -37,6 +37,164 @@ límites de volumen; la carga ampliada queda para una funcionalidad posterior.
 | Bibliotecas: aiokafka, asyncpg, FastAPI, GeoPandas, Shapely | Pruebas del modelo (`tests/db`), medición de índices (`tests/benchmark`) y arranques (`tests/startup`) |
 | Feed y API de catálogo de USGS como fuente de datos | Adaptación de productor, consumidor y API al modelo nuevo |
 
+## Fuentes y extracción
+
+Esta sección describe lo que USGS devuelve de verdad, cómo se registra cada consulta y qué
+limitaciones tiene la extracción. Las cifras proceden de respuestas reales guardadas por el
+sistema; el perfil completo, campo a campo, está en
+[source-profile.md](evidence/003/source-profile.md), generado por
+[tests/analysis/source_profile.py](../tests/analysis/source_profile.py).
+
+### Fuentes
+
+| Fuente | Acceso | Qué devuelve | Frecuencia |
+|---|---|---|---|
+| Feed `all_day.geojson` | `GET https://earthquake.usgs.gov/earthquakes/feed/v1.0/summary/all_day.geojson` | Ventana móvil de las últimas 24 horas, completa en cada respuesta | Cada 60 s (`PRODUCER_INTERVAL_SECONDS`) |
+| Catálogo FDSN | `GET https://earthquake.usgs.gov/fdsnws/event/1/count` y `/query` | Eventos de un intervalo `[starttime, endtime)` con filtros de magnitud y tipo; como máximo 20.000 por respuesta | A demanda (`catalog-loader`) |
+| Natural Earth | `frontend/public/datos/paises.geojson` (copia entregada) | 177 entidades con polígonos y atributos | Una vez, al crear la base |
+
+### Respuesta del feed
+
+Un `FeatureCollection` GeoJSON con `metadata` (`generated`, `count`, `status`, `api`…), `bbox` y
+`features`. Medido el 2026-11-15: unos 190 elementos, 137 kB sin comprimir y 17 kB con gzip,
+servidos en 0,1–0,3 s. La respuesta lleva `Last-Modified` y `Cache-Control: max-age=60`, sin
+`ETag`; USGS regenera el contenido cada minuto, así que en la práctica la petición condicional
+(`If-Modified-Since`) casi nunca obtiene un 304.
+
+Campos que usa el sistema:
+
+| Campo | Tipo observado | Unidad | Significado | Ausencias observadas |
+|---|---|---|---|---|
+| `id` | texto | — | Identificador del evento en USGS | Nunca falta |
+| `properties.time` | entero | ms Unix, UTC | Momento de ocurrencia | Nunca falta |
+| `properties.updated` | entero | ms Unix, UTC | Última actualización en USGS; identidad de la versión | Nunca falta |
+| `properties.mag` | decimal o entero | adimensional | Magnitud, en la escala de `magType`; hay valores negativos (−0,02) | Ninguna en el periodo observado; el modelo admite nulos |
+| `properties.magType` | texto | — | Tipo de magnitud (ml, md, mb, mw…) | Ninguna en el periodo observado |
+| `properties.type` | texto | — | Tipo de evento; solo `earthquake` se publica | Nunca falta |
+| `properties.place` | texto | — | Descripción libre del lugar | Ninguna en el periodo observado |
+| `geometry.type` | texto | — | Siempre `Point` | Nunca falta |
+| `geometry.coordinates[0]`, `[1]` | decimal | grados WGS84 | Longitud y latitud | Nunca faltan |
+| `geometry.coordinates[2]` | decimal | km | Profundidad; negativa si el foco está sobre el nivel del mar (−0,80) | Nunca falta |
+
+Campos opcionales que el sistema conserva en el original pero no usa: `alert` (nulo en el
+99 %), `mmi` (96 %), `felt` y `cdi` (94 %) y `tz` (100 %). El retraso entre ocurrencia y última
+actualización (`updated − time`) tiene una mediana de 3,5 min, pero un percentil 95 de unas 3
+horas y casos de más de 20 horas: un evento puede revisarse muchas veces mientras está en el
+feed, y por eso cada versión se publica y se conserva.
+
+### Respuesta del catálogo
+
+El mismo formato GeoJSON, con `metadata.count` igual al número de elementos. `/count` devuelve
+`{"count": N, "maxAllowed": 20000}` en 0,3–1,4 s. Comprobado con peticiones reales el
+2026-11-15:
+
+- una consulta que excede el máximo devuelve **HTTP 400** («N matching events exceeds search
+  limit of 20000»); USGS no trunca si no se le pide un `limit`, y el sistema no lo pide nunca;
+- los límites son `[starttime, endtime)`: un evento justo en el límite pertenece solo al
+  intervalo que empieza en él. El enunciado advierte de que pueden incluirse ambos extremos, así
+  que se deduplica igualmente por identificador;
+- ningún mes de 2025 ni de 2026 supera el máximo con magnitud ≥ 4 (el mayor, julio de 2025,
+  tiene 2.684), ni siquiera con todas las magnitudes (septiembre de 2026: 11.740).
+
+### Cómo se carga
+
+- **Feed** (`producer`): cada minuto, una consulta. Se registra siempre en `core.extraction`
+  (resultado, código HTTP, intentos, duración, `metadata.generated` y el reparto recibidos =
+  terremotos + excluidos); el original se guarda comprimido una vez por contenido distinto; los
+  elementos de otro tipo se guardan en `core.excluded_event`; solo se publican las versiones con
+  `updated` posterior a la ya publicada, y se marcan tras la confirmación de Kafka.
+- **Catálogo** (`docker compose run --rm catalog-loader`): por meses, primero el recuento y
+  después la descarga, que debe traer exactamente lo declarado; si un intervalo excede el
+  máximo se divide por mitades. Cada respuesta se guarda sin modificar en `data/usgs/catalog/`
+  con su huella en el nombre, y la base registra la huella y la ruta. Los eventos se publican
+  por el topic `earthquakes.catalog` y entran en `core` con la misma regla de versiones que el
+  feed. Un intervalo cuyo fichero existe con la huella registrada no se vuelve a descargar
+  («descarga una vez y reutiliza», enunciado §4.2), así que repetir la orden continúa una carga
+  interrumpida y no publica nada dos veces.
+
+### Registro de procedencia
+
+| Conjunto | Fuente | Periodo y filtros | Extracción | Consultas | Registros |
+|---|---|---|---|---|---|
+| Histórico obligatorio | Catálogo FDSN | 2025-01-01 a 2026-01-01, mundial, magnitud ≥ 4, `eventtype=earthquake` | 2026-11-15, 11:40–11:43 UTC | 12 descargas mensuales y sus recuentos, más el recuento del año | 18.302 (declarados por USGS: 18.302) |
+| Ampliación 2026 | Catálogo FDSN | 2026-01-01 a 2026-11-15, mismo filtro | 2026-11-15, 11:51–11:53 UTC | 11 descargas y sus recuentos | 14.225 (declarados: 14.225) |
+| Reciente | Feed `all_day.geojson` | Últimas 24 h, todas las magnitudes, todos los tipos (solo se publican terremotos) | Continua desde 2026-11-15 11:31 UTC | Una por minuto | Variable; ver `core.extraction` |
+
+Las consultas, sus parámetros y sus recuentos están en `core.extraction`
+(`request_params.endpoint` distingue recuentos y descargas), y los resúmenes de cada carga en
+`data/usgs/catalog/summary-*.json`. Evidencia: [catalog-load.md](evidence/003/catalog-load.md) y
+[catalog-load-2026.md](evidence/003/catalog-load-2026.md).
+
+**Periodos con distinto filtro.** El espacio real contiene 2025 y 2026 hasta el 15 de noviembre
+con magnitud ≥ 4, y a partir de la puesta en marcha del feed, todas las magnitudes. Cualquier
+comparación entre periodos debe usar el mismo filtro (magnitud ≥ 4 y tipo terremoto).
+
+### Originales y retención
+
+- La huella de una respuesta del feed se calcula sobre la lista de eventos en JSON canónico, no
+  sobre la respuesta completa: `metadata.generated` cambia en cada regeneración aunque los
+  eventos sean los mismos. Dos respuestas con los mismos eventos ocupan una sola fila.
+- Los cuerpos del feed se purgan cuando llevan más de 7 días sin observarse
+  (`RAW_PAYLOAD_RETENTION_DAYS`); el productor lo hace al arrancar y cada 24 horas, y anota en su
+  log cuántos eliminó. Las extracciones y las referencias a ficheros del catálogo no caducan.
+- Estimación: unos 17 kB comprimidos por contenido distinto y, como mucho, uno por minuto, es
+  decir, menos de 175 MB en 7 días. El tamaño medido está en
+  [retention.md](evidence/003/retention.md).
+- Los ficheros del catálogo (13 MB para 2025) están fuera de Git, en `data/`; la versión
+  original de cada evento se conserva además en `event_version.payload`.
+
+### Fallos de la fuente
+
+| Fallo | Qué hace el sistema |
+|---|---|
+| Tiempo agotado, sin conexión, HTTP 429 o 5xx | Hasta 4 intentos con espera de 1, 2 y 4 s, o la de `Retry-After` si es mayor; si `Retry-After` supera 120 s no se reintenta en ese ciclo y no se vuelve a consultar antes del plazo |
+| Otro 4xx | No se reintenta |
+| Respuesta que no es JSON (también `NaN` o `Infinity`, que no son JSON) | Resultado `invalid_json`; se guarda lo recibido |
+| JSON sin la estructura `FeatureCollection` | Resultado `invalid_structure`; se guarda lo recibido |
+
+En todos los casos la consulta queda registrada con su resultado, intentos y detalle; no se
+publica ni se borra nada, y el ciclo siguiente lo vuelve a intentar sin intervención. Un fallo
+de USGS no vuelve `unhealthy` al productor: se ve en la antigüedad de la última ingesta
+(`last_ingestion`, la última consulta al feed con resultado `ok` o `not_modified`). Si la base
+falla después de que USGS respondiera, el resultado se conserva en memoria y se registra al
+volver la base, antes de consultar otra vez. Evidencia:
+[source-failures.md](evidence/003/source-failures.md).
+
+### Recuperación de huecos
+
+El feed solo cubre 24 horas. Si la ingesta se para más tiempo, al arrancar el productor escribe
+en su log el periodo no cubierto y la orden exacta para recuperarlo, y sigue con el feed:
+
+```text
+Ingestion gap detected: last successful feed request at <instante>; events between <inicio> and
+<fin> are not covered by the feed. Recover with: docker compose run --rm catalog-loader
+--purpose gap_recovery --start <inicio> --end <fin>
+```
+
+El periodo va desde la última consulta correcta hasta 24 horas antes de la siguiente, con un
+margen de 60 minutos a cada lado para los eventos que USGS publica con retraso. La recuperación
+usa la carga del catálogo con todas las magnitudes y todos los tipos, como el feed, y registra
+sus consultas con el propósito `gap_recovery`. Los huecos se calculan siempre desde
+`core.extraction`, así que `catalog-loader --gaps` los lista, pendientes o recuperados, aunque el
+aviso ya no esté en el log. No se automatiza: el enunciado pide explicar cómo recuperar el
+hueco y la recuperación manual se puede demostrar sin añadir complejidad. Evidencia:
+[gap-recovery.md](evidence/003/gap-recovery.md).
+
+### Limitaciones del alcance
+
+- **Instantánea del catálogo.** El histórico es el catálogo tal como estaba en la fecha de
+  extracción; un evento revisado después solo se actualiza al repetir la carga.
+- **Eventos fuera del feed.** No se reconcilian los eventos que USGS elimina, fusiona o revisa
+  cuando ya han salido de la ventana de 24 horas. Que un evento deje de aparecer en el feed no
+  significa que se haya eliminado, y nunca se borra nada.
+- **Hueco recuperado tarde.** La recuperación consulta el catálogo cuando se ejecuta, no como
+  estaba durante la parada.
+- **Consulta sin registro.** Si el productor se reinicia justo mientras tiene una respuesta
+  pendiente de registrar porque la base estaba caída, esa consulta se pierde. Es el único caso.
+- **Cuarentena heredada.** Hasta la spec 004 el consumidor envía a cuarentena los eventos sin
+  magnitud; en una recuperación con todas las magnitudes puede haber más publicados que
+  almacenados, y la diferencia está en `core.quarantine`.
+
 ## Modelo conceptual
 
 ```mermaid
@@ -174,18 +332,18 @@ Una fila por consulta a USGS (feed o catálogo), conservada indefinidamente.
 | `source` | `text` | `usgs_feed` o `usgs_catalog` | — |
 | `purpose` | `text` | `live`, `historical_load`, `gap_recovery` o `replay_selection` | — |
 | `request_url` | `text` | URL completa consultada | — |
-| `request_params` | `jsonb` | Parámetros del catálogo (intervalo, magnitud mínima, tipo) | Nulo en el feed |
+| `request_params` | `jsonb` | Parámetros enviados al catálogo: `endpoint` (`count`, recuento declarado, o `query`, descarga), `starttime`, `endtime`, `minmagnitude`, `eventtype` y `orderby` | Nulo en el feed |
 | `window_start`, `window_end` | `timestamptz` | Intervalo pedido al catálogo; el final es posterior al inicio | Nulo en el feed |
 | `requested_at` | `timestamptz` | Inicio de la consulta | — |
 | `duration_ms` | `integer`, ms | Latencia total, reintentos incluidos | Nulo si no se midió |
 | `attempt_count` | `smallint` | Intentos realizados (≥ 1) | 1 por defecto |
 | `http_status` | `integer` | Último código HTTP | Nulo si no hubo respuesta (tiempo agotado) |
 | `outcome` | `text` | `ok`, `not_modified`, `http_error`, `timeout`, `invalid_json` o `invalid_structure` | — |
-| `error_detail` | `text` | Descripción del fallo | Nulo si fue correcta |
+| `error_detail` | `text` | Descripción del fallo (código HTTP, `Retry-After`, tiempo agotado, error de análisis). En una consulta correcta, describe los elementos no identificables (sin `id` o sin `updated` legible): cuántos y en qué posición de la respuesta | Nulo si fue correcta y todos los elementos eran identificables |
 | `source_generated_at` | `timestamptz` | `metadata.generated` de la respuesta (ms Unix convertidos a UTC) | Nulo si no hubo cuerpo válido |
-| `record_count` | `integer` | Elementos recibidos | Nulo si no hubo cuerpo válido |
-| `earthquake_count`, `excluded_count`, `published_count` | `integer` | Reparto de los elementos: terremotos, excluidos por tipo y versiones publicadas | Nulo si no hubo cuerpo válido |
-| `content_sha256` | `text` | Huella SHA-256 de la colección de eventos (no de la cabecera, que cambia en cada respuesta) | Nulo si no hubo cuerpo válido |
+| `record_count` | `integer` | Elementos recibidos; en un recuento del catálogo (`endpoint = count`), los eventos que USGS declara para ese intervalo y filtro | Nulo si no hubo cuerpo válido |
+| `earthquake_count`, `excluded_count`, `published_count` | `integer` | Reparto de los elementos: terremotos identificables; excluidos (otro tipo, sin tipo o no identificables), de modo que `record_count = earthquake_count + excluded_count`; versiones confirmadas por Kafka en esa consulta | Nulo si no hubo cuerpo válido; `published_count` nulo además si la publicación se interrumpió |
+| `content_sha256` | `text` | Huella SHA-256: en el feed, de la lista de eventos en JSON canónico (no de la cabecera, que cambia en cada respuesta); en el catálogo, de los bytes del fichero descargado; en una respuesta ilegible, de los bytes recibidos. Un 304 repite la del último contenido | Nulo en fallos sin cuerpo y en recuentos |
 
 ### `core.raw_payload`
 
@@ -196,7 +354,7 @@ Una fila por contenido original distinto.
 | `content_sha256` | `text`, clave | Huella del contenido | — |
 | `encoding` | `text` | `gzip` (cuerpo del feed en la base) o `file` (fichero en `data/`) | — |
 | `body` | `bytea` | Cuerpo comprimido con gzip | Nulo para ficheros; se purga a los 7 días (`RAW_PAYLOAD_RETENTION_DAYS`) |
-| `file_path` | `text` | Ruta bajo `data/` del fichero del catálogo | Nulo para cuerpos del feed |
+| `file_path` | `text` | Ruta bajo `data/` del fichero del catálogo: `usgs/catalog/<inicio>_<fin>_<filtro>_<huella12>.geojson`, inmutable | Nulo para cuerpos del feed |
 | `byte_size` | `integer`, bytes | Tamaño sin comprimir | — |
 | `first_seen_at`, `last_seen_at` | `timestamptz` | Primera y última vez que se obtuvo este contenido | — |
 
@@ -271,7 +429,7 @@ Versiones de elementos de USGS que no son terremotos (voladuras, explosiones…)
 |---|---|---|---|
 | `event_id`, `updated_at` | `text`, `timestamptz` | Identidad de la versión excluida; clave | — |
 | `event_type` | `text` | `properties.type` recibido (`quarry blast`, `explosion`…) | Nulo si no venía |
-| `reason_code` | `text` | Motivo de la exclusión | `not_earthquake` por defecto |
+| `reason_code` | `text` | Motivo de la exclusión: `not_earthquake` (otro tipo) o `missing_type` (sin `properties.type`) | `not_earthquake` por defecto |
 | `extraction_id` | `bigint` | Extracción en la que se vio por primera vez; clave foránea a `core.extraction` | Nulo |
 | `payload` | `jsonb` | `Feature` original | — |
 | `first_seen_at` | `timestamptz` | Primera observación | — |

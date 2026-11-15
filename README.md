@@ -89,7 +89,8 @@ Editar `.env` y sustituir cada `CHANGE_ME_LOCALLY` por una contraseña local: `P
 (propietario de la base), `DB_WRITER_PASSWORD` (productor y consumidor) y `DB_READER_PASSWORD`
 (API). Poner en `CORS_ORIGINS` el origen exacto del sitio de Netlify. `.env` está en
 `.gitignore`: no se versiona nunca. La lista completa de variables está en
-[contracts/runtime.md](specs/002-platform-data-model/contracts/runtime.md).
+[contracts/runtime.md](specs/002-platform-data-model/contracts/runtime.md) y, para la ingesta,
+en [contracts/runtime.md de la spec 003](specs/003-usgs-ingestion/contracts/runtime.md).
 
 ### Arrancar
 
@@ -109,10 +110,21 @@ docker compose logs -f producer consumer
 ```
 
 Los cinco servicios deben aparecer como `healthy` en menos de tres minutos con las imágenes ya
-construidas. La salud del productor y del consumidor se basa en un latido que actualizan tras
-cada ciclo correcto; la de la API, en `GET /api/salud`, que responde `degraded` si la base no
-está disponible. Si una dependencia cae, los servicios reintentan con espera exponencial de 1 s a
-30 s y se recuperan sin reiniciarlos.
+construidas. La salud del productor y del consumidor se basa en un latido; la de la API, en
+`GET /api/salud`, que responde `degraded` si la base no está disponible. El productor actualiza
+el latido tras cada consulta a USGS que queda registrada, **también si USGS falla**: un fallo de
+la fuente no es un fallo del servicio y se ve en la antigüedad de la última ingesta. El productor
+deja de estar sano si no puede registrar las consultas (base caída) o Kafka rechaza los
+mensajes durante más de tres intervalos. Si una dependencia cae, los servicios reintentan con
+espera exponencial de 1 s a 30 s y se recuperan sin reiniciarlos.
+
+Cada consulta al feed queda en `core.extraction`. Para ver la última ingesta correcta, abrir
+`psql` como se indica a continuación y ejecutar:
+
+```sql
+SELECT max(requested_at) FROM core.extraction
+WHERE source = 'usgs_feed' AND outcome IN ('ok', 'not_modified');
+```
 
 Para consultar la base:
 
@@ -180,15 +192,96 @@ El contrato definitivo de la API se rehace en la spec 006.
 
 ## 7. Datos
 
-- `data/`: ubicación de los conjuntos descargados (catálogo histórico de USGS y similares). Está
-  fuera de Git y se monta en solo lectura en `/data` en productor y consumidor; la base guarda
-  solo su huella y su ruta (`core.raw_payload`). El procedimiento de descarga es de la spec 003.
+- `data/`: ubicación de los conjuntos descargados. Está fuera de Git; la carga del catálogo
+  escribe en `data/usgs/catalog/` y el productor y el consumidor lo montan en solo lectura en
+  `/data`. La base guarda la huella y la ruta de cada fichero (`core.raw_payload`).
 - `db/seeds/`: lotes pequeños versionados para la reproducción, montados en `/seeds`. Ver
   [db/seeds/README.md](db/seeds/README.md).
 - `frontend/public/datos/paises.geojson`: catálogo Natural Earth de 177 países, del que salen
   `core.dim_country` y el cruce espacial del consumidor.
 
 Ninguna imagen contiene conjuntos de datos: se montan al ejecutar.
+
+### Cargar el histórico
+
+El histórico obligatorio (2025, mundial, magnitud ≥ 4, tipo terremoto) se carga a mano, una
+vez, con el sistema arrancado:
+
+```bash
+docker compose run --rm catalog-loader
+```
+
+Tarda alrededor de un minuto con una conexión doméstica y deja unos 18.300 terremotos en el
+esquema `core`. La orden divide el año en meses, pide primero a USGS cuántos eventos tiene cada
+uno, divide el intervalo si supera el máximo de 20.000 y comprueba que cada descarga trae
+exactamente lo declarado; nunca acepta una respuesta truncada. Al terminar muestra un resumen:
+
+```text
+Eventos distintos:      18302
+Declarados por USGS:    18302   (recuento del periodo completo al terminar)
+Diferencia:             0
+```
+
+| Código de salida | Significado |
+|---|---|
+| 0 | Carga completa, diferencia cero |
+| 1 | Error (USGS no responde, Kafka o la base no están disponibles). Lo hecho se conserva: repetir la misma orden continúa |
+| 2 | Argumentos no válidos; no se consulta USGS |
+| 3 | Terminada, pero con diferencia frente al total de USGS; el resumen la detalla |
+
+Repetir la orden no descarga de nuevo los meses ya completos ni publica nada dos veces. Para
+actualizar la instantánea con las revisiones posteriores de USGS, añadir `--refresh`.
+
+Otras opciones (ver [contracts/catalog-loader.md](specs/003-usgs-ingestion/contracts/catalog-loader.md)):
+
+```bash
+# Ampliación con 2026 hasta una fecha, con el mismo filtro
+docker compose run --rm catalog-loader --start 2026-01-01 --end 2026-11-15
+
+# Ver qué se descargaría, sin descargar ni publicar
+docker compose run --rm catalog-loader --dry-run
+```
+
+Las respuestas se guardan sin modificar en `data/usgs/catalog/`, una por intervalo, con la huella
+en el nombre (`2025-01-01T000000Z_2025-02-01T000000Z_m4_earthquake_<huella>.geojson`), y un
+resumen `summary-*.json` por carga. Para comprobar que un fichero no ha cambiado:
+
+```bash
+(cd data && sha256sum usgs/catalog/*.geojson)
+```
+
+y comparar con `SELECT file_path, content_sha256 FROM core.raw_payload WHERE encoding = 'file'`.
+Para regenerarlos desde cero basta con borrar `data/usgs/catalog/` y repetir la carga: un
+intervalo cuyo fichero falta o no coincide con su huella se vuelve a descargar.
+
+**En Linux**, la carga escribe en `./data` con el usuario indicado en `LOADER_UID` y
+`LOADER_GID` (por defecto, `root`). Para que los ficheros sean tuyos:
+
+```bash
+LOADER_UID=$(id -u) LOADER_GID=$(id -g) docker compose run --rm catalog-loader
+```
+
+o escribir esos dos valores en `.env`. En Windows y macOS con Docker Desktop no hace falta.
+
+### Paradas de más de 24 horas
+
+El feed solo cubre las últimas 24 horas. Si el sistema ha estado parado más tiempo, al arrancar
+el productor escribe en su log un aviso con el periodo perdido y la orden exacta para
+recuperarlo, y sigue con el feed:
+
+```bash
+docker compose logs producer | grep "Ingestion gap detected"
+docker compose run --rm catalog-loader --gaps      # huecos pendientes y recuperados
+docker compose run --rm catalog-loader --purpose gap_recovery --start <inicio> --end <fin>
+```
+
+La recuperación trae todas las magnitudes del periodo, como el feed, y no duplica nada.
+
+### Originales del feed
+
+Cada respuesta distinta del feed se guarda comprimida en `core.raw_payload` y se borra cuando
+lleva más de `RAW_PAYLOAD_RETENTION_DAYS` días (7) sin observarse. El productor purga al
+arrancar y cada 24 horas; las consultas registradas no se borran nunca.
 
 ### Reproducción acelerada
 
