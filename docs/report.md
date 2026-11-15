@@ -56,10 +56,12 @@ sistema; el perfil completo, campo a campo, está en
 ### Respuesta del feed
 
 Un `FeatureCollection` GeoJSON con `metadata` (`generated`, `count`, `status`, `api`…), `bbox` y
-`features`. Medido el 2026-11-15: unos 190 elementos, 137 kB sin comprimir y 17 kB con gzip,
-servidos en 0,1–0,3 s. La respuesta lleva `Last-Modified` y `Cache-Control: max-age=60`, sin
-`ETag`; USGS regenera el contenido cada minuto, así que en la práctica la petición condicional
-(`If-Modified-Since`) casi nunca obtiene un 304.
+`features`. Medido el 2026-11-15 sobre 37 respuestas distintas: unos 185–192 elementos, todos de
+tipo `earthquake` y geometría `Point` con 3 coordenadas; 137 kB sin comprimir y 17 kB con gzip;
+servidos con una mediana de 97 ms. La respuesta lleva `Last-Modified` y `Cache-Control: max-age=60`, sin
+`ETag`. La petición condicional (`If-Modified-Since`) obtuvo 3 respuestas 304 en una hora de
+funcionamiento; el resto de minutos USGS había regenerado el feed, aunque solo cambiaron los
+eventos de 17 de esas 60 respuestas.
 
 Campos que usa el sistema:
 
@@ -71,16 +73,19 @@ Campos que usa el sistema:
 | `properties.mag` | decimal o entero | adimensional | Magnitud, en la escala de `magType`; hay valores negativos (−0,02) | Ninguna en el periodo observado; el modelo admite nulos |
 | `properties.magType` | texto | — | Tipo de magnitud (ml, md, mb, mw…) | Ninguna en el periodo observado |
 | `properties.type` | texto | — | Tipo de evento; solo `earthquake` se publica | Nunca falta |
-| `properties.place` | texto | — | Descripción libre del lugar | Ninguna en el periodo observado |
+| `properties.place` | texto | — | Descripción libre del lugar | Ninguna en el feed observado; 1 nula entre los 32.655 eventos del catálogo |
 | `geometry.type` | texto | — | Siempre `Point` | Nunca falta |
 | `geometry.coordinates[0]`, `[1]` | decimal | grados WGS84 | Longitud y latitud | Nunca faltan |
-| `geometry.coordinates[2]` | decimal | km | Profundidad; negativa si el foco está sobre el nivel del mar (−0,80) | Nunca falta |
+| `geometry.coordinates[2]` | decimal o entero | km | Profundidad; negativa si el foco está sobre el nivel del mar (mínimo observado −2,74) | Nunca falta |
 
 Campos opcionales que el sistema conserva en el original pero no usa: `alert` (nulo en el
 99 %), `mmi` (96 %), `felt` y `cdi` (94 %) y `tz` (100 %). El retraso entre ocurrencia y última
-actualización (`updated − time`) tiene una mediana de 3,5 min, pero un percentil 95 de unas 3
-horas y casos de más de 20 horas: un evento puede revisarse muchas veces mientras está en el
-feed, y por eso cada versión se publica y se conserva.
+actualización (`updated − time`) tiene en el feed una mediana de 3,5 min, pero un percentil 95
+de unas 12 horas y casos de más de 20 horas: un evento puede revisarse muchas veces mientras
+está en el feed, y por eso cada versión se publica y se conserva. En el catálogo la mediana es
+de unos 76 días: lo que se descarga ya está revisado. El retraso de ingesta de los eventos
+ocurridos con el sistema en marcha (desde la ocurrencia hasta su primera escritura en la base)
+tiene una mediana de 3,2 min y un percentil 95 de 4,1 min, sobre 9 eventos.
 
 ### Respuesta del catálogo
 
