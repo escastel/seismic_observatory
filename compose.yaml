@@ -170,9 +170,9 @@ services:
 
   # Optional public tunnel: docker compose --profile tunnel up -d
   tunnel:
-    image: ngrok/ngrok:3.18.4-alpine
+    image: ngrok/ngrok:3.39.13-alpine
     profiles: ["tunnel"]
-    command: ["http", "http://api:8000", "--url", "${NGROK_DOMAIN}"]
+    command: ["http", "http://api:8000", "--url", "${NGROK_DOMAIN}", "--log", "stdout"]
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
     depends_on:

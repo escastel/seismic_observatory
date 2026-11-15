@@ -12,7 +12,7 @@ comparten.
 | `producer` | propia | ninguno | `kafka`, `postgres` | latido reciente |
 | `consumer` | propia | ninguno | `kafka`, `postgres` | latido reciente |
 | `api` | propia | `127.0.0.1:8000` | `postgres` | `GET /api/salud` responde |
-| `tunnel` (perfil `tunnel`) | `ngrok/ngrok:3.18.4-alpine` | ninguno | `api` | — |
+| `tunnel` (perfil `tunnel`) | `ngrok/ngrok:3.39.13-alpine` | ninguno | `api` | — |
 
 - `docker compose up --build -d` arranca los cinco primeros.
 - `docker compose --profile tunnel up -d` añade el túnel hacia `http://api:8000`.

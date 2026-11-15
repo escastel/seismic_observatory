@@ -1,221 +1,223 @@
 # Observatorio Sísmico
 
-Sistema local reproducible de streaming ETL para ingerir, validar, enriquecer y
-consultar terremotos del feed GeoJSON de USGS. El proyecto implementa una
-arquitectura dimensional sobre PostgreSQL/PostGIS, mensajería Kafka y una API
-FastAPI consumida por un mapa Angular/Leaflet.
+Sistema local y reproducible de streaming ETL que ingiere, valida, enriquece y sirve los
+terremotos del feed GeoJSON de USGS: productor → Kafka → consumidor → PostgreSQL → API FastAPI,
+consultada por un panel Angular/Leaflet publicado en Netlify a través de un túnel ngrok.
 
 ## 1. Objetivo académico
 
-El sistema demuestra un pipeline de datos con semántica **at-least-once**,
-calidad auditable e integración espacial:
+El sistema demuestra un pipeline de datos con semántica **al menos una vez**, idempotente y
+versionado, con calidad auditable e integración espacial:
 
-- Los eventos originales se publican en Kafka antes de ser procesados.
-- El consumidor aplica un WAF de calidad y nunca descarta silenciosamente un
-  evento inválido.
-- Los eventos válidos se enriquecen con Point in Polygon sobre Natural Earth.
-- PostgreSQL se confirma antes que el offset Kafka.
-- El upsert por `external_id` solo acepta una versión con `updated` posterior.
-- Los históricos de 2025 se reproducen en un topic aislado y trazable.
+- Los eventos originales se publican en Kafka antes de procesarse.
+- El consumidor nunca descarta en silencio un evento inválido: lo guarda en cuarentena con el
+  mensaje original y todos los motivos.
+- Los eventos válidos se cruzan con los polígonos de Natural Earth (punto en polígono).
+- La transacción de PostgreSQL se confirma antes que el offset de Kafka.
+- Una versión antigua de un evento nunca sustituye a una más reciente, y cada versión queda en
+  el historial.
+- La reproducción acelerada del histórico escribe en un esquema propio, separado de los datos
+  reales.
 
-## 2. Arquitectura de cinco servicios
+## 2. Arquitectura
 
-`docker compose up --build -d` levanta exactamente los cinco servicios locales:
+`docker compose up --build -d` levanta exactamente cinco servicios:
 
 | Servicio | Responsabilidad | Tecnología |
 |---|---|---|
-| `producer` | Descarga USGS cada 60 segundos y publica features | Python, `requests`, `aiokafka` |
-| `consumer` | WAF, cuarentena, enriquecimiento y persistencia | Python, GeoPandas, Shapely, `psycopg2` |
-| `api` | Consultas filtrables, estadísticas y GeoJSON | FastAPI, `asyncpg`, Pydantic |
-| `kafka` | Topics `terremotos_raw` y `terremotos_replay` | Kafka KRaft |
-| `postgres` | Modelo dimensional y PostGIS | PostgreSQL 15 + PostGIS |
+| `producer` | Consulta USGS cada 60 s y publica las versiones nuevas | Python, `requests`, `aiokafka`, `asyncpg` |
+| `consumer` | Validación, cuarentena, cruce espacial y persistencia | Python, GeoPandas, Shapely, `aiokafka`, `asyncpg` |
+| `api` | Consultas filtrables, estadísticas y GeoJSON | FastAPI, Pydantic, `asyncpg` |
+| `kafka` | Topics `earthquakes.live`, `earthquakes.catalog` y `earthquakes.replay` | Kafka 3.7 en modo KRaft |
+| `postgres` | Modelo de datos (esquemas `core` y `replay`) | PostgreSQL 16 |
 
-Angular/Leaflet se mantiene como cliente web, no como contenedor adicional del
-backend. El frontend se publica en Netlify y accede obligatoriamente al backend
-mediante el dominio configurado en el túnel ngrok.
+El túnel ngrok es un sexto servicio opcional, `tunnel`, que solo arranca con
+`--profile tunnel` (apartado 5). El panel Angular no es un contenedor: se publica en Netlify
+desde `frontend/`.
 
-## 3. Decisiones de diseño
+El modelo de datos, sus decisiones y el diccionario están en
+[specs/002-platform-data-model/data-model.md](specs/002-platform-data-model/data-model.md) y en
+[docs/report.md](docs/report.md); la interfaz que usan los servicios, en
+[contracts/database.md](specs/002-platform-data-model/contracts/database.md).
 
-### WAF de calidad y cuarentena
+### Red y superficie expuesta
 
-Cada evento atraviesa validaciones de completitud, validez, exactitud,
-consistencia, oportunidad, unicidad y frescura. Los fallos se insertan en `cuarentena`
-con payload original, topic, partición, offset, código estable, detalle y
-timestamp. Por ejemplo, un `mag` nulo es un fallo de **Completitud** y una
-latitud fuera de `[-90, 90]` es un fallo de **Validez**.
+Solo la API publica un puerto, y únicamente en el propio equipo (`127.0.0.1:8000`). Kafka tiene
+un único listener interno (`kafka:9092`) y PostgreSQL no publica ninguno: nada fuera de la red de
+Compose puede escribir en el broker ni en la base. Es una decisión deliberada: la API es la única
+pieza que llega a Internet, a través del túnel, y se conecta con un rol de solo lectura
+(`observatory_reader`). Las herramientas que necesitan Kafka o PostgreSQL se ejecutan dentro de
+la red con `docker compose exec` o con el servicio de pruebas de `compose.dev.yaml`.
 
-### Transaccionalidad e idempotencia
+### Entrega y versiones
 
-El consumidor desactiva el auto-commit de Kafka. Para cada mensaje:
+El consumidor desactiva la confirmación automática de offsets. Por cada mensaje abre una
+transacción, aplica la versión con `apply_event_version` (o la guarda en cuarentena), anota el
+mensaje en `message_log`, confirma la transacción y solo entonces confirma el offset. Si algo
+falla, reintenta el mismo mensaje con espera creciente y no confirma ningún offset posterior. Un
+grupo de consumo nuevo empieza por el principio del topic.
 
-1. Parseo y WAF.
-2. Cuarentena o enriquecimiento.
-3. Commit de la transacción PostgreSQL.
-4. `consumer.commit()` del offset Kafka.
+La función `apply_event_version` devuelve `new`, `revised`, `stale` o `duplicate`: el estado
+actual solo cambia con un `updated` posterior al guardado, y reprocesar un mensaje no cambia
+nada.
 
-El upsert está condicionado por `excluded.updated > fact_sismos.updated`.
-Si el proceso falla antes del commit de base de datos, el offset queda sin
-confirmar. Si falla después, el reprocesamiento es seguro.
+### Eventos sin país
 
-### GeoPandas y eventos marítimos
+Si el punto no cae dentro de ningún polígono del catálogo, el evento se guarda con país nulo y
+el panel muestra «Sin país asignado»; nunca se imputa el país más cercano.
 
-El catálogo Natural Earth se carga una vez por consumidor y cada punto se cruza
-con polígonos terrestres. Si no existe intersección, el país es exactamente
-`Sin país asignado`; no se imputa el país más cercano.
+## 3. Requisitos y versiones
 
-## 4. Arranque y configuración
+- Docker Engine 26 o posterior con Docker Compose v2 (en Windows y macOS, Docker Desktop).
+- Unos 3 GB libres para las imágenes y 8 GB de RAM.
+- Git. En Windows, las órdenes de este documento se escriben para Git Bash.
 
-Requisitos: Docker Engine y Docker Compose.
+Imágenes fijadas: `postgres:16.4`, `confluentinc/cp-kafka:7.7.1`,
+`python:3.11.10-slim-bookworm` (base de productor, consumidor y API) y
+`ngrok/ngrok:3.39.13-alpine` (túnel). Las dependencias de Python están fijadas con todas sus
+transitivas en el `requirements.txt` de cada servicio.
 
-1. Copiar `.env.example` a `.env` y establecer credenciales locales seguras.
-2. Arrancar el backend:
+## 4. Puesta en marcha
 
-   ```powershell
-   docker compose up --build -d
-   docker compose ps
-   ```
+### Crear `.env`
 
-3. Esperar los healthchecks de Kafka y PostgreSQL. API, Productor y Consumidor
-   dependen de esos servicios saludables.
-
-Variables principales:
-
-| Variable | Uso |
-|---|---|
-| `DATABASE_DSN` | DSN de PostgreSQL para Consumidor |
-| `KAFKA_BOOTSTRAP_SERVERS` | Broker Kafka |
-| `KAFKA_RAW_TOPIC` | Topic de ingesta USGS |
-| `KAFKA_REPLAY_TOPIC` | Topic de histórico |
-| `KAFKA_GROUP_ID` | Grupo del consumidor |
-| `USGS_FEED_URL` | Feed GeoJSON consultado |
-| `PRODUCER_INTERVAL_SECONDS` | Periodicidad de ingesta |
-| `COUNTRIES_GEOJSON_PATH` | Catálogo Natural Earth montado |
-| `CORS_ORIGINS` | `*` en demo o lista separada por comas |
-| `NGROK_DOMAIN` | Dominio reservado del túnel ngrok para el frontend Netlify |
-
-El productor usa `all_day.geojson`, filtra exclusivamente features cuyo tipo sea
-`earthquake` y conserva el estado de publicación en PostgreSQL. Los reintentos
-HTTP para 429/5xx usan backoff progresivo; una caída superior a 24 horas se
-recupera iniciando de nuevo el ciclo y comparando `updated`.
-
-El listener interno de Kafka usa `kafka:9092`; las pruebas E2E desde el host usan
-el listener externo `localhost:29092`.
-
-## 5. API
-
-Base URL: `http://localhost:8000/api`.
-
-Para acceso externo, el frontend publicado en Netlify debe usar la URL HTTPS
-del dominio `NGROK_DOMAIN`; el túnel se inicia desde el contenedor API cuando
-`NGROK_AUTHTOKEN` y `NGROK_DOMAIN` están configurados.
-
-```powershell
-curl "http://localhost:8000/api/eventos?format=geojson&min_magnitude=4"
-curl "http://localhost:8000/api/estadisticas/paises"
-curl "http://localhost:8000/api/estadisticas/timeline?bucket=month"
+```bash
+cp .env.example .env
 ```
 
-`/eventos` acepta `country`, `date_from`, `date_to`, `min_magnitude`,
-`max_magnitude`, `start`, `end`, `min_mag`, `country_id`, `limit` y `offset`.
-También están disponibles `/salud` y `/estadisticas`. Con `format=geojson` o
-`Accept: application/geo+json` devuelve un `FeatureCollection` con puntos
-`[longitude, latitude, depth_km]`.
+Editar `.env` y sustituir cada `CHANGE_ME_LOCALLY` por una contraseña local: `POSTGRES_PASSWORD`
+(propietario de la base), `DB_WRITER_PASSWORD` (productor y consumidor) y `DB_READER_PASSWORD`
+(API). Poner en `CORS_ORIGINS` el origen exacto del sitio de Netlify. `.env` está en
+`.gitignore`: no se versiona nunca. La lista completa de variables está en
+[contracts/runtime.md](specs/002-platform-data-model/contracts/runtime.md).
 
-Los rangos incompatibles devuelven HTTP 400. La indisponibilidad de PostgreSQL
-devuelve HTTP 503 sin exponer detalles sensibles. CORS permite `GET` y
-`OPTIONS`, incluyendo el header `ngrok-skip-browser-warning`.
+### Arrancar
 
-## 6. Replay histórico 2025
-
-El lote reproducible está en
-[`db/seeds/historical_2025.jsonl`](db/seeds/historical_2025.jsonl). Incluye
-eventos válidos, un punto marítimo, fallos WAF y dos versiones del mismo ID.
-
-Publicar a velocidad acelerada:
-
-```powershell
-docker compose run --rm producer python -m app.replay `
-  --path /data/seeds/historical_2025.jsonl --rate 10
+```bash
+docker compose up --build -d
 ```
 
-El script valida opcionalmente el año indicado con `--year`, conserva
-`source_topic=terremotos_replay` y registra el contador de publicación. El
-consumidor procesa ambos topics mediante el mismo WAF, cruce espacial y upsert.
+La primera vez la base se crea sola desde `db/sql/` (esquemas, roles, dimensiones con los 177
+países y los días de 1900 a 2035, tablas de eventos y privilegios). No hay pasos manuales.
 
-También se puede reproducir el año completo más antiguo disponible en USGS
-(1900), descargado en [`db/seeds/historical_1900.jsonl`](db/seeds/historical_1900.jsonl):
+### Comprobar el estado y los logs
 
-```powershell
-docker compose run --rm producer python -m app.replay `
-  --path /data/seeds/historical_1900.jsonl --year 1900 --rate 10
+```bash
+docker compose ps
+curl -s http://127.0.0.1:8000/api/salud
+docker compose logs -f producer consumer
 ```
 
-Para obtener y persistir todos los registros disponibles de un intervalo
-histórico, el descargador crea un archivo por año. Por ejemplo, para todo el
-catálogo consultable desde 1900 hasta 2026:
+Los cinco servicios deben aparecer como `healthy` en menos de tres minutos con las imágenes ya
+construidas. La salud del productor y del consumidor se basa en un latido que actualizan tras
+cada ciclo correcto; la de la API, en `GET /api/salud`, que responde `degraded` si la base no
+está disponible. Si una dependencia cae, los servicios reintentan con espera exponencial de 1 s a
+30 s y se recuperan sin reiniciarlos.
 
-```powershell
-python -m producer.app.history --start-year 1900 --end-year 2026 `
-  --output-dir db/seeds
+Para consultar la base:
+
+```bash
+docker compose exec postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"'
 ```
 
-Después se reproduce cada archivo generado en `terremotos_replay`. Los lotes se
-mantienen separados por año para permitir reanudar la extracción o la
-persistencia sin repetir todo el catálogo:
+### Parar
 
-```powershell
-docker compose run --rm producer python -m app.replay `
-  --path /data/seeds/historical_2026.jsonl --year 2026 --rate 100
-```
-
-La ruta del argumento es siempre interna al contenedor (`/data/seeds/...`).
-Si se ejecuta desde Git Bash en Windows y transforma la ruta en
-`C:/Program Files/Git/data/seeds/...`, el replay reconoce el nombre del archivo
-y lo resuelve contra el volumen montado.
-
-## 7. Validación reproducible
-
-La guía completa de evaluación está en
-[`specs/001-streaming-sismos-etl/quickstart.md`](specs/001-streaming-sismos-etl/quickstart.md).
-Incluye:
-
-- Evento válido y evento marítimo.
-- Cuarentena por magnitud nula y coordenada inválida.
-- Idempotencia con versiones antiguas y nuevas.
-- Orden commit PostgreSQL → offset Kafka.
-- Consultas API, GeoJSON, filtros y CORS.
-- Replay acelerado y trazabilidad por topic.
-
-Métricas operativas se escriben en los logs estructurados:
-
-- Productor: publicados por ciclo y reintentos de conexión/publicación.
-- Consumidor: procesados, puestos en cuarentena y lag observado por offset.
-- API: filas devueltas por endpoint y filtros aplicados.
-
-La revisión de calidad aplica la regla 1-10-100 de forma manual: prevenir
-errores mediante contratos y validación temprana, detectarlos en el WAF antes de
-persistir y reservar la corrección costosa para los eventos ya observados en
-producción. No se generan informes automáticos de calidad.
-
-La evidencia manual ampliada está en
-[`docs/calidad.md`](docs/calidad.md), y la evaluación financiera constitucional
-en [`docs/evaluacion-financiera.md`](docs/evaluacion-financiera.md). El contrato
-anexo añade filtros `start`, `end`, `min_mag` y `country_id`, además de
-distribuciones en `/api/estadisticas`.
-
-La política de frescura rechaza timestamps futuros con más de 300 segundos de
-tolerancia. La ingesta `terremotos_raw` rechaza eventos con más de 7 días; el
-topic `terremotos_replay` permite históricos válidos de 2025.
-
-Para detener servicios sin borrar evidencia:
-
-```powershell
+```bash
 docker compose down
 ```
 
-No usar `docker compose down -v` durante las pruebas de idempotencia o replay.
+Se conservan los volúmenes `postgres_data` (eventos, versiones, cuarentena y estado de
+publicación) y `kafka_data` (mensajes durante 7 días y offsets confirmados). Al volver a
+arrancar, el productor no republica versiones ya publicadas y el consumidor sigue donde lo dejó.
 
-## 8. Límites tecnológicos
+### Recrear la base desde cero
 
-El proyecto usa únicamente el stack aprobado: Python, Kafka, PostgreSQL/PostGIS,
-FastAPI, Docker Compose, Angular y Leaflet.
+Los ficheros de inicialización solo se ejecutan con el volumen vacío. Para aplicar un cambio
+del modelo, o si el volumen viene de una versión anterior, hay que borrar los volúmenes.
+**Esto elimina todos los datos locales**:
+
+```bash
+docker compose down -v
+docker compose up -d
+```
+
+## 5. Túnel para el panel publicado
+
+Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` (dominio reservado) en `.env`:
+
+```bash
+docker compose --profile tunnel up -d
+docker compose --profile tunnel logs tunnel
+curl -s "https://TU-DOMINIO.ngrok-free.app/api/salud" -H "ngrok-skip-browser-warning: 1"
+```
+
+El túnel apunta a `http://api:8000` dentro de la red de Compose. Para retirarlo:
+
+```bash
+docker compose --profile tunnel stop tunnel
+```
+
+Sin `--profile tunnel` el servicio no arranca, y los cinco obligatorios funcionan igual.
+
+## 6. API
+
+Base: `http://127.0.0.1:8000/api` (o la URL del túnel).
+
+```bash
+curl "http://127.0.0.1:8000/api/eventos?format=geojson&min_mag=4"
+curl "http://127.0.0.1:8000/api/estadisticas/paises"
+curl "http://127.0.0.1:8000/api/estadisticas/timeline?bucket=month"
+```
+
+`/eventos` acepta `country`, `country_id`, `start`, `end`, `date_from`, `date_to`, `min_mag`,
+`min_magnitude`, `max_magnitude`, `limit` y `offset`. También están `/salud` y
+`/estadisticas`. Con `format=geojson` o `Accept: application/geo+json` devuelve un
+`FeatureCollection`. La magnitud, la profundidad y el país pueden ser nulos. Los rangos
+incompatibles devuelven HTTP 400 y la base no disponible, HTTP 503 sin detalles internos. CORS
+admite solo los orígenes de `CORS_ORIGINS` (sin comodín) y los métodos `GET` y `OPTIONS`.
+
+El contrato definitivo de la API se rehace en la spec 006.
+
+## 7. Datos
+
+- `data/`: ubicación de los conjuntos descargados (catálogo histórico de USGS y similares). Está
+  fuera de Git y se monta en solo lectura en `/data` en productor y consumidor; la base guarda
+  solo su huella y su ruta (`core.raw_payload`). El procedimiento de descarga es de la spec 003.
+- `db/seeds/`: lotes pequeños versionados para la reproducción, montados en `/seeds`. Ver
+  [db/seeds/README.md](db/seeds/README.md).
+- `frontend/public/datos/paises.geojson`: catálogo Natural Earth de 177 países, del que salen
+  `core.dim_country` y el cruce espacial del consumidor.
+
+Ninguna imagen contiene conjuntos de datos: se montan al ejecutar.
+
+### Reproducción acelerada
+
+```bash
+docker compose run --rm producer python -m app.replay --path /seeds/historical_2025.jsonl --rate 10
+```
+
+Los mensajes van a `earthquakes.replay` y el consumidor los escribe en el esquema `replay`, que
+no puede modificar los datos reales de `core`. En Git Bash, anteponer `MSYS_NO_PATHCONV=1` si la
+ruta se convierte en una ruta de Windows. La reproducción completa se define en la spec 005.
+
+## 8. Pruebas
+
+Las pruebas se ejecutan en un contenedor dentro de la red de Compose, contra una base temporal
+`observatory_test` que se crea con los mismos ficheros de `db/sql/` y se elimina al terminar:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/db -v
+docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/unit tests/contract -v
+```
+
+`tests/db` cubre la secuencia de duplicados y revisiones de la FAQ 12, nulos y rangos,
+idempotencia con 1.000 pasadas, privilegios, aislamiento de la reproducción y procedencia. Los
+escenarios de validación con el sistema real están en
+[specs/002-platform-data-model/quickstart.md](specs/002-platform-data-model/quickstart.md), y
+sus resultados en [docs/evidence/002/](docs/evidence/002/).
+
+## 9. Límites tecnológicos
+
+El proyecto usa únicamente el stack aprobado: Python, Kafka, PostgreSQL, FastAPI, Docker
+Compose, Angular y Leaflet. No usa PostGIS, Spark, Flink ni Kubernetes: el cruce espacial se
+hace en Python con GeoPandas.

@@ -158,6 +158,9 @@ marcadas como **verificado** se comprobaron el 2026-11-14 en un contenedor desec
 - **Decisión**: `postgres:16.4`, `confluentinc/cp-kafka:7.7.1` en modo KRaft (ya en uso y
   funcionando), `python:3.11.10-slim-bookworm`, `ngrok/ngrok:3.18.4-alpine`. Todas las
   etiquetas existen en el registro (**verificado**).
+- **Corrección al implementar (2026-11-15, T041)**: ngrok rechaza el agente 3.18.4 para la
+  cuenta del proyecto (ERR_NGROK_121, mínimo 3.29.0). Se fija `ngrok/ngrok:3.39.13-alpine`,
+  que mantiene `--url` para el dominio reservado. Evidencia en `docs/evidence/002/startup.md`.
 - **Razón**: se abandona `postgis/postgis` porque ninguna consulta usa PostGIS; el enunciado
   pide PostgreSQL y el cruce espacial se hace en Python.
 - **Dependencias Python**: cada servicio tiene un `requirements.in` con dependencias directas y
