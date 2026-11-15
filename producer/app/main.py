@@ -24,6 +24,7 @@ import logging
 import time
 from collections.abc import Awaitable, Callable
 from dataclasses import dataclass, field
+from datetime import datetime, timedelta, timezone
 
 import asyncpg
 from aiokafka import AIOKafkaProducer
@@ -35,7 +36,7 @@ from common.retry import retry
 from common.settings import ProducerSettings
 from common.topics import ensure_topics
 
-from . import provenance
+from . import gaps, provenance
 from .classify import Classified, Item, classify
 from .config import load_config
 from .fingerprint import bytes_fingerprint, features_fingerprint
@@ -190,15 +191,60 @@ async def feed_cycle(
     return CycleReport(result, extraction_id, published, error)
 
 
+PURGE_EVERY = timedelta(hours=24)
+
+
+def purge_due(last_purge: datetime | None, now: datetime) -> bool:
+    """At start-up and then once every 24 hours (FR-033)."""
+    return last_purge is None or now - last_purge >= PURGE_EVERY
+
+
+async def purge_raw_payloads(pool: asyncpg.Pool, retention_days: int) -> int | None:
+    """Delete feed bodies not seen for retention_days; file references and extractions stay.
+
+    The count goes to the log, which FR-033 accepts as the record of each
+    purge. A failure is logged and never stops the feed.
+    """
+    try:
+        async with pool.acquire() as conn:
+            purged = await conn.fetchval("SELECT core.purge_raw_payload($1)", retention_days)
+    except DATABASE_ERRORS as exc:
+        logger.warning("Raw payload purge failed, will try again in the next cycle: %s", exc)
+        return None
+    logger.info("Purged %d raw payload(s) not seen for more than %d days", purged, retention_days)
+    return purged
+
+
+async def startup_gap_warning(pool: asyncpg.Pool, now: datetime, margin_minutes: int) -> str | None:
+    """Warning text when the feed was stopped for more than 24 hours (FR-028, FR-032).
+
+    Only warns: the recovery is a manual command (FR-029), so the feed starts
+    right away whatever the answer.
+    """
+    async with pool.acquire() as conn:
+        gap = await gaps.open_gap(conn, now, timedelta(minutes=margin_minutes))
+    return gaps.warning_line(gap) if gap else None
+
+
 async def run(config: ProducerSettings) -> None:
     await retry(lambda: ensure_topics(config.kafka), description="creating Kafka topics", log=logger)
     pool = await create_pool(config.database, "core", application_name="producer", max_size=2)
     producer = AIOKafkaProducer(bootstrap_servers=config.kafka.bootstrap_servers, acks="all")
     await retry(producer.start, description="connecting to Kafka", log=logger)
+    warning = await retry(
+        lambda: startup_gap_warning(pool, datetime.now(timezone.utc), config.gap_margin_minutes),
+        description="checking for ingestion gaps", retry_on=DATABASE_ERRORS, log=logger,
+    )
+    if warning:
+        logger.warning(warning)
     heartbeat = Heartbeat()
     state = FeedState()
+    last_purge: datetime | None = None
     try:
         while True:
+            if purge_due(last_purge, datetime.now(timezone.utc)):
+                if await purge_raw_payloads(pool, config.raw_payload_retention_days) is not None:
+                    last_purge = datetime.now(timezone.utc)
             started = time.monotonic()
             report = await retry(
                 lambda: feed_cycle(config, producer, pool, state),

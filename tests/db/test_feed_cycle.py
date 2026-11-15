@@ -241,3 +241,27 @@ def test_last_ingestion_ignores_failures(test_database, owner_conn, usgs) -> Non
 )
 def test_requests_never_start_closer_than_the_interval(last_start, now, retry_until, expected) -> None:
     assert seconds_until_next_cycle(last_start, now, 60, retry_until) == pytest.approx(expected)
+
+
+def test_startup_warns_about_an_old_last_request(test_database, owner_conn) -> None:
+    from datetime import timedelta
+
+    from producer.app.main import startup_gap_warning
+
+    now = datetime(2026, 11, 15, 12, 0, tzinfo=timezone.utc)
+
+    def warning():
+        return run_with_pool(test_database, lambda pool: startup_gap_warning(pool, now, 60))
+
+    assert warning() is None                                  # fresh install: no gap (FR-032)
+
+    owner_conn.execute(
+        "INSERT INTO core.extraction (source, purpose, request_url, requested_at, outcome) "
+        "VALUES ('usgs_feed', 'live', 'x', %s, 'ok')", (now - timedelta(hours=2),))
+    assert warning() is None                                  # covered by the 24-hour feed
+
+    owner_conn.execute("UPDATE core.extraction SET requested_at = requested_at - interval '34 hours'")
+    text = warning()
+    assert text.startswith("Ingestion gap detected: last successful feed request at 2026-11-14T00:00:00Z;")
+    assert ("docker compose run --rm catalog-loader --purpose gap_recovery "
+            "--start 2026-11-13T23:00:00Z --end 2026-11-14T13:00:00Z") in text

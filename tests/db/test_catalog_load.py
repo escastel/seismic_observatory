@@ -74,7 +74,7 @@ def extractions(owner_conn: psycopg.Connection) -> list[dict]:
 
 
 def downloads(owner_conn) -> list[dict]:
-    return [row for row in extractions(owner_conn) if row["request_params"]["endpoint"] == "query"]
+    return [row for row in extractions(owner_conn) if (row["request_params"] or {}).get("endpoint") == "query"]
 
 
 @pytest.fixture
@@ -317,3 +317,54 @@ def test_two_simultaneous_loads(test_database, owner_conn, usgs, tmp_path) -> No
     assert len(states) == 8 and all(n == 1 for _, n in states)
     published = {key for producer in producers for key in producer.keys()}
     assert published == {"J0", "J1", "J2", "J3", "J4", "F0", "F1", "F2"}
+
+
+def test_gap_listing_and_recovery(test_database, owner_conn, tmp_path) -> None:
+    from producer.app.gaps import report_gaps
+
+    # The feed worked until 2025-01-10 06:00 and again from 2025-01-12 06:00: a 48-hour stop.
+    listed_at = datetime(2025, 1, 12, 7, 0, tzinfo=timezone.utc)   # right after the feed came back
+    for moment in ("2025-01-10T05:00:00Z", "2025-01-10T06:00:00Z", "2025-01-12T06:00:00Z"):
+        owner_conn.execute("INSERT INTO core.extraction (source, purpose, request_url, requested_at, outcome) "
+                           "VALUES ('usgs_feed', 'live', 'x', %s, 'ok')", (moment,))
+    lost = [feature("G1", time="2025-01-10T12:00:00Z", mag=1.2),                       # small: all magnitudes
+            feature("G2", time="2025-01-11T03:00:00Z", mag=4.4),
+            feature("G3", time="2025-01-10T20:00:00Z", mag=2.0, event_type="quarry blast")]
+
+    with FakeUsgs(FakeCatalog(events() + lost)) as usgs:
+        def listing() -> list[str]:
+            lines: list[str] = []
+            run_with_pool(test_database, lambda pool: report_gaps(settings(usgs, tmp_path), pool, lines.append,
+                                                                  now=listed_at))
+            return lines
+
+        before = listing()
+        assert before == [
+            "2025-01-10T05:00:00Z → 2025-01-11T07:00:00Z  PENDIENTE",
+            "    docker compose run --rm catalog-loader --purpose gap_recovery "
+            "--start 2025-01-10T05:00:00Z --end 2025-01-11T07:00:00Z",
+        ]
+
+        producer = FakeProducer()
+        code, summary, _ = load(test_database, usgs, tmp_path, producer, [
+            "--purpose", "gap_recovery", "--start", "2025-01-10T05:00:00Z", "--end", "2025-01-11T07:00:00Z"])
+        after = listing()
+
+    assert code == EXIT_OK
+    assert sorted(producer.keys("earthquakes.catalog")) == ["G1", "G2", "J1"]   # J1: 2025-01-11 00:00, inside the gap
+    assert {row["purpose"] for row in extractions(owner_conn) if row["source"] == "usgs_catalog"} == {"gap_recovery"}
+    assert downloads(owner_conn)[0]["request_params"] == {
+        "endpoint": "query", "format": "geojson", "starttime": "2025-01-10T05:00:00Z",
+        "endtime": "2025-01-11T07:00:00Z", "orderby": "time-asc"}
+    assert owner_conn.execute("SELECT event_id FROM core.excluded_event").fetchall() == [("G3",)]
+    assert after == ["2025-01-10T05:00:00Z → 2025-01-11T07:00:00Z  recuperado"]
+
+
+def test_no_gaps_message(test_database, tmp_path) -> None:
+    from producer.app.gaps import report_gaps
+
+    lines: list[str] = []
+    with FakeUsgs(FakeCatalog()) as usgs:
+        code = run_with_pool(test_database, lambda pool: report_gaps(settings(usgs, tmp_path), pool, lines.append, now=NOW))
+    assert code == 0
+    assert lines == ["No ingestion gaps: the feed has never been stopped for more than 24 hours."]

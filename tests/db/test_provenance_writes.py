@@ -192,3 +192,47 @@ def test_last_successful_feed_request(test_database) -> None:
     empty, last = run_with_conn(test_database, run)
     assert empty is None
     assert last == NOW + timedelta(minutes=1)
+
+
+def insert_feed_requests(owner_conn, moments, outcome="ok") -> None:
+    for moment in moments:
+        owner_conn.execute(
+            "INSERT INTO core.extraction (source, purpose, request_url, requested_at, outcome) "
+            "VALUES ('usgs_feed', 'live', %s, %s, %s)", (FEED_URL, moment, outcome))
+
+
+def test_gaps_are_detected_from_the_feed_history_and_recovered(test_database, owner_conn) -> None:
+    from producer.app.gaps import detect
+
+    hour = timedelta(hours=1)
+    first_run = [NOW - 100 * hour + n * hour for n in range(10)]           # 10 hourly requests
+    second_run = [NOW - 54 * hour + n * hour for n in range(5)]            # 36 h after the first run ends
+    third_run = [NOW - 20 * hour + n * hour for n in range(20)]            # 29 h after the second ends
+    insert_feed_requests(owner_conn, first_run + second_run + third_run)
+    insert_feed_requests(owner_conn, [NOW - 70 * hour], outcome="timeout")  # failures do not close a gap
+
+    def found():
+        return run_with_conn(test_database, lambda conn: detect(conn, NOW, timedelta(minutes=60)))
+
+    gaps = found()
+    assert [(gap.last_before, gap.next_after, covered) for gap, covered in gaps] == [
+        (first_run[-1], second_run[0], False),
+        (second_run[-1], third_run[0], False),
+    ]
+    first = gaps[0][0]
+    assert first.start == first_run[-1] - hour and first.end == second_run[0] - 24 * hour + hour
+
+    owner_conn.execute(
+        "INSERT INTO core.extraction (source, purpose, request_url, requested_at, outcome, request_params, "
+        "window_start, window_end) VALUES ('usgs_catalog', 'gap_recovery', 'x', %s, 'ok', "
+        "'{\"endpoint\": \"query\"}', %s, %s)", (NOW, first.start, first.end))
+    assert [covered for _, covered in found()] == [True, False]
+
+
+def test_open_gap_when_the_feed_stopped(test_database, owner_conn) -> None:
+    from producer.app.gaps import open_gap
+
+    insert_feed_requests(owner_conn, [NOW - timedelta(hours=36)])
+    gap = run_with_conn(test_database, lambda conn: open_gap(conn, NOW, timedelta(minutes=60)))
+    assert gap is not None and gap.next_after is None
+    assert gap.end == NOW - timedelta(hours=23)
