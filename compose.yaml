@@ -107,6 +107,45 @@ services:
     networks:
       - observatorio
 
+  # Manual load of the USGS catalog (contracts/catalog-loader.md of spec 003).
+  # Not started by `docker compose up`; run it on demand:
+  #   docker compose run --rm catalog-loader            # mandatory 2025 load
+  #   docker compose run --rm catalog-loader --gaps     # pending ingestion gaps
+  catalog-loader:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    entrypoint: ["python", "-m", "app.catalog_load"]
+    # Writes into ./data; on Linux export LOADER_UID/LOADER_GID with your own ids.
+    user: "${LOADER_UID:-0}:${LOADER_GID:-0}"
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_LIVE: ${KAFKA_TOPIC_LIVE:-earthquakes.live}
+      KAFKA_TOPIC_CATALOG: ${KAFKA_TOPIC_CATALOG:-earthquakes.catalog}
+      KAFKA_TOPIC_REPLAY: ${KAFKA_TOPIC_REPLAY:-earthquakes.replay}
+      KAFKA_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
+      USGS_CATALOG_URL: ${USGS_CATALOG_URL:-https://earthquake.usgs.gov/fdsnws/event/1}
+      USGS_TIMEOUT_SECONDS: ${USGS_TIMEOUT_SECONDS:-30}
+      USGS_MAX_ATTEMPTS: ${USGS_MAX_ATTEMPTS:-4}
+      USGS_USER_AGENT: ${USGS_USER_AGENT:-seismic-observatory/1.0}
+      GAP_MARGIN_MINUTES: ${GAP_MARGIN_MINUTES:-60}
+      DATA_DIR: /data
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    restart: "no"
+    networks:
+      - observatorio
+
   consumer:
     build:
       context: .

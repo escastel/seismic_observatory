@@ -149,9 +149,11 @@ def _instant(value: str) -> int:
 class FakeCatalog:
     """In-memory FDSN event service: /count and /query with USGS semantics."""
 
-    def __init__(self, events: Sequence[dict[str, Any]] = (), max_allowed: int = 20_000) -> None:
+    def __init__(self, events: Sequence[dict[str, Any]] = (), max_allowed: int = 20_000, inclusive_end: bool = False) -> None:
         self.events: list[dict[str, Any]] = list(events)
         self.max_allowed = max_allowed
+        # USGS uses [start, end); the assignment warns that both ends may be included.
+        self.inclusive_end = inclusive_end
         # Optional hook to tamper with a /query answer (e.g. drop events).
         self.query_filter: Callable[[list[dict[str, Any]]], list[dict[str, Any]]] | None = None
 
@@ -165,7 +167,7 @@ class FakeCatalog:
             props = item["properties"]
             if start is not None and props["time"] < start:
                 continue
-            if end is not None and props["time"] >= end:
+            if end is not None and (props["time"] > end if self.inclusive_end else props["time"] >= end):
                 continue
             if min_mag is not None and (props.get("mag") is None or props["mag"] < min_mag):
                 continue

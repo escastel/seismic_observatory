@@ -74,9 +74,13 @@ Solo en el catálogo: `window_start` y `window_end` (intervalo `[inicio, fin)`) 
   Un 304 actualiza `last_seen_at` del último contenido.
 - Purga: `core.purge_raw_payload(RAW_PAYLOAD_RETENTION_DAYS)` cada 24 horas; elimina solo filas
   con `body`. Las de fichero no caducan.
-- Ficheros: `data/usgs/catalog/<inicio>_<fin>_<filtro>.geojson`, por ejemplo
-  `2025-01-01T000000Z_2025-02-01T000000Z_m4_earthquake.geojson`; sin filtro, `all`. El contenido
-  es la respuesta de USGS sin modificar.
+- Ficheros: `data/usgs/catalog/<inicio>_<fin>_<filtro>_<huella12>.geojson`, por ejemplo
+  `2025-01-01T000000Z_2025-02-01T000000Z_m4_earthquake_9b2d8cb824cb.geojson`; sin filtro, `all`.
+  `<huella12>` son los 12 primeros caracteres de su SHA-256. El contenido es la respuesta de USGS
+  sin modificar. Cada fichero es inmutable: una descarga nueva con otro contenido (USGS regenera
+  `metadata` en cada respuesta) crea otro fichero en lugar de sobrescribir, así que toda huella
+  registrada coincide siempre con su fichero, también con `--refresh` o con dos cargas a la vez.
+  Las descargas anteriores se conservan en `data/`, que está fuera de Git.
 
 ## 4. `core.excluded_event`
 
