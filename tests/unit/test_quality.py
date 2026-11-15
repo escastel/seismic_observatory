@@ -117,7 +117,7 @@ def test_quality_rejects_stale_raw_event() -> None:
     stale = now - timedelta(days=7, seconds=1)
     payload["time"] = int(stale.timestamp() * 1000)
 
-    event, failures = validate_event(payload, now=now, source_topic="terremotos_raw")
+    event, failures = validate_event(payload, now=now, source_topic="earthquakes.live")
 
     assert event is None
     assert failures[0].reason_code == "event_too_old"
@@ -130,7 +130,7 @@ def test_quality_allows_historical_replay_event() -> None:
     historical = datetime(2025, 1, 1, tzinfo=timezone.utc)
     payload["time"] = int(historical.timestamp() * 1000)
 
-    event, failures = validate_event(payload, now=now, source_topic="terremotos_replay")
+    event, failures = validate_event(payload, now=now, source_topic="earthquakes.replay")
 
     assert event is not None
     assert failures == []

@@ -17,18 +17,21 @@ if TYPE_CHECKING:
 
 logger = logging.getLogger(__name__)
 
+# compose.yaml mounts db/seeds read only here.
+SEEDS_MOUNT = "/seeds"
+
 
 def _resolve_replay_path(path: str | Path) -> Path:
     source = Path(path)
     if source.is_file():
         return source
-    mounted_source = Path("/data/seeds") / source.name
+    mounted_source = Path(SEEDS_MOUNT) / source.name
     if mounted_source.is_file():
         logger.warning("Replay path %s mapped to mounted path %s", source, mounted_source)
         return mounted_source
     raise FileNotFoundError(
         f"Replay file does not exist: {source}. "
-        f"Inside Docker use /data/seeds/{source.name}"
+        f"Inside Docker use {SEEDS_MOUNT}/{source.name}"
     )
 
 
@@ -88,8 +91,8 @@ async def publish_replay(
 
     if not isinstance(config, ProducerConfig):
         raise TypeError("config must be a ProducerConfig")
-    events = read_replay_events(path, config.replay_topic, expected_year)
-    producer = AIOKafkaProducer(bootstrap_servers=config.kafka_bootstrap_servers)
+    events = read_replay_events(path, config.kafka.topics.replay, expected_year)
+    producer = AIOKafkaProducer(bootstrap_servers=config.kafka.bootstrap_servers)
     published = 0
     delay = 1 / rate
     await producer.start()
@@ -99,7 +102,7 @@ async def publish_replay(
             if not isinstance(event_id, str) or not event_id:
                 raise ValueError("Replay event id must be a non-empty string")
             await producer.send_and_wait(
-                config.replay_topic,
+                config.kafka.topics.replay,
                 key=event_id.encode("utf-8"),
                 value=json.dumps(event, separators=(",", ":")).encode("utf-8"),
             )
@@ -110,7 +113,7 @@ async def publish_replay(
     logger.info(
         "Replay complete source=%s topic=%s published=%d rate=%.2f events/sec",
         path,
-        config.replay_topic,
+        config.kafka.topics.replay,
         published,
         rate,
     )
@@ -118,12 +121,14 @@ async def publish_replay(
 
 
 def main() -> None:
-    from .config import ProducerConfig
+    from common.logging import configure
+
+    from .config import load_config
 
     parser = argparse.ArgumentParser(description="Publish a historical seismic batch to Kafka")
     parser.add_argument(
         "--path",
-        default="/data/seeds/historical_2025.jsonl",
+        default=f"{SEEDS_MOUNT}/historical_2025.jsonl",
         help="JSONL replay file path",
     )
     parser.add_argument(
@@ -139,11 +144,8 @@ def main() -> None:
         help="Require every event to belong to this year; omit to infer from the file",
     )
     args = parser.parse_args()
-    logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s %(levelname)s %(name)s %(message)s",
-    )
-    asyncio.run(publish_replay(ProducerConfig(), args.path, args.rate, args.year))
+    configure("producer-replay")
+    asyncio.run(publish_replay(load_config(), args.path, args.rate, args.year))
 
 
 if __name__ == "__main__":

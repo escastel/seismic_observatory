@@ -72,7 +72,9 @@ ngrok.yaml
 .ngrok/
 
 # Downloaded or generated datasets: regenerate them, never commit them
-data/
+# data/ itself is kept (empty) so compose can mount it on a clean clone.
+data/*
+!data/.gitkeep
 db/seeds/*.jsonl
 !db/seeds/historical_1900.jsonl
 !db/seeds/historical_2025.jsonl

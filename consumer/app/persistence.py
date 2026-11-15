@@ -1,182 +1,130 @@
-"""Transactional PostgreSQL persistence for accepted and quarantined events."""
+"""Writes of one Kafka message, inside the caller's transaction.
+
+Follows contracts/database.md, «Transacción del consumidor por mensaje»: the
+event goes through apply_event_version (or the rejection into quarantine) and
+the message_log row is written in the same transaction. The services never
+run DDL: the model is created by db/sql/.
+"""
 
 from __future__ import annotations
 
+import json
+from dataclasses import dataclass
+from datetime import datetime
 from typing import Any
 
-import psycopg2
-from psycopg2.extras import Json
+import asyncpg
 
 from .quality import ValidatedEvent
-from .spatial import Geography
+
+APPLY_SQL = """
+SELECT apply_event_version($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14, $15, $16, $17)
+"""
+
+QUARANTINE_SQL = """
+INSERT INTO quarantine (kafka_topic, kafka_partition, kafka_offset, event_id,
+                        reason_codes, reason_detail, payload, raw_text)
+VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
+ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING
+"""
+
+MESSAGE_LOG_SQL = """
+INSERT INTO message_log (kafka_topic, kafka_partition, kafka_offset, event_id, updated_at, outcome, produced_at)
+VALUES ($1, $2, $3, $4, $5, $6, $7)
+ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING
+"""
 
 
-def ensure_schema(dsn: str) -> None:
-    with psycopg2.connect(dsn) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute("ALTER TABLE fact_sismos ADD COLUMN IF NOT EXISTS mag_type TEXT")
-            cursor.execute(
-                """
-                CREATE TABLE IF NOT EXISTS event_versions (
-                    version_key BIGSERIAL PRIMARY KEY,
-                    external_id TEXT NOT NULL,
-                    updated TIMESTAMPTZ NOT NULL,
-                    source_topic TEXT NOT NULL,
-                    payload JSONB NOT NULL,
-                    received_at TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE (external_id, updated)
-                )
-                """
-            )
+@dataclass(frozen=True)
+class Position:
+    """Where a message sits in Kafka."""
+
+    topic: str
+    partition: int
+    offset: int
 
 
-def persist_event(
-    dsn: str,
+@dataclass(frozen=True)
+class Rejection:
+    """A message that goes to quarantine, with every reason found."""
+
+    reason_codes: list[str]
+    reason_detail: str
+    event_id: str | None = None
+    payload: Any = None          # decoded JSON, when the message was JSON
+    raw_text: str | None = None  # original text, when it was not
+
+
+def to_json(value: Any) -> str:
+    """Strict JSON (no NaN or infinity), as PostgreSQL jsonb requires."""
+    return json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":"))
+
+
+async def store_version(
+    conn: asyncpg.Connection,
+    position: Position,
     event: ValidatedEvent,
-    geography: Geography,
-    source_topic: str,
-) -> None:
-    with psycopg2.connect(dsn) as connection:
-        with connection.cursor() as cursor:
-            cursor.execute(
-                """
-                INSERT INTO dim_geografia
-                    (country, continent, subregion, country_id, source_dataset, geometry_hash)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                ON CONFLICT (country, continent, subregion, source_dataset, geometry_hash)
-                DO UPDATE SET
-                    country = EXCLUDED.country,
-                    country_id = EXCLUDED.country_id
-                RETURNING geografia_key
-                """,
-                (
-                    geography.country,
-                    geography.continent,
-                    geography.subregion,
-                    geography.country_id,
-                    geography.source_dataset,
-                    geography.geometry_hash,
-                ),
-            )
-            geography_key = cursor.fetchone()[0]
-            event_date = event.event_time.date()
-            cursor.execute(
-                """
-                INSERT INTO dim_tiempo (event_date, year, month, day, week)
-                VALUES (%s, %s, %s, %s, %s)
-                ON CONFLICT (event_date)
-                DO UPDATE SET event_date = EXCLUDED.event_date
-                RETURNING tiempo_key
-                """,
-                (event_date, event_date.year, event_date.month, event_date.day, event_date.isocalendar().week),
-            )
-            tiempo_key = cursor.fetchone()[0]
-            cursor.execute(
-                """
-                INSERT INTO fact_sismos
-                    (external_id, updated, event_time, magnitude, longitude, latitude,
-                     depth_km, place, mag_type, geografia_key, tiempo_key, source_topic)
-                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
-                ON CONFLICT (external_id) DO UPDATE
-                SET updated = EXCLUDED.updated,
-                    event_time = EXCLUDED.event_time,
-                    magnitude = EXCLUDED.magnitude,
-                    mag_type = EXCLUDED.mag_type,
-                    longitude = EXCLUDED.longitude,
-                    latitude = EXCLUDED.latitude,
-                    depth_km = EXCLUDED.depth_km,
-                    place = EXCLUDED.place,
-                    geografia_key = EXCLUDED.geografia_key,
-                    tiempo_key = EXCLUDED.tiempo_key,
-                    source_topic = EXCLUDED.source_topic,
-                    ingested_at = CURRENT_TIMESTAMP
-                WHERE EXCLUDED.updated > fact_sismos.updated
-                """,
-                (
-                    event.external_id,
-                    event.updated,
-                    event.event_time,
-                    event.magnitude,
-                    event.longitude,
-                    event.latitude,
-                    event.depth_km,
-                    event.place,
-                    event.mag_type,
-                    geography_key,
-                    tiempo_key,
-                    source_topic,
-                ),
-            )
-            cursor.execute(
-                """
-                INSERT INTO event_versions
-                    (external_id, updated, source_topic, payload)
-                VALUES (%s, %s, %s, %s)
-                ON CONFLICT (external_id, updated) DO NOTHING
-                """,
-                (event.external_id, event.updated, source_topic, Json(event.original_payload)),
-            )
-
-
-def persist_quarantine(
-    dsn: str,
-    payload: Any,
-    external_id: str | None,
-    source_topic: str,
-    partition: int,
-    offset: int,
-    dimension: str,
-    reason_code: str,
-    reason_detail: str,
-) -> None:
-    persist_quarantines(
-        dsn,
-        [
-            (
-                payload,
-                external_id,
-                source_topic,
-                partition,
-                offset,
-                dimension,
-                reason_code,
-                reason_detail,
-            )
-        ],
+    *,
+    source: str,
+    country_id: str | None,
+    original: Any,
+    replayed_at: datetime | None,
+) -> str:
+    """apply_event_version; returns new, revised, stale or duplicate."""
+    return await conn.fetchval(
+        APPLY_SQL,
+        event.external_id,
+        source,
+        event.event_time,
+        event.updated,
+        event.magnitude,
+        event.mag_type,
+        event.longitude,
+        event.latitude,
+        event.depth_km,
+        event.place or None,
+        country_id,
+        [],
+        to_json(original),
+        position.topic,
+        position.partition,
+        position.offset,
+        replayed_at,
     )
 
 
-def persist_quarantines(
-    dsn: str,
-    failures: list[tuple[Any, str | None, str, int, int, str, str, str]],
+async def store_rejection(conn: asyncpg.Connection, position: Position, rejection: Rejection) -> str:
+    """Quarantine row, once per message position; returns 'quarantined'."""
+    await conn.execute(
+        QUARANTINE_SQL,
+        position.topic,
+        position.partition,
+        position.offset,
+        rejection.event_id,
+        rejection.reason_codes,
+        rejection.reason_detail,
+        to_json(rejection.payload) if rejection.raw_text is None else None,
+        rejection.raw_text,
+    )
+    return "quarantined"
+
+
+async def log_message(
+    conn: asyncpg.Connection,
+    position: Position,
+    *,
+    outcome: str,
+    event_id: str | None,
+    updated_at: datetime | None,
+    produced_at: datetime | None,
 ) -> None:
-    with psycopg2.connect(dsn) as connection:
-        with connection.cursor() as cursor:
-            for (
-                payload,
-                external_id,
-                source_topic,
-                partition,
-                offset,
-                dimension,
-                reason_code,
-                reason_detail,
-            ) in failures:
-                cursor.execute(
-                    """
-                    INSERT INTO cuarentena
-                        (external_id, source_topic, quality_dimension, reason_code,
-                         reason_detail, payload, kafka_partition, kafka_offset)
-                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
-                    """,
-                    (
-                        external_id,
-                        source_topic,
-                        dimension,
-                        reason_code,
-                        reason_detail,
-                        Json(payload),
-                        partition,
-                        offset,
-                    ),
-                )
+    await conn.execute(
+        MESSAGE_LOG_SQL,
+        position.topic,
+        position.partition,
+        position.offset,
+        event_id,
+        updated_at,
+        outcome,
+        produced_at,
+    )

@@ -11,8 +11,8 @@ def test_write_history_jsonl_and_replay_infers_year(tmp_path) -> None:
     }
     path = tmp_path / "history.jsonl"
     assert write_jsonl([event], path) == 1
-    result = read_replay_events(path, "terremotos_replay")
-    assert result[0]["source_topic"] == "terremotos_replay"
+    result = read_replay_events(path, "earthquakes.replay")
+    assert result[0]["source_topic"] == "earthquakes.replay"
     assert result[0]["id"] == "historic-1900"
 
 
@@ -23,7 +23,7 @@ def test_replay_year_validation_is_optional(tmp_path) -> None:
         '"geometry":{"type":"Point","coordinates":[0,0,1]}}\n',
         encoding="utf-8",
     )
-    assert read_replay_events(path, "terremotos_replay", expected_year=1900)
+    assert read_replay_events(path, "earthquakes.replay", expected_year=1900)
 
 
 def test_fetch_years_retrieves_an_inclusive_range(monkeypatch) -> None:

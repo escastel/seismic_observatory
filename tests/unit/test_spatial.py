@@ -1,32 +1,26 @@
-import pytest
+"""Point-in-polygon against the delivered Natural Earth catalog (principle IV)."""
 
+from pathlib import Path
+
+import pytest
 
 pytest.importorskip("geopandas")
 
-from shapely.geometry import Point
+from consumer.app.spatial import SpatialEnricher  # noqa: E402
 
-from consumer.app.spatial import SpatialEnricher, UNASSIGNED_COUNTRY
-
-
-class EmptyMatches:
-    empty = True
+CATALOG = Path(__file__).resolve().parents[2] / "frontend" / "public" / "datos" / "paises.geojson"
 
 
-class EmptyCountries:
-    geometry = Point(0.0, 0.0)
-
-    def __getitem__(self, key: object) -> EmptyMatches:
-        return EmptyMatches()
+@pytest.fixture(scope="module")
+def enricher() -> SpatialEnricher:
+    return SpatialEnricher(str(CATALOG))
 
 
-def test_maritime_event_is_not_assigned_to_nearest_country() -> None:
-    enricher = SpatialEnricher.__new__(SpatialEnricher)
-    enricher._countries = EmptyCountries()
-    enricher._source_dataset = "paises.geojson"
-    enricher._geometry_hash = "test-hash"
+def test_point_inside_a_country_returns_its_adm0_a3(enricher: SpatialEnricher) -> None:
+    assert enricher.lookup(-3.70, 40.42) == "ESP"  # Madrid
+    assert enricher.lookup(139.69, 35.69) == "JPN"  # Tokyo
 
-    geography = enricher.lookup(-120.0, -20.0)
 
-    assert geography.country == UNASSIGNED_COUNTRY
-    assert geography.continent == "Sin continente asignado"
-    assert geography.subregion == "Sin subregión asignada"
+def test_maritime_event_is_not_assigned_to_nearest_country(enricher: SpatialEnricher) -> None:
+    # South-east Pacific, far from any coast: no country, never the closest one.
+    assert enricher.lookup(-120.0, -20.0) is None
