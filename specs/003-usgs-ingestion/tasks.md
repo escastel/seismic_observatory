@@ -184,8 +184,8 @@ la carga del catálogo
 
 **Independent Test**: V7 de [quickstart.md](quickstart.md)
 
-- [ ] T042 [US6] Anotar el recuento de 2025 en `core.event_current` y ejecutar `docker compose run --rm catalog-loader --start 2026-01-01 --end <fecha de hoy en UTC>`; requiere conexión a Internet y descarga unos 14.200 eventos
-- [ ] T043 [US6] Validar V7 cuando el consumidor termine: diferencia 0 con el total declarado; el recuento de 2025 no ha cambiado; ningún `event_id` duplicado; los eventos recientes que también trae el feed conservan su versión más reciente; y una consulta sobre `core.extraction` muestra por separado la carga de 2025 y la de 2026 con su periodo, filtro y fecha de extracción. Guardar en `docs/evidence/003/catalog-load-2026.md`
+- [X] T042 [US6] Anotar el recuento de 2025 en `core.event_current` y ejecutar `docker compose run --rm catalog-loader --start 2026-01-01 --end <fecha de hoy en UTC>`; requiere conexión a Internet y descarga unos 14.200 eventos
+- [X] T043 [US6] Validar V7 cuando el consumidor termine: diferencia 0 con el total declarado; el recuento de 2025 no ha cambiado; ningún `event_id` duplicado; los eventos recientes que también trae el feed conservan su versión más reciente; y una consulta sobre `core.extraction` muestra por separado la carga de 2025 y la de 2026 con su periodo, filtro y fecha de extracción. Guardar en `docs/evidence/003/catalog-load-2026.md`
 
 **Checkpoint**: el espacio real contiene 2025 y 2026 con magnitud ≥ 4 además del feed
 
