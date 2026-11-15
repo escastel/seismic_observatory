@@ -38,3 +38,6 @@
   para `/speckit-plan`.
 - Resuelto el 2026-11-14: `db/seeds/historical_2026.jsonl` (99 MB) se elimina del historial
   de Git con aprobación expresa.
+- Revisado tras implementar (2026-11-15, T058): los tres puntos sin marcar siguen siendo la
+  misma excepción aceptada; la implementación no añadió detalles técnicos a la especificación.
+  El resultado de la revisión constitucional está en `docs/evidence/002/README.md`.

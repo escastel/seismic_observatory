@@ -6,6 +6,8 @@ Offset guarantees (principle II, research.md R20):
 - the offset of a message is committed only after its transaction commits;
 - if processing fails, the same message is retried with backoff and no later
   offset is committed meanwhile. A quarantined message counts as processed.
+- a version the data model refuses (constraint or data error) is not retried
+  forever: it goes to quarantine, so one bad record never blocks the topic.
 """
 
 from __future__ import annotations
@@ -37,6 +39,14 @@ logger = logging.getLogger(__name__)
 
 POLL_TIMEOUT_MS = 5_000
 MAX_RECORDS = 100
+
+# Errors that will repeat on every retry of the same message: the data model
+# rejects the values. Anything else (connection lost, server restarting) is
+# transient and the same message is retried.
+PERMANENT_DATABASE_ERRORS: tuple[type[BaseException], ...] = (
+    asyncpg.IntegrityConstraintViolationError,
+    asyncpg.DataError,
+)
 
 
 class KafkaMessage(Protocol):
@@ -148,14 +158,30 @@ class MessageHandler:
             return await self._write(search_path, position, rejection=rejection, produced_at=produced_at)
 
         original = decoded.get("original_event") if isinstance(decoded.get("original_event"), dict) else decoded
-        return await self._write(
-            search_path,
-            position,
-            event=event,
-            country_id=self.spatial.lookup(event.longitude, event.latitude),
-            original=original,
-            produced_at=produced_at,
-        )
+        try:
+            return await self._write(
+                search_path,
+                position,
+                event=event,
+                country_id=self.spatial.lookup(event.longitude, event.latitude),
+                original=original,
+                produced_at=produced_at,
+            )
+        except PERMANENT_DATABASE_ERRORS as exc:
+            # The model refused a version the rules above accepted (for example a
+            # date outside dim_date). Retrying would block the topic forever
+            # (principle III), so the message goes to quarantine with the reason.
+            logger.warning(
+                "Model rejected topic=%s partition=%d offset=%d event_id=%s: %s",
+                message.topic, message.partition, message.offset, event.external_id, exc,
+            )
+            rejection = Rejection(
+                reason_codes=["model_constraint_violation"],
+                reason_detail=f"Validez: the data model rejected the version ({type(exc).__name__}: {exc})",
+                event_id=event.external_id,
+                payload=decoded,
+            )
+            return await self._write(search_path, position, rejection=rejection, produced_at=produced_at)
 
     async def _write(
         self,
