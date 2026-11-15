@@ -131,7 +131,7 @@ y con recuentos comprobables
 ### Implementation for User Story 3
 
 - [X] T032 [US3] Ajustar `producer/app/main.py` y `producer/app/usgs.py` hasta que T031 pase, sin debilitar las pruebas de T006 ni T014
-- [ ] T033 [US3] Validar V3 con el sistema real: levantar `usgs-stub` con el perfil `test`, parar el `producer` normal y arrancar uno con `USGS_FEED_URL` apuntando sucesivamente a `/feed/fail-503`, `/feed/fail-429`, `/feed/timeout`, `/feed/not-json` y `/feed/bad-structure`; comprobar las extracciones registradas, que el contenedor sigue `healthy` mientras la fuente falla y que al volver a la fuente real el ciclo siguiente es correcto; restaurar el `producer` normal y guardar en `docs/evidence/003/source-failures.md`
+- [X] T033 [US3] Validar V3 con el sistema real: levantar `usgs-stub` con el perfil `test`, parar el `producer` normal y arrancar uno con `USGS_FEED_URL` apuntando sucesivamente a `/feed/fail-503`, `/feed/fail-429`, `/feed/timeout`, `/feed/not-json` y `/feed/bad-structure`; comprobar las extracciones registradas, que el contenedor sigue `healthy` mientras la fuente falla y que al volver a la fuente real el ciclo siguiente es correcto; restaurar el `producer` normal y guardar en `docs/evidence/003/source-failures.md`
 
 **Checkpoint**: un fallo de USGS es visible en el registro y no detiene ni daña el sistema
 
