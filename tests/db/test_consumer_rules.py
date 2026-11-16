@@ -240,3 +240,26 @@ def test_a_defective_message_does_not_delay_the_next_one(test_database: str) -> 
     started = time.monotonic()
     assert handle_all(test_database, messages) == ["quarantined", "new"]
     assert time.monotonic() - started < 1.0 + 5
+
+
+def test_a_synthetic_key_marks_a_message_whose_body_cannot_be_read(test_database: str, owner_conn: psycopg.Connection) -> None:
+    """FR-025: unreadable JSON cannot carry the marker; the Kafka key (the event id) does."""
+    class Keyed(FakeMessage):
+        key = b"synthetic-malformed_json"
+
+    from .test_consumer_persistence import handle_all as run_handler
+
+    run_handler(test_database, [Keyed("earthquakes.live", 0, b"{truncated"), FakeMessage("earthquakes.live", 1, b"{truncated")])
+
+    rows = owner_conn.execute("SELECT kafka_offset, is_synthetic FROM core.quarantine ORDER BY kafka_offset").fetchall()
+    assert rows == [(0, True), (1, False)]
+
+
+def test_a_synthetic_key_adds_the_flag_to_a_readable_event(test_database: str, owner_conn: psycopg.Connection) -> None:
+    class Keyed(FakeMessage):
+        key = b"synthetic-keyed"
+
+    from .test_consumer_persistence import handle_all as run_handler
+
+    run_handler(test_database, [Keyed("earthquakes.live", 0, json.dumps(flat("synthetic-keyed")).encode())])
+    assert current(owner_conn, "synthetic-keyed")[4] == ["synthetic"]

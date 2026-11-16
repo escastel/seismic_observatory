@@ -135,6 +135,23 @@ def _produced_at(decoded: dict[str, Any]) -> datetime | None:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+SYNTHETIC_KEY_PREFIX = b"synthetic-"
+
+
+def _mark_synthetic_key(result: Any, message: Any) -> Any:
+    """A message keyed ``synthetic-...`` is synthetic even if its body cannot be read.
+
+    The Kafka key is the event id (contracts/messages.md), so the reserved prefix identifies the
+    damaged-on-purpose messages whose JSON is unreadable and cannot carry the marker themselves.
+    """
+    key = getattr(message, "key", None) or b""
+    if not key.startswith(SYNTHETIC_KEY_PREFIX) or result.synthetic:
+        return result
+    if isinstance(result, Accepted):
+        return replace(result, synthetic=True, flags=sorted({*result.flags, "synthetic"}))
+    return replace(result, synthetic=True)
+
+
 class MessageHandler:
     """Validates one message and writes it with the search_path of its topic."""
 
@@ -146,7 +163,7 @@ class MessageHandler:
     async def __call__(self, message: KafkaMessage) -> str:
         search_path = search_path_for(message.topic, self.topics)
         position = Position(message.topic, message.partition, message.offset)
-        result = evaluate(message.value, datetime.now(timezone.utc))
+        result = _mark_synthetic_key(evaluate(message.value, datetime.now(timezone.utc)), message)
         decoded = _decoded(message.value)
         produced_at = _produced_at(decoded)
         if isinstance(result, Quarantine):
