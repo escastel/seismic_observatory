@@ -59,9 +59,9 @@ mensaje no crea otra fila.
 
 ## Registro de mensajes
 
-`INSERT INTO message_log ... ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING`
+`INSERT INTO message_log ... ON CONFLICT (kafka_topic, kafka_partition, kafka_offset, attempt) DO NOTHING`
 en la misma transacción que `apply_event_version` o que la fila de cuarentena. `outcome` toma el
-valor devuelto por la función, o `quarantined`. `produced_at` es el `ingested_at` del mensaje.
+valor devuelto por la función, `excluded` si el elemento no es un terremoto (spec 004) o `quarantined`. `attempt` es 0 en el tratamiento original y 1 en un reprocesado de la cuarentena (spec 004). `produced_at` es el `ingested_at` del mensaje.
 
 ## Transacción del consumidor por mensaje
 

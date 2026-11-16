@@ -200,6 +200,158 @@ hueco y la recuperación manual se puede demostrar sin añadir complejidad. Evid
   magnitud; en una recuperación con todas las magnitudes puede haber más publicados que
   almacenados, y la diferencia está en `core.quarantine`.
 
+## Calidad de los datos
+
+### Conjunto analizado
+
+- **Fuente y periodo**: feed de USGS (desde el 2026-11-15 11:31 UTC) y catálogo histórico de USGS
+  (2025 y 2026 hasta el 15-11, magnitud ≥ 4), tal como están en `core` el **2026-11-16**.
+- **Denominadores** (siempre explícitos): **33.112 mensajes recibidos** (`message_log`,
+  `attempt = 0`), **33.112 versiones distintas** (`event_version`) y **32.978 terremotos
+  actuales** (`event_current`; 445 del feed y 32.533 del catálogo).
+- **Sin sintéticos**: todas las consultas excluyen los casos de prueba dañados a propósito
+  (1.031 mensajes, ver «Casos sintéticos»). Las consultas están en
+  [db/queries/quality.sql](../db/queries/quality.sql) y se ejecutan con
+  `docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /queries/quality.sql'`;
+  entre corchetes va el nombre de cada una. Evidencia:
+  [spatial-and-counts.md](evidence/004/spatial-and-counts.md).
+- Los problemas pueden solaparse: **no se suman incidencias** entre filas para obtener un total
+  de registros «malos». Cada fila usa su propio denominador.
+
+### Reglas del consumidor y decisiones
+
+Cada regla tiene un código estable, una dimensión y una justificación en el catálogo
+([contracts/rules-catalog.md](../specs/004-consumer-quality/contracts/rules-catalog.md));
+`consumer/app/rules.py` es su única implementación y una prueba comprueba que coinciden. Solo
+va a cuarentena lo que **no puede tratarse**: JSON ilegible, sin identificador, sin tiempo o sin
+versión legibles, geometría que no es un punto, coordenadas no numéricas o fuera de rango, o una
+versión que el modelo rechaza. Todo lo demás se conserva, con una marca si es anómalo.
+
+| Decisión | Por qué |
+|---|---|
+| No sustituir la magnitud o la profundidad ausentes por cero | Introduciríamos un valor que la fuente no da y falsearíamos medias y mínimos; se conservan nulas y se excluyen de los cálculos que las necesitan, informando del denominador |
+| No rechazar la magnitud negativa | Las escalas locales dan valores negativos (el mínimo observado es −0,02); no es un error por sí misma y **no lleva marca** |
+| Marcar, no rechazar, la profundidad negativa | Es un foco sobre el nivel del mar (mínimo observado −2,74 km); se señala con `negative_depth` para poder estudiarla |
+| Marcar los valores fuera de [−2, 10] de magnitud o más de 800 km | Un valor raro se señala; la medición física no se puede verificar desde los datos (ver exactitud) |
+| Retirar el rechazo por antigüedad (7 días) | Impedía cargar el histórico y recuperar huecos por el mismo camino; una versión antigua no es un defecto |
+| Retirar el rechazo por tiempo futuro | Un reloj desajustado no invalida el evento; pasa a la marca `future_time` (más de 5 min tras la recepción) |
+| Retirar `duplicate_id` | Nunca se aplicaba y la repetición la resuelve la regla de versiones del modelo |
+| Dejar al modelo como última barrera | Si rechaza una versión (p. ej. fecha anterior a 1900), va a cuarentena con `model_constraint_violation` y el detalle del error; no se replican sus restricciones |
+
+### Antes y después
+
+| Problema | Antes (reglas heredadas) | Acción | Después |
+|---|---|---|---|
+| Magnitud fuera de 0–10 (incluida la negativa) | 2 mensajes del mismo evento en cuarentena (`magnitude_out_of_range`), fuera del análisis | Regla retirada; reprocesado de la cuarentena | 2 recuperados (`recovered_new`, `recovered_revised`); el evento tiene magnitud −0,02 y país `USA`. Cuarentena real: 2 filas conservadas con su resultado |
+| Magnitud nula | Habría ido a cuarentena (`magnitude_null`) | Se conserva nula | Probado con el caso sintético `null_magnitude`: queda en el estado actual con `magnitude` nula; en los datos reales hay 0 nulos |
+| Profundidad negativa | 5 eventos sin señalar | Marca `negative_depth` desde que rige la regla | Los 5 ya guardados conservan el valor y **no se re-marcan** (se guardaron antes); se cuentan por la columna; los nuevos llevan la marca |
+| País por orden de polígonos | `matches.iloc[0]`: el orden decidía en una frontera | Orden por `ADM0_A3` y marca `ambiguous_country` | Recalculados los 32.977 eventos reales: **0 cambian de país**, 0 ambiguos |
+| Versiones duplicadas | La clave primaria ya las impedía | Sin cambios | 0 [duplicated-versions] |
+
+### Calidad por dimensión
+
+**Completitud** — sobre 32.978 terremotos actuales [completeness]:
+
+| Campo | Informado | Tratamiento de la ausencia |
+|---|---|---|
+| Magnitud | 32.978 (100 %) | Nula = ND, excluida de medias y filtros por magnitud, contada aparte; el panel debe indicar cuántas excluye |
+| Tipo de magnitud | 100 % | Nulo |
+| Profundidad | 100 % | Nula = ND |
+| Lugar | 100 % | Nulo |
+| País | 7.624 (23,12 %) | Nulo = «Sin país asignado»; permanece en el análisis |
+
+*Acción*: ninguna sobre los datos reales (no hay ausencias de magnitud, profundidad, tipo ni lugar);
+el comportamiento ante ausencias está probado con casos sintéticos (magnitud, profundidad y tipo
+nulos o no numéricos). *Limitación*: 25.354 eventos sin país (el 76,9 %) son sobre todo marinos y
+costas recortadas por la escala 1:110.000.000; el catálogo no permite distinguir un evento marino
+de uno en tierra mal cubierto.
+
+**Unicidad** — [versions-vs-messages] **33.112 versiones distintas para 33.112 mensajes**: ninguna
+repetición exacta en los datos reales. [duplicated-versions] 0 versiones duplicadas y
+[current-uniqueness] 0 identificadores repetidos en el estado actual: lo garantizan las claves
+primarias. 135 revisiones de 91 eventos (versiones que no son la actual). *Limitación*: la carga
+de 2025 y 2026 trae una instantánea sin sus revisiones pasadas (enunciado §4.2); las repeticiones
+solo aparecen cuando el feed reenvía una versión. La regla `duplicate` se prueba en `tests/db`.
+
+**Validez** — [invalid-coordinates] 0 terremotos actuales con coordenadas fuera de rango;
+[quarantined-messages] 2 mensajes en cuarentena real (ya reprocesados). Rangos observados:
+magnitud −0,02 a 8,8, profundidad −2,74 a 683,6 km, sin valores fuera del rango plausible
+[events-by-flag]. Todas las coordenadas son finitas y la geometría es siempre un `Point` con tres
+valores (perfil en [source-profile.md](evidence/003/source-profile.md)). *Acción*: coordenadas
+imposibles → cuarentena con motivo y original; valores raros → marca. *Limitación*: el rango
+plausible es una convención documentada, no una verdad física.
+
+**Consistencia** — [updated-before-event] 0 versiones con `updated_at` anterior a `event_time`;
+[country-missing-entity] 0 países que no existan en la dimensión (`ADM0_A3` único, comprobado al
+arrancar). La secuencia de revisiones queda ordenada por la regla de versiones (`new`, `revised`,
+`stale`, `duplicate`): [messages-by-outcome] 32.976 nuevos, 134 revisados y 2 rechazados, y
+[received-check] **recibidos = suma de resultados, diferencia 0**. Unidades coherentes: magnitud
+adimensional, profundidad en km, coordenadas en grados WGS84, tiempos en UTC.
+
+**Actualidad** — distingue tres tiempos: ocurrencia (`event_time`), actualización en USGS
+(`updated_at`) y ingesta (`first_ingested_at`), todos en UTC [delays-updated-minutes,
+delays-ingested-minutes]:
+
+| Medida | Mediana | Percentil 95 | Lectura |
+|---|---|---|---|
+| Ocurrencia → actualización en USGS, catálogo | ≈ 76 días | ≈ 91 días | Lo descargado ya está revisado |
+| Ocurrencia → actualización en USGS, feed | 3,5 min | ≈ 12 h | Una revisión antigua aumenta la diferencia; no es un retraso |
+| Ocurrencia → ingesta, eventos con el productor en marcha | 3,2 min | 4,1 min | Mide el sistema (9 eventos, [source-profile.md](evidence/003/source-profile.md)) |
+| Ocurrencia → ingesta, todos los eventos | ≈ 364 días | ≈ 648 días | Sin interés: está dominado por la carga histórica |
+
+*Limitación*: los eventos que ya estaban en la ventana de 24 h al arrancar el feed y los
+ocurridos durante una parada tienen un retraso que mide la parada, no la ingesta; se tratan
+aparte.
+
+**Exactitud** — Se puede contrastar: tipos y unidades, rangos, finitud, coherencia temporal y
+que el país obtenido exista en la dimensión. **No se puede contrastar** que la magnitud o la
+profundidad sean las físicas: comprobar que un valor es numérico y plausible no demuestra que
+sea exacto, y no hay una segunda fuente independiente en el proyecto. Tampoco la asignación de
+país tiene precisión cartográfica: los límites están simplificados (escala 1:110.000.000), y un
+punto sobre una frontera recibe la entidad de `ADM0_A3` menor con la marca `ambiguous_country`.
+Las revisiones de USGS (`status` automático o revisado) pueden cambiar los valores; el sistema
+conserva todas las versiones.
+
+### Integración espacial
+
+El país se obtiene con **punto en polígono** (longitud y latitud, EPSG:4326) sobre la copia
+entregada de Natural Earth, nunca del texto de `place` (probado con un evento cuyo `place` dice
+«Madrid» en el Pacífico: queda sin país). Al arrancar, el consumidor comprueba que `ADM0_A3` es
+único y que todas las entidades existen en `core.dim_country`, y se detiene con un mensaje claro
+si no. Un punto en varias entidades o sobre una frontera recibe la de `ADM0_A3` menor en orden
+alfabético y la marca `ambiguous_country`; el resultado es siempre el mismo. Sin polígono →
+país nulo, «Sin país asignado», sin error y dentro de los totales.
+
+### Reprocesar la cuarentena
+
+Los mensajes rechazados por reglas que ya no existen se recuperan con
+`docker compose run --rm quality-reprocess` (ver [reprocess.md](../specs/004-consumer-quality/contracts/reprocess.md)):
+aplica las reglas vigentes a cada fila pendiente, en el espacio de su topic, escribe una fila
+`attempt = 1` en el registro de mensajes junto a la original y marca la fila de cuarentena con la
+fecha y el resultado. Es idempotente y no borra nada. Evidencia:
+[reprocess.md](evidence/004/reprocess.md).
+
+### Casos sintéticos
+
+Para probar el consumidor sin inventar errores en los datos reales hay 30 casos dañados a
+propósito (`tests/synthetic/cases.py`) y un lote de 1.000 mensajes válidos. Llevan el prefijo
+reservado `synthetic-` en el identificador (y como clave de Kafka), la marca `synthetic` en el
+evento y su versión, e `is_synthetic` en la cuarentena. Todas las consultas de esta sección los
+excluyen; la variante `-synthetic-only` de cada una los cuenta aparte: 1.013 eventos sintéticos,
+16 en cuarentena y 2 exclusiones. Evidencia: [acceptance.md](evidence/004/acceptance.md) y
+[restart.md](evidence/004/restart.md).
+
+### Limitaciones
+
+- Las marcas de calidad solo se asignan al procesar un mensaje: los eventos guardados antes de
+  esta regla (2025 y el feed anterior) no están re-marcados; las consultas usan las columnas
+  para cifras como la profundidad negativa.
+- Ninguna comprobación demuestra la exactitud física de una magnitud.
+- El feed lleva solo unas horas de datos reales: los porcentajes del feed son frágiles y las cifras
+  del feed crecen con el tiempo (las de esta sección son del 2026-11-16).
+- Los eventos sin magnitud no aparecen en el histórico de 2025 y 2026 porque se cargó con
+  magnitud ≥ 4; la recuperación de un hueco, que trae todas las magnitudes, sí los puede traer.
+
 ## Modelo conceptual
 
 ```mermaid
@@ -425,6 +577,9 @@ Una fila por mensaje rechazado; reprocesarlo no crea otra.
 | `raw_text` | `text` | Mensaje original como texto, si no es JSON | Nulo si es JSON; nunca faltan los dos |
 | `is_synthetic` | `boolean` | Caso dañado a propósito para pruebas | `false` |
 | `quarantined_at` | `timestamptz` | Momento del rechazo | — |
+| `reprocessed_at` | `timestamptz` | Cuándo se reprocesó la fila con las reglas vigentes (spec 004); una fila reprocesada no se vuelve a tomar | Nulo = pendiente de reprocesar |
+| `reprocess_result` | `text` | `recovered_new`, `recovered_revised`, `recovered_stale`, `recovered_duplicate` (resultado de la regla de versiones) o `still_rejected`; presente si y solo si `reprocessed_at` lo está | Nulo = pendiente |
+| `reprocess_reason_codes` | `text[]` | Motivos vigentes si sigue rechazada tras el reprocesado | Nulo si se recuperó o está pendiente |
 
 ### `core.excluded_event`, `replay.excluded_event`
 
@@ -446,10 +601,11 @@ recuentos de terremotos.
 
 | Columna | Tipo | Significado | Ausencias |
 |---|---|---|---|
-| `kafka_topic`, `kafka_partition`, `kafka_offset` | `text`, `integer`, `bigint` | Posición del mensaje; clave conjunta | — |
+| `kafka_topic`, `kafka_partition`, `kafka_offset` | `text`, `integer`, `bigint` | Posición del mensaje; clave conjunta junto con `attempt` | — |
 | `event_id` | `text` | Evento al que se refiere | Nulo si no se pudo leer |
 | `updated_at` | `timestamptz` | Versión a la que se refiere | Nulo en los rechazos |
-| `outcome` | `text` | `new`, `revised`, `stale`, `duplicate` o `quarantined` | — |
+| `outcome` | `text` | `new`, `revised`, `stale`, `duplicate`, `excluded` (elemento que no es un terremoto) o `quarantined` | — |
+| `attempt` | `smallint` | 0 = tratamiento original; 1 = reprocesado de la cuarentena. Forma parte de la clave primaria | 0 por defecto |
 | `produced_at` | `timestamptz` | `ingested_at` del mensaje: cuándo lo obtuvo el productor | Nulo si el mensaje no lo trae |
 | `processed_at` | `timestamptz` | Cuándo lo procesó el consumidor | — |
 

@@ -15,17 +15,18 @@
 # schema with the psql variable "schema" set to core and then to replay.
 set -euo pipefail
 
-if [[ $# -ne 1 ]]; then
-    echo "usage: $0 <database>" >&2
+if [[ $# -lt 1 || $# -gt 2 ]]; then
+    echo "usage: $0 <database> [file.sql]" >&2
     exit 2
 fi
 database="$1"
+only="${2:-}"   # apply a single file (used for idempotent changes on an existing database)
 sql_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 catalog_path="${CATALOG_PATH:-/catalog/paises.geojson}"
 : "${DB_WRITER_PASSWORD:?DB_WRITER_PASSWORD is required}"
 : "${DB_READER_PASSWORD:?DB_READER_PASSWORD is required}"
 
-templates=(040_event_tables.sql 060_indexes.sql)
+templates=(040_event_tables.sql 041_consumer_quality.sql 060_indexes.sql)
 
 run() {
     psql --no-psqlrc --quiet --set ON_ERROR_STOP=1 --single-transaction \
@@ -53,6 +54,7 @@ fi
 
 for file in "${files[@]}"; do
     name="$(basename "$file")"
+    [[ -n "$only" && "$name" != "$only" ]] && continue
     if is_template "$name"; then
         for schema in core replay; do
             echo "applying $name to schema $schema"

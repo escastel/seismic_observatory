@@ -16,6 +16,7 @@ import asyncio
 import json
 import logging
 from collections.abc import Awaitable, Callable, Mapping
+from dataclasses import replace
 from datetime import datetime, timezone
 from typing import Any, Protocol
 
@@ -31,8 +32,8 @@ from common.retry import retry
 from common.settings import ConsumerSettings, TopicNames
 from common.topics import ensure_topics, search_path_for
 
-from .persistence import Position, Rejection, log_message, store_rejection, store_version
-from .quality import validate_event
+from .persistence import Position, log_message, store_exclusion, store_rejection, store_version
+from .rules import Accepted, Exclusion, Quarantine, evaluate
 from .spatial import SpatialEnricher
 
 logger = logging.getLogger(__name__)
@@ -109,11 +110,22 @@ async def consume(
             heartbeat.beat()
 
 
-def _reject_constant(name: str) -> None:
-    raise ValueError(f"{name} is not valid JSON")
+def _decoded(value: bytes) -> dict[str, Any]:
+    """The message as an object, or {} when it is not one (the rules already judged it)."""
+    try:
+        decoded = json.loads(value, parse_constant=lambda name: None)
+    except (UnicodeDecodeError, ValueError):
+        return {}
+    return decoded if isinstance(decoded, dict) else {}
 
 
-def _parse_time(value: Any) -> datetime | None:
+def _extraction_id(decoded: dict[str, Any]) -> int | None:
+    value = decoded.get("extraction_id")
+    return value if isinstance(value, int) and not isinstance(value, bool) else None
+
+
+def _produced_at(decoded: dict[str, Any]) -> datetime | None:
+    value = decoded.get("ingested_at")
     if not isinstance(value, str):
         return None
     try:
@@ -121,6 +133,23 @@ def _parse_time(value: Any) -> datetime | None:
     except ValueError:
         return None
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
+SYNTHETIC_KEY_PREFIX = b"synthetic-"
+
+
+def _mark_synthetic_key(result: Any, message: Any) -> Any:
+    """A message keyed ``synthetic-...`` is synthetic even if its body cannot be read.
+
+    The Kafka key is the event id (contracts/messages.md), so the reserved prefix identifies the
+    damaged-on-purpose messages whose JSON is unreadable and cannot carry the marker themselves.
+    """
+    key = getattr(message, "key", None) or b""
+    if not key.startswith(SYNTHETIC_KEY_PREFIX) or result.synthetic:
+        return result
+    if isinstance(result, Accepted):
+        return replace(result, synthetic=True, flags=sorted({*result.flags, "synthetic"}))
+    return replace(result, synthetic=True)
 
 
 class MessageHandler:
@@ -134,83 +163,71 @@ class MessageHandler:
     async def __call__(self, message: KafkaMessage) -> str:
         search_path = search_path_for(message.topic, self.topics)
         position = Position(message.topic, message.partition, message.offset)
-        try:
-            # NaN and Infinity are not JSON (RFC 8259) and jsonb rejects them.
-            decoded = json.loads(message.value, parse_constant=_reject_constant)
-        except (UnicodeDecodeError, ValueError):
-            rejection = Rejection(
-                reason_codes=["malformed_json"],
-                reason_detail="Validez: Kafka message is not valid JSON",
-                raw_text=bytes(message.value).decode("utf-8", errors="replace"),
-            )
-            return await self._write(search_path, position, rejection=rejection)
-
-        event, failures = validate_event(decoded, source_topic=message.topic, live_topic=self.topics.live)
-        produced_at = _parse_time(decoded.get("ingested_at")) if isinstance(decoded, dict) else None
-        if failures or event is None:
-            event_id = decoded.get("id") if isinstance(decoded, dict) else None
-            rejection = Rejection(
-                reason_codes=[failure.reason_code for failure in failures],
-                reason_detail="; ".join(f"{failure.dimension}: {failure.reason_detail}" for failure in failures),
-                event_id=event_id if isinstance(event_id, str) else None,
-                payload=decoded,
-            )
-            return await self._write(search_path, position, rejection=rejection, produced_at=produced_at)
-
-        original = decoded.get("original_event") if isinstance(decoded.get("original_event"), dict) else decoded
-        try:
+        result = _mark_synthetic_key(evaluate(message.value, datetime.now(timezone.utc)), message)
+        decoded = _decoded(message.value)
+        produced_at = _produced_at(decoded)
+        if isinstance(result, Quarantine):
+            return await self._write(search_path, position, result, produced_at=produced_at)
+        if isinstance(result, Exclusion):
             return await self._write(
-                search_path,
-                position,
-                event=event,
-                country_id=self.spatial.lookup(event.longitude, event.latitude),
-                original=original,
-                produced_at=produced_at,
+                search_path, position, result, produced_at=produced_at, extraction_id=_extraction_id(decoded)
             )
+
+        country_id, ambiguous = self.spatial.lookup(result.event.longitude, result.event.latitude)
+        if ambiguous:
+            result = replace(result, flags=sorted({*result.flags, "ambiguous_country"}))
+        try:
+            return await self._write(search_path, position, result, country_id=country_id, produced_at=produced_at)
         except PERMANENT_DATABASE_ERRORS as exc:
-            # The model refused a version the rules above accepted (for example a
-            # date outside dim_date). Retrying would block the topic forever
+            # The model refused a version the rules accepted (for example a date
+            # outside dim_date). Retrying would block the topic forever
             # (principle III), so the message goes to quarantine with the reason.
             logger.warning(
                 "Model rejected topic=%s partition=%d offset=%d event_id=%s: %s",
-                message.topic, message.partition, message.offset, event.external_id, exc,
+                message.topic, message.partition, message.offset, result.event.external_id, exc,
             )
-            rejection = Rejection(
-                reason_codes=["model_constraint_violation"],
-                reason_detail=f"Validez: the data model rejected the version ({type(exc).__name__}: {exc})",
-                event_id=event.external_id,
+            rejection = Quarantine(
+                reasons=["model_constraint_violation"],
+                detail=f"Consistencia: model_constraint_violation ({type(exc).__name__}: {exc})",
                 payload=decoded,
+                raw_text=None,
+                event_id=result.event.external_id,
+                synthetic=result.synthetic,
             )
-            return await self._write(search_path, position, rejection=rejection, produced_at=produced_at)
+            return await self._write(search_path, position, rejection, produced_at=produced_at)
 
     async def _write(
         self,
         search_path: str,
         position: Position,
+        result: Accepted | Exclusion | Quarantine,
         *,
-        rejection: Rejection | None = None,
-        event: Any = None,
         country_id: str | None = None,
-        original: Any = None,
         produced_at: datetime | None = None,
+        extraction_id: int | None = None,
     ) -> str:
         replayed_at = datetime.now(timezone.utc) if position.topic == self.topics.replay else None
+        updated_at: datetime | None = None
         async with self.pools[search_path].acquire() as conn:
             async with conn.transaction():
-                if rejection is not None:
-                    outcome = await store_rejection(conn, position, rejection)
-                    event_id, updated_at = rejection.event_id, None
+                if isinstance(result, Quarantine):
+                    outcome = await store_rejection(conn, position, result)
+                    event_id = result.event_id
+                elif isinstance(result, Exclusion):
+                    outcome = await store_exclusion(conn, result, extraction_id)
+                    event_id, updated_at = result.event_id, result.updated_at
                 else:
                     outcome = await store_version(
                         conn,
                         position,
-                        event,
+                        result.event,
                         source=source_for(position.topic, self.topics),
                         country_id=country_id,
-                        original=original,
+                        flags=result.flags,
+                        original=result.original,
                         replayed_at=replayed_at,
                     )
-                    event_id, updated_at = event.external_id, event.updated
+                    event_id, updated_at = result.event.external_id, result.event.updated
                 await log_message(
                     conn, position, outcome=outcome, event_id=event_id, updated_at=updated_at, produced_at=produced_at
                 )
@@ -218,12 +235,23 @@ class MessageHandler:
 
 
 async def run(config: ConsumerSettings) -> None:
+    from .spatial import CatalogError
+
     spatial = SpatialEnricher(config.countries_path)
     await retry(lambda: ensure_topics(config.kafka), description="creating Kafka topics", log=logger)
     pools = {
         "core": await create_pool(config.database, "core", application_name="consumer"),
         "replay, core": await create_pool(config.database, "replay, core", application_name="consumer-replay"),
     }
+    try:
+        async with pools["core"].acquire() as conn:
+            known = {row["country_id"] for row in await conn.fetch("SELECT country_id FROM dim_country")}
+        spatial.verify_against_dimension(known)
+    except CatalogError as exc:
+        logger.error("Country catalog does not match core.dim_country: %s", exc)
+        for pool in pools.values():
+            await pool.close()
+        raise SystemExit(1) from exc
     consumer = AIOKafkaConsumer(*config.kafka.topics.all(), **consumer_options(config))
     await retry(consumer.start, description="connecting to Kafka", log=logger)
     heartbeat = Heartbeat()

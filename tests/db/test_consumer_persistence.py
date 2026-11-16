@@ -33,11 +33,12 @@ class FakeMessage:
 
 
 class FixedCountry:
-    def __init__(self, country_id: str | None) -> None:
+    def __init__(self, country_id: str | None, ambiguous: bool = False) -> None:
         self.country_id = country_id
+        self.ambiguous = ambiguous
 
-    def lookup(self, longitude: float, latitude: float) -> str | None:
-        return self.country_id
+    def lookup(self, longitude: float, latitude: float) -> tuple[str | None, bool]:
+        return self.country_id, self.ambiguous
 
 
 def feature_message(event_id: str, event_time: datetime, updated: datetime, mag: float | None = 4.2) -> bytes:
@@ -64,7 +65,9 @@ def feature_message(event_id: str, event_time: datetime, updated: datetime, mag:
     return json.dumps(message).encode()
 
 
-def handle_all(test_database: str, messages: list[FakeMessage], country_id: str | None = "ESP") -> list[str]:
+def handle_all(
+    test_database: str, messages: list[FakeMessage], country_id: str | None = "ESP", ambiguous: bool = False
+) -> list[str]:
     settings = DatabaseSettings(
         host=os.environ["PGHOST"],
         port=int(os.environ.get("PGPORT", "5432")),
@@ -79,7 +82,7 @@ def handle_all(test_database: str, messages: list[FakeMessage], country_id: str 
             "replay, core": await open_pool(settings, "replay, core", application_name="test-consumer-replay"),
         }
         try:
-            handler = MessageHandler(pools, TOPICS, FixedCountry(country_id))
+            handler = MessageHandler(pools, TOPICS, FixedCountry(country_id, ambiguous))
             return [await handler(message) for message in messages]
         finally:
             for pool in pools.values():
