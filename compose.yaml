@@ -35,36 +35,34 @@ services:
   kafka:
     image: confluentinc/cp-kafka:7.7.1
     environment:
+      # Single node in KRaft mode. One internal listener only: nothing outside
+      # the compose network can reach the broker.
       KAFKA_NODE_ID: 1
       KAFKA_PROCESS_ROLES: broker,controller
       KAFKA_CONTROLLER_QUORUM_VOTERS: "1@kafka:29093"
-      KAFKA_LISTENERS: INTERNAL://:9092,EXTERNAL://:29092,CONTROLLER://:29093
-      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092,EXTERNAL://localhost:29092
-      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,EXTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
+      KAFKA_LISTENERS: INTERNAL://:9092,CONTROLLER://:29093
+      KAFKA_ADVERTISED_LISTENERS: INTERNAL://kafka:9092
+      KAFKA_LISTENER_SECURITY_PROTOCOL_MAP: INTERNAL:PLAINTEXT,CONTROLLER:PLAINTEXT
       KAFKA_CONTROLLER_LISTENER_NAMES: CONTROLLER
       KAFKA_INTER_BROKER_LISTENER_NAME: INTERNAL
       KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
-      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
-      KAFKA_NUM_PARTITIONS: 1
-      KAFKA_DEFAULT_REPLICATION_FACTOR: 1
-      KAFKA_RAW_TOPIC: ${KAFKA_RAW_TOPIC:-terremotos_raw}
-      KAFKA_REPLAY_TOPIC: ${KAFKA_REPLAY_TOPIC:-terremotos_replay}
+      # Topics are created by the producer and the consumer (common/topics.py).
+      KAFKA_AUTO_CREATE_TOPICS_ENABLE: "false"
+      KAFKA_LOG_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
       CLUSTER_ID: MkU3OEVBNTcwNTJENDM2Qk
-    ports:
-      - "9092:9092"
-      - "29092:29092"
+    # No published ports.
+    volumes:
+      - kafka_data:/var/lib/kafka/data
     healthcheck:
-      test:
-        [
-          "CMD-SHELL",
-          "kafka-topics --bootstrap-server localhost:9092 --create --if-not-exists --topic \"$${KAFKA_RAW_TOPIC}\" --partitions 1 --replication-factor 1 && kafka-topics --bootstrap-server localhost:9092 --create --if-not-exists --topic \"$${KAFKA_REPLAY_TOPIC}\" --partitions 1 --replication-factor 1 && kafka-topics --bootstrap-server localhost:9092 --list | grep -Fxq \"$${KAFKA_RAW_TOPIC}\" && kafka-topics --bootstrap-server localhost:9092 --list | grep -Fxq \"$${KAFKA_REPLAY_TOPIC}\"",
-        ]
+      test: ["CMD-SHELL", "kafka-broker-api-versions --bootstrap-server localhost:9092 >/dev/null"]
       interval: 10s
       timeout: 10s
       retries: 12
+      start_period: 20s
+    restart: unless-stopped
     networks:
       - observatorio
 
@@ -72,15 +70,79 @@ services:
     build:
       context: .
       dockerfile: producer/Dockerfile
-    env_file:
-      - .env
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_LIVE: ${KAFKA_TOPIC_LIVE:-earthquakes.live}
+      KAFKA_TOPIC_CATALOG: ${KAFKA_TOPIC_CATALOG:-earthquakes.catalog}
+      KAFKA_TOPIC_REPLAY: ${KAFKA_TOPIC_REPLAY:-earthquakes.replay}
+      KAFKA_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
+      USGS_FEED_URL: ${USGS_FEED_URL:?set USGS_FEED_URL in .env}
+      PRODUCER_INTERVAL_SECONDS: ${PRODUCER_INTERVAL_SECONDS:-60}
+      RAW_PAYLOAD_RETENTION_DAYS: ${RAW_PAYLOAD_RETENTION_DAYS:-7}
+      USGS_CATALOG_URL: ${USGS_CATALOG_URL:-https://earthquake.usgs.gov/fdsnws/event/1}
+      USGS_TIMEOUT_SECONDS: ${USGS_TIMEOUT_SECONDS:-30}
+      USGS_MAX_ATTEMPTS: ${USGS_MAX_ATTEMPTS:-4}
+      USGS_USER_AGENT: ${USGS_USER_AGENT:-seismic-observatory/1.0}
+      GAP_MARGIN_MINUTES: ${GAP_MARGIN_MINUTES:-60}
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
     volumes:
-      - ./db/seeds:/data/seeds:ro
+      - ./data:/data:ro
+      - ./db/seeds:/seeds:ro
+    healthcheck:
+      # Healthy while a feed cycle succeeded within three intervals (3 x 60 s).
+      test: ["CMD", "python", "-m", "common.health", "--max-age", "180"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 120s
+    restart: unless-stopped
+    networks:
+      - observatorio
+
+  # Manual load of the USGS catalog (contracts/catalog-loader.md of spec 003).
+  # Not started by `docker compose up`; run it on demand:
+  #   docker compose run --rm catalog-loader            # mandatory 2025 load
+  #   docker compose run --rm catalog-loader --gaps     # pending ingestion gaps
+  catalog-loader:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: producer/Dockerfile
+    entrypoint: ["python", "-m", "app.catalog_load"]
+    # Writes into ./data; on Linux export LOADER_UID/LOADER_GID with your own ids.
+    user: "${LOADER_UID:-0}:${LOADER_GID:-0}"
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_LIVE: ${KAFKA_TOPIC_LIVE:-earthquakes.live}
+      KAFKA_TOPIC_CATALOG: ${KAFKA_TOPIC_CATALOG:-earthquakes.catalog}
+      KAFKA_TOPIC_REPLAY: ${KAFKA_TOPIC_REPLAY:-earthquakes.replay}
+      KAFKA_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
+      USGS_CATALOG_URL: ${USGS_CATALOG_URL:-https://earthquake.usgs.gov/fdsnws/event/1}
+      USGS_TIMEOUT_SECONDS: ${USGS_TIMEOUT_SECONDS:-30}
+      USGS_MAX_ATTEMPTS: ${USGS_MAX_ATTEMPTS:-4}
+      USGS_USER_AGENT: ${USGS_USER_AGENT:-seismic-observatory/1.0}
+      GAP_MARGIN_MINUTES: ${GAP_MARGIN_MINUTES:-60}
+      DATA_DIR: /data
+    depends_on:
+      kafka:
+        condition: service_healthy
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./data:/data
+    restart: "no"
     networks:
       - observatorio
 
@@ -88,16 +150,35 @@ services:
     build:
       context: .
       dockerfile: consumer/Dockerfile
-    env_file:
-      - .env
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_LIVE: ${KAFKA_TOPIC_LIVE:-earthquakes.live}
+      KAFKA_TOPIC_CATALOG: ${KAFKA_TOPIC_CATALOG:-earthquakes.catalog}
+      KAFKA_TOPIC_REPLAY: ${KAFKA_TOPIC_REPLAY:-earthquakes.replay}
+      KAFKA_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
+      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-observatory-consumer}
+      COUNTRIES_GEOJSON_PATH: /catalog/paises.geojson
     depends_on:
       kafka:
         condition: service_healthy
       postgres:
         condition: service_healthy
     volumes:
-      - ./frontend/public/datos/paises.geojson:/data/paises.geojson:ro
-      - ./db/seeds:/data/seeds:ro
+      - ./frontend/public/datos/paises.geojson:/catalog/paises.geojson:ro
+      - ./data:/data:ro
+    healthcheck:
+      # The loop beats after every poll (at most 5 s apart plus processing);
+      # stale for 60 s means it is stuck retrying a message or lost Kafka.
+      test: ["CMD", "python", "-m", "common.health", "--max-age", "60"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 60s
+    restart: unless-stopped
     networks:
       - observatorio
 
@@ -105,18 +186,49 @@ services:
     build:
       context: .
       dockerfile: api/Dockerfile
-    env_file:
-      - .env
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_READER_PASSWORD: ${DB_READER_PASSWORD:?set DB_READER_PASSWORD in .env}
+      CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS in .env}
     depends_on:
       postgres:
         condition: service_healthy
+    # The only published port, and only on this machine.
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000"
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/api/salud', timeout=4)"
+      interval: 10s
+      timeout: 5s
+      retries: 6
+      start_period: 15s
+    restart: unless-stopped
+    networks:
+      - observatorio
+
+  # Optional public tunnel: docker compose --profile tunnel up -d
+  tunnel:
+    image: ngrok/ngrok:3.39.13-alpine
+    profiles: ["tunnel"]
+    command: ["http", "http://api:8000", "--url", "${NGROK_DOMAIN}", "--log", "stdout"]
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    depends_on:
+      api:
+        condition: service_healthy
+    restart: unless-stopped
     networks:
       - observatorio
 
 volumes:
   postgres_data:
+  kafka_data:
 
 networks:
   observatorio:

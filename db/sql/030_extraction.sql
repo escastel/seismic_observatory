@@ -38,3 +38,23 @@ CREATE TABLE core.raw_payload (
     CHECK (body IS NOT NULL OR file_path IS NOT NULL),
     CHECK (last_seen_at >= first_seen_at)
 );
+
+-- Deletes the stored feed bodies not seen for retention_days and returns how
+-- many were deleted. File records (catalog downloads) and extractions stay:
+-- an extraction keeps its fingerprint after its body is gone.
+-- Created here, called periodically by the producer from spec 003.
+CREATE FUNCTION core.purge_raw_payload(retention_days integer) RETURNS integer
+LANGUAGE sql
+SET search_path = core, pg_temp
+AS $$
+    WITH purged AS (
+        DELETE FROM raw_payload
+        WHERE body IS NOT NULL
+          AND last_seen_at < now() - make_interval(days => retention_days)
+        RETURNING 1
+    )
+    SELECT count(*)::integer FROM purged;
+$$;
+
+COMMENT ON FUNCTION core.purge_raw_payload(integer) IS
+    'Purges raw feed bodies older than the retention; keeps file records and extractions';

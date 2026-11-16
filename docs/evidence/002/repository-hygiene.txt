@@ -1,0 +1,36 @@
+- Observado (UTC): 2026-11-15T00:35:02Z
+- Rama y commit: 002-platform-data-model @ 41d68ee (con cambios sin commit)
+- Equipo: MINGW64_NT-10.0-26200 3.5.4-cbe555e0.x86_64 x86_64
+- Motor: Docker 29.1.3 (Docker Desktop (containerized)), Compose 2.40.3-desktop.1; recursos del motor: 12 CPU, 7.6 GiB
+
+## V12: ficheros versionados de más de 5 MB
+$ git ls-files -z | xargs -0 du -k | awk '$1 > 5000'
+
+## V12: credenciales y node_modules versionados
+$ git ls-files | grep -E '(^|/)\.env$|node_modules/' || echo limpio
+limpio
+
+## Ficheros de datos versionados (*.jsonl, data/)
+data/.gitkeep
+db/seeds/historical_1900.jsonl
+db/seeds/historical_2025.jsonl
+
+## Contenido de las imágenes (docker image inspect y listado de /app)
+### seismic_observatory-producer
+id=sha256:19d9e7fecec0550ef253fc4770c6e735469fe8dd7d402a54a19fc08cca7901ed creado=2026-11-15T00:25:34.376960185Z usuario=observatory tamaño=54115385
+app
+common
+seeds en la imagen: 0
+datos *.geojson/*.jsonl en /app: 0
+### seismic_observatory-consumer
+id=sha256:f1e8d5041b9564f49fcf7954b6e54160a74cc8f180cc4ed6b30f088269ced03b creado=2026-11-15T00:25:48.558933405Z usuario=observatory tamaño=146431829
+app
+common
+seeds en la imagen: 0
+datos *.geojson/*.jsonl en /app: 0
+### seismic_observatory-api
+id=sha256:b0585369a902c17ccab3405039fd2926554c6b6c0659f12a967ea5d0bd80841e creado=2026-11-15T00:25:38.953945262Z usuario=observatory tamaño=62512931
+app
+common
+seeds en la imagen: 0
+datos *.geojson/*.jsonl en /app: 0

@@ -35,21 +35,22 @@ class EventResponse(BaseModel):
     id: str
     updated: datetime
     time: datetime
-    mag: float
+    mag: float | None = None
     mag_type: str | None = Field(
         default=None,
         validation_alias="mag_type",
         serialization_alias="magType",
     )
-    place: str
+    place: str | None = None
     longitude: float
     latitude: float
     depth_km: float | None
-    country: str
+    # NULL when the point falls outside every country polygon.
+    country: str | None = None
     country_name: str | None = None
-    continent: str
-    subregion: str
-    source_topic: str
+    continent: str | None = None
+    subregion: str | None = None
+    source: str
     country_id: str | None = None
 
 
@@ -61,7 +62,7 @@ class EventsResponse(BaseModel):
 
 
 class CountryCount(BaseModel):
-    country: str
+    country: str | None
     count: int
 
 

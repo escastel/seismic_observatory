@@ -1,0 +1,896 @@
+{
+  "environment": {
+    "date_utc": "2026-11-15T00:41:37Z",
+    "postgres": "PostgreSQL 16.4 (Debian 16.4-1.pgdg120+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit",
+    "shared_buffers": "128MB",
+    "work_mem": "4MB",
+    "client": "Linux 6.18.58.1-microsoft-standard-WSL2 x86_64, Python 3.11.10",
+    "cpus": "12",
+    "memory": "7.6 GiB",
+    "host_note": "Windows 11 Pro for Workstations 10.0.26200, Docker Desktop 29.1.3 (motor con 12 CPU y 7.6 GiB)"
+  },
+  "results": [
+    {
+      "size": 10000,
+      "query": "last_24h",
+      "index": null,
+      "median_ms": 0.462,
+      "runs_ms": [
+        0.522,
+        0.468,
+        0.443,
+        0.426,
+        0.462
+      ],
+      "shared_buffers": 200,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "month_by_hour",
+      "index": null,
+      "median_ms": 0.791,
+      "runs_ms": [
+        0.807,
+        0.807,
+        0.765,
+        0.791,
+        0.766
+      ],
+      "shared_buffers": 200,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "country_interval",
+      "index": null,
+      "median_ms": 0.688,
+      "runs_ms": [
+        0.722,
+        0.719,
+        0.673,
+        0.677,
+        0.688
+      ],
+      "shared_buffers": 200,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "min_magnitude_year",
+      "index": null,
+      "median_ms": 0.482,
+      "runs_ms": [
+        0.478,
+        0.482,
+        0.461,
+        0.548,
+        0.497
+      ],
+      "shared_buffers": 200,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "versions_of_event",
+      "index": null,
+      "median_ms": 0.636,
+      "runs_ms": [
+        0.907,
+        0.655,
+        0.618,
+        0.618,
+        0.636
+      ],
+      "shared_buffers": 640,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "versions_of_event",
+      "index": "event_version_pkey",
+      "median_ms": 0.012,
+      "runs_ms": [
+        0.016,
+        0.015,
+        0.012,
+        0.01,
+        0.01
+      ],
+      "shared_buffers": 3,
+      "plan_nodes": [
+        "Index Scan using event_version_pkey"
+      ],
+      "index_bytes": 753664
+    },
+    {
+      "size": 10000,
+      "query": "last_ingestion",
+      "index": null,
+      "median_ms": 1.604,
+      "runs_ms": [
+        1.604,
+        1.615,
+        1.549,
+        1.606,
+        1.555
+      ],
+      "shared_buffers": 197,
+      "plan_nodes": [
+        "Aggregate",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 10000,
+      "query": "last_24h",
+      "index": "event_time",
+      "median_ms": 0.013,
+      "runs_ms": [
+        0.015,
+        0.013,
+        0.011,
+        0.013,
+        0.011
+      ],
+      "shared_buffers": 4,
+      "plan_nodes": [
+        "Index Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 245760
+    },
+    {
+      "size": 10000,
+      "query": "month_by_hour",
+      "index": "event_time",
+      "median_ms": 0.369,
+      "runs_ms": [
+        0.507,
+        0.376,
+        0.352,
+        0.369,
+        0.354
+      ],
+      "shared_buffers": 5,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Index Only Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 245760
+    },
+    {
+      "size": 10000,
+      "query": "country_interval",
+      "index": "country_event_time",
+      "median_ms": 0.021,
+      "runs_ms": [
+        0.025,
+        0.021,
+        0.017,
+        0.021,
+        0.017
+      ],
+      "shared_buffers": 4,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_country_event_time"
+      ],
+      "index_bytes": 335872
+    },
+    {
+      "size": 10000,
+      "query": "min_magnitude_year",
+      "index": "magnitude_event_time",
+      "median_ms": 0.025,
+      "runs_ms": [
+        0.027,
+        0.025,
+        0.022,
+        0.034,
+        0.025
+      ],
+      "shared_buffers": 11,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_magnitude_event_time"
+      ],
+      "index_bytes": 335872
+    },
+    {
+      "size": 10000,
+      "query": "last_24h",
+      "index": "brin_event_time",
+      "median_ms": 0.244,
+      "runs_ms": [
+        0.306,
+        0.249,
+        0.244,
+        0.241,
+        0.24
+      ],
+      "shared_buffers": 74,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 10000,
+      "query": "month_by_hour",
+      "index": "brin_event_time",
+      "median_ms": 0.757,
+      "runs_ms": [
+        0.759,
+        0.757,
+        0.801,
+        0.684,
+        0.664
+      ],
+      "shared_buffers": 130,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 10000,
+      "query": "last_ingestion",
+      "index": "extraction_last_ok",
+      "median_ms": 0.013,
+      "runs_ms": [
+        0.014,
+        0.011,
+        0.011,
+        0.013,
+        0.015
+      ],
+      "shared_buffers": 3,
+      "plan_nodes": [
+        "Result",
+        "Limit",
+        "Index Only Scan using ix_bench_extraction_last_ok"
+      ],
+      "index_bytes": 229376
+    },
+    {
+      "size": 100000,
+      "query": "last_24h",
+      "index": null,
+      "median_ms": 4.746,
+      "runs_ms": [
+        4.812,
+        4.746,
+        5.062,
+        4.733,
+        4.718
+      ],
+      "shared_buffers": 2000,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "month_by_hour",
+      "index": null,
+      "median_ms": 6.587,
+      "runs_ms": [
+        6.574,
+        6.664,
+        6.587,
+        6.652,
+        6.549
+      ],
+      "shared_buffers": 2000,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "country_interval",
+      "index": null,
+      "median_ms": 7.999,
+      "runs_ms": [
+        8.14,
+        7.738,
+        7.914,
+        8.408,
+        7.999
+      ],
+      "shared_buffers": 2000,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "min_magnitude_year",
+      "index": null,
+      "median_ms": 6.173,
+      "runs_ms": [
+        5.462,
+        6.593,
+        6.173,
+        6.115,
+        6.205
+      ],
+      "shared_buffers": 2000,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "versions_of_event",
+      "index": null,
+      "median_ms": 13.666,
+      "runs_ms": [
+        14.015,
+        14.231,
+        13.666,
+        12.433,
+        12.069
+      ],
+      "shared_buffers": 6208,
+      "plan_nodes": [
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "versions_of_event",
+      "index": "event_version_pkey",
+      "median_ms": 0.015,
+      "runs_ms": [
+        0.015,
+        0.016,
+        0.014,
+        0.028,
+        0.013
+      ],
+      "shared_buffers": 4,
+      "plan_nodes": [
+        "Index Scan using event_version_pkey"
+      ],
+      "index_bytes": 7413760
+    },
+    {
+      "size": 100000,
+      "query": "last_ingestion",
+      "index": null,
+      "median_ms": 16.982,
+      "runs_ms": [
+        17.32,
+        16.659,
+        17.333,
+        16.982,
+        16.192
+      ],
+      "shared_buffers": 1961,
+      "plan_nodes": [
+        "Aggregate",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 100000,
+      "query": "last_24h",
+      "index": "event_time",
+      "median_ms": 0.059,
+      "runs_ms": [
+        0.066,
+        0.06,
+        0.059,
+        0.058,
+        0.051
+      ],
+      "shared_buffers": 11,
+      "plan_nodes": [
+        "Index Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 2260992
+    },
+    {
+      "size": 100000,
+      "query": "month_by_hour",
+      "index": "event_time",
+      "median_ms": 2.437,
+      "runs_ms": [
+        2.37,
+        2.437,
+        2.423,
+        3.693,
+        2.45
+      ],
+      "shared_buffers": 25,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Index Only Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 2260992
+    },
+    {
+      "size": 100000,
+      "query": "country_interval",
+      "index": "country_event_time",
+      "median_ms": 0.042,
+      "runs_ms": [
+        0.061,
+        0.047,
+        0.042,
+        0.037,
+        0.037
+      ],
+      "shared_buffers": 33,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_country_event_time"
+      ],
+      "index_bytes": 3178496
+    },
+    {
+      "size": 100000,
+      "query": "min_magnitude_year",
+      "index": "magnitude_event_time",
+      "median_ms": 0.104,
+      "runs_ms": [
+        0.112,
+        0.088,
+        0.104,
+        0.108,
+        0.087
+      ],
+      "shared_buffers": 89,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_magnitude_event_time"
+      ],
+      "index_bytes": 3178496
+    },
+    {
+      "size": 100000,
+      "query": "last_24h",
+      "index": "brin_event_time",
+      "median_ms": 0.334,
+      "runs_ms": [
+        0.376,
+        0.371,
+        0.334,
+        0.334,
+        0.33
+      ],
+      "shared_buffers": 82,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 100000,
+      "query": "month_by_hour",
+      "index": "brin_event_time",
+      "median_ms": 3.13,
+      "runs_ms": [
+        3.13,
+        3.093,
+        3.481,
+        3.288,
+        3.073
+      ],
+      "shared_buffers": 258,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 100000,
+      "query": "last_ingestion",
+      "index": "extraction_last_ok",
+      "median_ms": 0.014,
+      "runs_ms": [
+        0.016,
+        0.014,
+        0.013,
+        0.013,
+        0.019
+      ],
+      "shared_buffers": 3,
+      "plan_nodes": [
+        "Result",
+        "Limit",
+        "Index Only Scan using ix_bench_extraction_last_ok"
+      ],
+      "index_bytes": 2080768
+    },
+    {
+      "size": 1000000,
+      "query": "last_24h",
+      "index": null,
+      "median_ms": 53.582,
+      "runs_ms": [
+        53.582,
+        58.75,
+        54.019,
+        45.049,
+        47.946
+      ],
+      "shared_buffers": 20073,
+      "plan_nodes": [
+        "Gather Merge",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "month_by_hour",
+      "index": null,
+      "median_ms": 51.318,
+      "runs_ms": [
+        60.065,
+        66.479,
+        50.299,
+        51.318,
+        47.269
+      ],
+      "shared_buffers": 20071,
+      "plan_nodes": [
+        "Aggregate",
+        "Gather Merge",
+        "Aggregate",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "country_interval",
+      "index": null,
+      "median_ms": 55.125,
+      "runs_ms": [
+        47.216,
+        61.56,
+        55.125,
+        52.839,
+        55.829
+      ],
+      "shared_buffers": 20073,
+      "plan_nodes": [
+        "Gather Merge",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "min_magnitude_year",
+      "index": null,
+      "median_ms": 40.354,
+      "runs_ms": [
+        44.485,
+        40.243,
+        41.445,
+        39.445,
+        40.354
+      ],
+      "shared_buffers": 20073,
+      "plan_nodes": [
+        "Gather Merge",
+        "Sort",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "versions_of_event",
+      "index": null,
+      "median_ms": 68.024,
+      "runs_ms": [
+        59.801,
+        68.024,
+        68.616,
+        62.08,
+        71.014
+      ],
+      "shared_buffers": 61824,
+      "plan_nodes": [
+        "Sort",
+        "Gather",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "versions_of_event",
+      "index": "event_version_pkey",
+      "median_ms": 0.014,
+      "runs_ms": [
+        0.022,
+        0.016,
+        0.012,
+        0.013,
+        0.014
+      ],
+      "shared_buffers": 4,
+      "plan_nodes": [
+        "Index Scan using event_version_pkey"
+      ],
+      "index_bytes": 74022912
+    },
+    {
+      "size": 1000000,
+      "query": "last_ingestion",
+      "index": null,
+      "median_ms": 78.975,
+      "runs_ms": [
+        77.826,
+        75.76,
+        79.868,
+        92.385,
+        78.975
+      ],
+      "shared_buffers": 19608,
+      "plan_nodes": [
+        "Aggregate",
+        "Gather",
+        "Aggregate",
+        "Seq Scan"
+      ],
+      "index_bytes": null
+    },
+    {
+      "size": 1000000,
+      "query": "last_24h",
+      "index": "event_time",
+      "median_ms": 0.426,
+      "runs_ms": [
+        0.464,
+        0.426,
+        0.487,
+        0.425,
+        0.419
+      ],
+      "shared_buffers": 76,
+      "plan_nodes": [
+        "Index Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 22487040
+    },
+    {
+      "size": 1000000,
+      "query": "month_by_hour",
+      "index": "event_time",
+      "median_ms": 21.803,
+      "runs_ms": [
+        22.605,
+        22.604,
+        21.803,
+        21.801,
+        21.229
+      ],
+      "shared_buffers": 228,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Index Only Scan using ix_bench_event_time"
+      ],
+      "index_bytes": 22487040
+    },
+    {
+      "size": 1000000,
+      "query": "country_interval",
+      "index": "country_event_time",
+      "median_ms": 0.277,
+      "runs_ms": [
+        0.658,
+        0.357,
+        0.271,
+        0.277,
+        0.263
+      ],
+      "shared_buffers": 324,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_country_event_time"
+      ],
+      "index_bytes": 31563776
+    },
+    {
+      "size": 1000000,
+      "query": "min_magnitude_year",
+      "index": "magnitude_event_time",
+      "median_ms": 1.004,
+      "runs_ms": [
+        1.148,
+        0.859,
+        0.995,
+        1.385,
+        1.004
+      ],
+      "shared_buffers": 988,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_magnitude_event_time"
+      ],
+      "index_bytes": 31563776
+    },
+    {
+      "size": 1000000,
+      "query": "last_24h",
+      "index": "brin_event_time",
+      "median_ms": 1.561,
+      "runs_ms": [
+        1.561,
+        1.587,
+        1.367,
+        1.283,
+        1.662
+      ],
+      "shared_buffers": 161,
+      "plan_nodes": [
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 1000000,
+      "query": "month_by_hour",
+      "index": "brin_event_time",
+      "median_ms": 25.55,
+      "runs_ms": [
+        28.963,
+        26.268,
+        25.55,
+        24.873,
+        23.803
+      ],
+      "shared_buffers": 1794,
+      "plan_nodes": [
+        "Aggregate",
+        "Sort",
+        "Bitmap Heap Scan",
+        "Bitmap Index Scan using ix_bench_brin_event_time"
+      ],
+      "index_bytes": 24576
+    },
+    {
+      "size": 1000000,
+      "query": "last_ingestion",
+      "index": "extraction_last_ok",
+      "median_ms": 0.016,
+      "runs_ms": [
+        0.019,
+        0.015,
+        0.017,
+        0.015,
+        0.016
+      ],
+      "shared_buffers": 4,
+      "plan_nodes": [
+        "Result",
+        "Limit",
+        "Index Only Scan using ix_bench_extraction_last_ok"
+      ],
+      "index_bytes": 20709376
+    }
+  ],
+  "decisions": [
+    {
+      "index": "event_time",
+      "ddl": "CREATE INDEX ix_bench_event_time ON bench.event_current (event_time)",
+      "ratios": {
+        "last_24h": 125.7793427230047,
+        "month_by_hour": 2.3537127918176397
+      },
+      "best_ratio": 125.7793427230047,
+      "verdict": "conservar"
+    },
+    {
+      "index": "country_event_time",
+      "ddl": "CREATE INDEX ix_bench_country_event_time ON bench.event_current (country_id, event_time)",
+      "ratios": {
+        "country_interval": 199.00722021660647
+      },
+      "best_ratio": 199.00722021660647,
+      "verdict": "conservar"
+    },
+    {
+      "index": "magnitude_event_time",
+      "ddl": "CREATE INDEX ix_bench_magnitude_event_time ON bench.event_current (magnitude, event_time)",
+      "ratios": {
+        "min_magnitude_year": 40.19322709163347
+      },
+      "best_ratio": 40.19322709163347,
+      "verdict": "conservar"
+    },
+    {
+      "index": "brin_event_time",
+      "ddl": "CREATE INDEX ix_bench_brin_event_time ON bench.event_current USING brin (event_time)",
+      "ratios": {
+        "last_24h": 34.32543241511851,
+        "month_by_hour": 2.00853228962818
+      },
+      "best_ratio": 34.32543241511851,
+      "verdict": "medido (alternativa a event_time)"
+    },
+    {
+      "index": "extraction_last_ok",
+      "ddl": "CREATE INDEX ix_bench_extraction_last_ok ON bench.extraction (requested_at) WHERE source = 'usgs_feed' AND outcome IN ('ok', 'not_modified')",
+      "ratios": {
+        "last_ingestion": 4935.937499999999
+      },
+      "best_ratio": 4935.937499999999,
+      "verdict": "conservar"
+    },
+    {
+      "index": "event_version_pkey",
+      "ddl": "PRIMARY KEY (event_id, updated_at)",
+      "ratios": {
+        "versions_of_event": 4858.857142857143
+      },
+      "best_ratio": 4858.857142857143,
+      "verdict": "obligatorio (clave primaria)"
+    }
+  ]
+}

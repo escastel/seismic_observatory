@@ -2,52 +2,27 @@
 
 from __future__ import annotations
 
-import hashlib
-from dataclasses import dataclass
 from pathlib import Path
 
 import geopandas as gpd
 from shapely.geometry import Point
 
 
-UNASSIGNED_COUNTRY = "Sin país asignado"
-
-
-@dataclass(frozen=True)
-class Geography:
-    country: str
-    continent: str
-    subregion: str
-    source_dataset: str
-    geometry_hash: str
-    country_id: str | None = None
-
-
 class SpatialEnricher:
-    def __init__(self, path: str) -> None:
-        dataset_path = Path(path)
-        self._source_dataset = dataset_path.name
-        self._geometry_hash = hashlib.sha256(dataset_path.read_bytes()).hexdigest()
-        self._countries = gpd.read_file(dataset_path).to_crs("EPSG:4326")
+    """Finds the Natural Earth entity (ADM0_A3) that contains a point.
 
-    def lookup(self, longitude: float, latitude: float) -> Geography:
+    The identifier is the key of core.dim_country, loaded from the same file.
+    A point outside every polygon (sea, Antarctic shelf...) has no country:
+    lookup returns None and the panel shows «Sin país asignado».
+    """
+
+    def __init__(self, path: str) -> None:
+        self._countries = gpd.read_file(Path(path)).to_crs("EPSG:4326")
+
+    def lookup(self, longitude: float, latitude: float) -> str | None:
         point = Point(longitude, latitude)
         matches = self._countries[self._countries.geometry.intersects(point)]
         if matches.empty:
-            return Geography(
-                UNASSIGNED_COUNTRY,
-                "Sin continente asignado",
-                "Sin subregión asignada",
-                self._source_dataset,
-                self._geometry_hash,
-                None,
-            )
-        row = matches.iloc[0]
-        return Geography(
-            str(row.get("NAME_ES") or row.get("NAME") or row.get("ADMIN") or UNASSIGNED_COUNTRY),
-            str(row.get("CONTINENT") or "Sin continente asignado"),
-            str(row.get("SUBREGION") or "Sin subregión asignada"),
-            self._source_dataset,
-            self._geometry_hash,
-            str(row.get("ADM0_A3")) if row.get("ADM0_A3") else None,
-        )
+            return None
+        country_id = matches.iloc[0].get("ADM0_A3")
+        return str(country_id) if country_id else None

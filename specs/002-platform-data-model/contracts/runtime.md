@@ -12,7 +12,7 @@ comparten.
 | `producer` | propia | ninguno | `kafka`, `postgres` | latido reciente |
 | `consumer` | propia | ninguno | `kafka`, `postgres` | latido reciente |
 | `api` | propia | `127.0.0.1:8000` | `postgres` | `GET /api/salud` responde |
-| `tunnel` (perfil `tunnel`) | `ngrok/ngrok:3.18.4-alpine` | ninguno | `api` | — |
+| `tunnel` (perfil `tunnel`) | `ngrok/ngrok:3.39.13-alpine` | ninguno | `api` | — |
 
 - `docker compose up --build -d` arranca los cinco primeros.
 - `docker compose --profile tunnel up -d` añade el túnel hacia `http://api:8000`.
@@ -69,8 +69,10 @@ una variable obligatoria termina con un mensaje que la nombra.
 
 ## Salud y reintentos
 
-- Productor y consumidor actualizan un fichero de latido tras cada ciclo correcto. La
-  comprobación falla si el latido tiene más de tres intervalos de antigüedad.
+- Productor y consumidor actualizan un fichero de latido tras cada ciclo. La comprobación
+  falla si el latido tiene más de tres intervalos de antigüedad. Desde la spec 003, en el
+  productor el ciclo cuenta tras cada consulta registrada, también si USGS falla; ver
+  [contracts/runtime.md de la spec 003](../../003-usgs-ingestion/contracts/runtime.md).
 - Conexiones a Kafka y PostgreSQL: reintento con espera exponencial desde 1 s hasta un máximo de
   30 s, sin límite de intentos, registrando cada fallo.
 - `GET /api/salud` responde aunque la base no esté disponible, indicando estado degradado; nunca

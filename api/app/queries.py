@@ -1,4 +1,8 @@
-"""Parameterized SQL queries for API endpoints."""
+"""Parameterized SQL queries for API endpoints.
+
+They read event_current with the search_path of the pool (core for live
+data), joined to dim_country; a NULL country_id means «Sin país asignado».
+"""
 
 from __future__ import annotations
 
@@ -19,9 +23,9 @@ def _event_conditions(filters: EventFilters) -> tuple[list[str], list[Any]]:
         conditions.append(condition.replace("?", f"${len(values)}"))
 
     if filters.country is not None:
-        add("g.country = ?", filters.country)
+        add("g.name_es = ?", filters.country)
     if filters.country_id is not None:
-        add("g.country_id = ?", filters.country_id)
+        add("f.country_id = ?", filters.country_id)
     if filters.date_from is not None:
         add("f.event_time >= ?", filters.date_from)
     if filters.date_to is not None:
@@ -44,14 +48,14 @@ async def fetch_events(pool: asyncpg.Pool, filters: EventFilters) -> list[asyncp
     values.extend([filters.limit, filters.offset])
     return await pool.fetch(
         f"""
-        SELECT f.external_id AS id, f.updated, f.event_time AS time,
+        SELECT f.event_id AS id, f.updated_at AS updated, f.event_time AS time,
                f.magnitude AS mag, f.mag_type, f.place, f.longitude, f.latitude, f.depth_km,
-               g.country, g.country AS country_name, g.continent, g.subregion, g.country_id,
-               f.source_topic
-        FROM fact_sismos f
-        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+               g.name_es AS country, g.name_es AS country_name, g.continent, g.subregion, f.country_id,
+               f.source
+        FROM event_current f
+        LEFT JOIN dim_country g ON g.country_id = f.country_id
         {where}
-        ORDER BY f.event_time DESC, f.external_id
+        ORDER BY f.event_time DESC, f.event_id
         LIMIT ${limit_index} OFFSET ${offset_index}
         """,
         *values,
@@ -65,8 +69,8 @@ async def count_events(pool: asyncpg.Pool, filters: EventFilters) -> int:
         await pool.fetchval(
             f"""
             SELECT COUNT(*)
-            FROM fact_sismos f
-            JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+            FROM event_current f
+            LEFT JOIN dim_country g ON g.country_id = f.country_id
             {where}
             """,
             *values,
@@ -79,12 +83,12 @@ async def country_stats(pool: asyncpg.Pool, filters: EventFilters) -> list[async
     where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
     return await pool.fetch(
         f"""
-        SELECT g.country, COUNT(*)::int AS count
-        FROM fact_sismos f
-        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        SELECT g.name_es AS country, COUNT(*)::int AS count
+        FROM event_current f
+        LEFT JOIN dim_country g ON g.country_id = f.country_id
         {where}
-        GROUP BY g.country
-        ORDER BY count DESC, g.country
+        GROUP BY g.name_es
+        ORDER BY count DESC, g.name_es NULLS LAST
         """,
         *values,
     )
@@ -105,8 +109,8 @@ async def timeline_stats(
     return await pool.fetch(
         f"""
         SELECT {expression} AS period, COUNT(*)::int AS count
-        FROM fact_sismos f
-        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        FROM event_current f
+        LEFT JOIN dim_country g ON g.country_id = f.country_id
         {where}
         GROUP BY period
         ORDER BY period
@@ -124,8 +128,8 @@ async def magnitude_stats(
     return await pool.fetch(
         f"""
         SELECT COALESCE(f.magnitude::text, 'null') AS bucket, COUNT(*)::int AS count
-        FROM fact_sismos f
-        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        FROM event_current f
+        LEFT JOIN dim_country g ON g.country_id = f.country_id
         {where}
         GROUP BY bucket
         ORDER BY bucket
@@ -146,8 +150,8 @@ async def depth_stats(
                WHEN f.depth_km < 70 THEN 'shallow'
                WHEN f.depth_km < 300 THEN 'intermediate'
                ELSE 'deep' END AS bucket, COUNT(*)::int AS count
-        FROM fact_sismos f
-        JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+        FROM event_current f
+        LEFT JOIN dim_country g ON g.country_id = f.country_id
         {where}
         GROUP BY bucket
         ORDER BY bucket
@@ -167,8 +171,8 @@ async def daily_average_2025(
         f"""
         SELECT COALESCE(AVG(day_count), 0) FROM (
             SELECT DATE_TRUNC('day', f.event_time), COUNT(*)::numeric AS day_count
-            FROM fact_sismos f
-            JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+            FROM event_current f
+            LEFT JOIN dim_country g ON g.country_id = f.country_id
             {where}
             GROUP BY DATE_TRUNC('day', f.event_time)
         ) daily
@@ -189,8 +193,8 @@ async def missing_magnitude(
         await pool.fetchval(
             f"""
             SELECT COUNT(*)
-            FROM fact_sismos f
-            JOIN dim_geografia g ON g.geografia_key = f.geografia_key
+            FROM event_current f
+            LEFT JOIN dim_country g ON g.country_id = f.country_id
             {where}
             """,
             *values,

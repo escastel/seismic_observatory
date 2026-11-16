@@ -3,18 +3,18 @@
 from __future__ import annotations
 
 import logging
-import os
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
-from datetime import timezone
 from typing import AsyncIterator, Literal
 
 import asyncpg
-import ngrok
 from fastapi import Depends, FastAPI, HTTPException, Query, Request
 from fastapi.middleware.cors import CORSMiddleware
 
-from .config import ApiConfig
+from common import settings
+from common.logging import configure
+
+from . import db
 from .db import database_error
 from .queries import (
     count_events,
@@ -35,44 +35,19 @@ from .schemas import (
     TimelineResponse,
 )
 
-logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s %(name)s %(message)s")
+configure("api")
 logger = logging.getLogger(__name__)
-config = ApiConfig()
+# The tunnel (ngrok) is the optional compose service "tunnel", never part of this process.
+config = settings.api()
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI) -> AsyncIterator[None]:
-    app.state.ngrok_forwarder = None
-    ngrok_domain = config.ngrok_domain.removeprefix("https://").removeprefix("http://").rstrip("/")
-    try:
-        app.state.db_pool = await asyncpg.create_pool(config.database_dsn, min_size=1, max_size=10)
-    except (OSError, asyncpg.PostgresError) as exc:
-        logger.error("Database pool initialization failed: %s", exc)
-        app.state.db_pool = None
-    if os.getenv("NGROK_AUTHTOKEN") and ngrok_domain:
-        try:
-            app.state.ngrok_forwarder = await ngrok.forward(
-                8000,
-                authtoken_from_env=True,
-                domain=ngrok_domain,
-            )
-        except (OSError, RuntimeError, ValueError) as exc:
-            logger.error("ngrok tunnel initialization failed: %s", exc)
-        else:
-            logger.info("ngrok tunnel available at: %s", app.state.ngrok_forwarder.url())
-    elif os.getenv("NGROK_AUTHTOKEN"):
-        logger.error("NGROK_DOMAIN is required when NGROK_AUTHTOKEN is configured")
-
+    connecting = db.start(app, config.database)
     try:
         yield
     finally:
-        if app.state.ngrok_forwarder is not None:
-            try:
-                await ngrok.disconnect(app.state.ngrok_forwarder.url())
-            except (OSError, RuntimeError) as exc:
-                logger.error("ngrok tunnel shutdown failed: %s", exc)
-        if app.state.db_pool is not None:
-            await app.state.db_pool.close()
+        await db.stop(app, connecting)
 
 
 app = FastAPI(
@@ -81,12 +56,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-origins = [origin.strip() for origin in config.cors_origins.split(",") if origin.strip()]
-allow_all_origins = origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=not allow_all_origins,
+    allow_origins=config.cors_origins,
+    allow_credentials=True,
     allow_methods=["GET", "OPTIONS"],
     allow_headers=["Content-Type", "ngrok-skip-browser-warning"],
 )
@@ -152,14 +125,23 @@ def event_filters(
     ).model_copy(update={"country_id": country_id})
 
 
+LAST_INGESTION_SQL = "SELECT MAX(ingested_at) FROM event_current"
+
+
 @app.get(f"{config.api_prefix}/health")
 async def health(request: Request) -> dict[str, str | int | None]:
+    """Always answers: «degraded» when the database is not reachable. Never shows credentials."""
     pool = request.app.state.db_pool
     last_ingestion = None
+    status = "degraded"
     if pool is not None:
-        last_ingestion = await pool.fetchval("SELECT MAX(ingested_at) FROM fact_sismos")
+        try:
+            last_ingestion = await pool.fetchval(LAST_INGESTION_SQL)
+            status = "ok"
+        except (OSError, asyncpg.PostgresError, asyncpg.InterfaceError) as exc:
+            logger.warning("Health check could not query the database: %s", exc)
     return {
-        "status": "ok" if pool is not None else "degraded",
+        "status": status,
         "last_ingestion": last_ingestion.isoformat() if last_ingestion else None,
     }
 
@@ -204,7 +186,7 @@ async def events(
                     exclude={"longitude", "latitude", "depth_km", "id"},
                 ),
             })
-        last_ingestion = await pool.fetchval("SELECT MAX(ingested_at) FROM fact_sismos")
+        last_ingestion = await pool.fetchval(LAST_INGESTION_SQL)
         return GeoJSONFeatureCollection(
             metadata={
                 "generated": int(datetime.now(timezone.utc).timestamp() * 1000),

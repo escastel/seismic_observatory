@@ -12,6 +12,8 @@ MIN_MAGNITUDE = 0.0
 MAX_MAGNITUDE = 10.0
 FUTURE_TIMESTAMP_TOLERANCE = timedelta(seconds=300)
 RAW_EVENT_MAX_AGE = timedelta(days=7)
+# Topic of the live feed: only its events must be recent (RAW_EVENT_MAX_AGE).
+LIVE_TOPIC = "earthquakes.live"
 
 
 @dataclass(frozen=True)
@@ -42,8 +44,9 @@ def _failure(dimension: str, code: str, detail: str) -> QualityFailure:
 def validate_event(
     payload: Any,
     seen_ids: set[str] | None = None,
-    source_topic: str = "terremotos_raw",
+    source_topic: str = LIVE_TOPIC,
     now: datetime | None = None,
+    live_topic: str = LIVE_TOPIC,
 ) -> tuple[ValidatedEvent | None, list[QualityFailure]]:
     if not isinstance(payload, dict):
         return None, [_failure("Consistencia", "event_not_object", "Event must be a JSON object")]
@@ -94,7 +97,7 @@ def validate_event(
                     "event time cannot be more than 300 seconds in the future",
                 )
             )
-        elif source_topic == "terremotos_raw" and reference_time - event_time > RAW_EVENT_MAX_AGE:
+        elif source_topic == live_topic and reference_time - event_time > RAW_EVENT_MAX_AGE:
             failures.append(
                 _failure(
                     "Frescura",

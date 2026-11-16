@@ -8,7 +8,7 @@ def test_replay_maps_windows_git_bash_path_to_docker_mount(monkeypatch, tmp_path
     class FakePath:
         def __init__(self, value):
             self.value = str(value)
-            self.path = mounted if self.value.startswith("/data/seeds/") else tmp_path / "missing"
+            self.path = mounted if self.value.startswith("/seeds/") else tmp_path / "missing"
 
         @property
         def name(self):
@@ -18,7 +18,7 @@ def test_replay_maps_windows_git_bash_path_to_docker_mount(monkeypatch, tmp_path
             return self.path.is_file()
 
         def __truediv__(self, value):
-            return FakePath(f"/data/seeds/{value}")
+            return FakePath(f"/seeds/{value}")
 
         def __str__(self):
             return str(self.path)
