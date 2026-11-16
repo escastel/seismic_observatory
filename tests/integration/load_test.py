@@ -34,24 +34,15 @@ def check_api(base_url: str, requests_count: int) -> tuple[float, float]:
     return successes / requests_count, percentile(latencies, 95)
 
 
-def check_replay(replay_file: Path, rate: float) -> float:
+def check_replay(start: str, end: str, min_magnitude: float, rate: float) -> float:
+    """Throughput (events per second) of one replay of the downloaded catalog (spec 005)."""
     if rate <= 0:
         raise ValueError("replay rate must be positive")
     started = time.perf_counter()
     result = subprocess.run(
         [
-            "docker",
-            "compose",
-            "run",
-            "--rm",
-            "producer",
-            "python",
-            "-m",
-            "app.replay",
-            "--path",
-            f"/data/seeds/{replay_file.name}",
-            "--rate",
-            str(rate),
+            "docker", "compose", "run", "--rm", "replay", "start",
+            "--start", start, "--end", end, "--min-mag", str(min_magnitude), "--rate", str(rate),
         ],
         check=False,
         capture_output=True,
@@ -59,16 +50,17 @@ def check_replay(replay_file: Path, rate: float) -> float:
     )
     elapsed = time.perf_counter() - started
     if result.returncode != 0:
-        raise RuntimeError(result.stderr.strip() or "replay command failed")
-    events = sum(1 for line in replay_file.read_text(encoding="utf-8").splitlines() if line.strip())
-    return events / elapsed
+        raise RuntimeError(result.stderr.strip() or result.stdout.strip() or "replay command failed")
+    status = json.loads(Path("data/replay/status.json").read_text(encoding="utf-8"))
+    return status["sent"] / elapsed
 
 
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--base-url", default="http://localhost:8000")
     parser.add_argument("--requests", type=int, default=100)
-    parser.add_argument("--replay-file", type=Path)
+    parser.add_argument("--replay-period", nargs=2, metavar=("START", "END"), help="replay the downloaded catalog between two dates")
+    parser.add_argument("--replay-min-mag", type=float, default=4.0)
     parser.add_argument("--replay-rate", type=float, default=10.0)
     args = parser.parse_args()
 
@@ -77,8 +69,8 @@ def main() -> int:
     if success_rate < 0.99 or p95 >= 2.0:
         return 1
 
-    if args.replay_file is not None:
-        throughput = check_replay(args.replay_file, args.replay_rate)
+    if args.replay_period is not None:
+        throughput = check_replay(*args.replay_period, args.replay_min_mag, args.replay_rate)
         baseline = 1 / 60
         print(json.dumps({"SC-006_replay_throughput": throughput, "SC-006_baseline_10x": baseline * 10}))
         if throughput < baseline * 10:

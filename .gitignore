@@ -76,8 +76,6 @@ ngrok.yaml
 data/*
 !data/.gitkeep
 db/seeds/*.jsonl
-!db/seeds/historical_1900.jsonl
-!db/seeds/historical_2025.jsonl
 *.dump
 *.sql.gz
 pgdata/

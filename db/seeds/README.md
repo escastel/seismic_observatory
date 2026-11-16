@@ -1,33 +1,43 @@
-# Lotes de reproducción versionados
+# Carpeta `db/seeds`
 
-Esta carpeta contiene solo lotes pequeños que se versionan en Git porque las pruebas y la
-demostración los necesitan siempre igual. Compose la monta en solo lectura en `/seeds` dentro
-del productor.
+Esta carpeta ya no contiene lotes versionados en Git. Se mantiene solo como marcador (`.gitkeep`)
+y este README.
 
-| Fichero | Contenido | Líneas |
-|---|---|---|
-| `historical_2025.jsonl` | Seis eventos **ficticios** de enero de 2025: válidos, uno marítimo, rechazos de calidad y dos versiones del mismo identificador. No es una descarga de USGS | 6 |
-| `historical_1900.jsonl` | Año 1900 completo según la API de USGS (el primero de su catálogo), extraído el 2026-11-11 UTC. SHA-256 `95F0BE1FC5D23ECDAE67D885DA75BCF6EFDB110A44BC11BE842C26BD99163927` | 35 |
+## Por qué no hay lotes aquí
 
-Formato: un objeto GeoJSON `Feature` por línea, con `id`, `time` y `updated` copiados también
-al primer nivel para el publicador de `producer/app/replay.py`.
+- Los conjuntos descargados de USGS no se guardan en Git: son regenerables con el procedimiento
+  de la spec 003 y versionarlos mezclaría datos externos con el código.
+- Los casos de prueba de reproducción los genera el código, no ficheros fijos. El conjunto
+  sintético lo produce `producer/app/replay/synthetic.py`, con la convención de la spec 004 y
+  resultados esperados comprobables.
+- Así hay un único mecanismo de reproducción, en vez de dos con resultados distintos.
+
+Los ficheros `historical_1900.jsonl` e `historical_2025.jsonl` se han retirado de Git por esas
+razones.
 
 ## Conjuntos descargados: en `data/`, fuera de Git
 
-Las descargas grandes (por ejemplo, el histórico mundial de 2025 con magnitud ≥ 4 que exige el
-enunciado) no se guardan aquí ni en ningún otro lugar del repositorio:
+Las descargas (por ejemplo, el histórico mundial de 2025 con magnitud ≥ 4 que exige el enunciado)
+van en `data/`, que está en `.gitignore` y que Compose monta en solo lectura en `/data` en
+productor y consumidor. Ninguna imagen de Docker las contiene.
 
-- se guardan en `data/`, que está en `.gitignore` y que Compose monta en solo lectura en
-  `/data` en productor y consumidor;
-- ninguna imagen de Docker los contiene;
-- la base registra cada consulta en `core.extraction` y la huella SHA-256 y la ruta del fichero
-  en `core.raw_payload` (con `encoding = 'file'`), de modo que se puede comprobar que el
-  fichero usado es el mismo que se descargó.
+Para regenerarlas:
 
-El procedimiento de descarga, la regeneración de los ficheros y su registro en la base están
-en el apartado «Cargar el histórico» del [README](../../README.md#cargar-el-histórico) y en
-[contracts/catalog-loader.md](../../specs/003-usgs-ingestion/contracts/catalog-loader.md)
-(spec 003): `docker compose run --rm catalog-loader`. El renombrado de `historical_2025.jsonl`, que hoy contiene eventos
-ficticios, y el marcado de los casos sintéticos se deciden en la spec 005.
+```
+docker compose run --rm catalog-loader
+```
 
-Ninguna copia (`*.bak`, `*.orig`) debe quedar en esta carpeta.
+El procedimiento y su registro en la base están en el apartado «Cargar el histórico» del
+[README](../../README.md#cargar-el-histórico) y en el contrato
+[catalog-loader.md](../../specs/003-usgs-ingestion/contracts/catalog-loader.md) (spec 003).
+La base registra cada consulta en `core.extraction` y la huella SHA-256 y la ruta del fichero en
+`core.raw_payload`, de modo que se puede comprobar que el fichero usado es el descargado.
+
+## Cómo se reproduce ahora
+
+El escenario de reproducción histórica y sus comprobaciones están en el
+[quickstart de la spec 005](../../specs/005-historical-replay/quickstart.md).
+
+## Copias de seguridad
+
+No deben guardarse copias (`*.bak`, `*.orig`) en esta carpeta.
