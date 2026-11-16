@@ -14,7 +14,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 EARTHQUAKE = "earthquake"
@@ -64,12 +64,16 @@ class Classified:
         return f"{len(self.unidentifiable)} unidentifiable item(s) counted as excluded ({listed}{more})"
 
 
+EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+
 def millis_to_utc(value: Any) -> datetime | None:
     """USGS milliseconds since the Unix epoch as an aware UTC datetime."""
     if isinstance(value, bool) or not isinstance(value, (int, float, str)):
         return None
     try:
-        return datetime.fromtimestamp(float(value) / 1000, tz=timezone.utc)
+        # Not fromtimestamp(): on Windows it raises OSError for instants before 1970.
+        return EPOCH + timedelta(milliseconds=float(value))
     except (ValueError, OverflowError, OSError):
         return None
 

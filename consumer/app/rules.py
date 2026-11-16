@@ -118,12 +118,16 @@ def _number(value: Any) -> float | None:
     return float(value)
 
 
+EPOCH = datetime(1970, 1, 1, tzinfo=timezone.utc)
+
+
 def _instant(value: Any) -> datetime | None:
     number = _number(value)
     if number is None or not math.isfinite(number):
         return None
     try:
-        return datetime.fromtimestamp(number / 1000, tz=timezone.utc)
+        # Not fromtimestamp(): on Windows it raises OSError for instants before 1970.
+        return EPOCH + timedelta(milliseconds=number)
     except (OverflowError, OSError, ValueError):
         return None
 
