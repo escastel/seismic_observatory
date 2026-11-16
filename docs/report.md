@@ -425,6 +425,9 @@ Una fila por mensaje rechazado; reprocesarlo no crea otra.
 | `raw_text` | `text` | Mensaje original como texto, si no es JSON | Nulo si es JSON; nunca faltan los dos |
 | `is_synthetic` | `boolean` | Caso dañado a propósito para pruebas | `false` |
 | `quarantined_at` | `timestamptz` | Momento del rechazo | — |
+| `reprocessed_at` | `timestamptz` | Cuándo se reprocesó la fila con las reglas vigentes (spec 004); una fila reprocesada no se vuelve a tomar | Nulo = pendiente de reprocesar |
+| `reprocess_result` | `text` | `recovered_new`, `recovered_revised`, `recovered_stale`, `recovered_duplicate` (resultado de la regla de versiones) o `still_rejected`; presente si y solo si `reprocessed_at` lo está | Nulo = pendiente |
+| `reprocess_reason_codes` | `text[]` | Motivos vigentes si sigue rechazada tras el reprocesado | Nulo si se recuperó o está pendiente |
 
 ### `core.excluded_event`, `replay.excluded_event`
 
@@ -446,10 +449,11 @@ recuentos de terremotos.
 
 | Columna | Tipo | Significado | Ausencias |
 |---|---|---|---|
-| `kafka_topic`, `kafka_partition`, `kafka_offset` | `text`, `integer`, `bigint` | Posición del mensaje; clave conjunta | — |
+| `kafka_topic`, `kafka_partition`, `kafka_offset` | `text`, `integer`, `bigint` | Posición del mensaje; clave conjunta junto con `attempt` | — |
 | `event_id` | `text` | Evento al que se refiere | Nulo si no se pudo leer |
 | `updated_at` | `timestamptz` | Versión a la que se refiere | Nulo en los rechazos |
-| `outcome` | `text` | `new`, `revised`, `stale`, `duplicate` o `quarantined` | — |
+| `outcome` | `text` | `new`, `revised`, `stale`, `duplicate`, `excluded` (elemento que no es un terremoto) o `quarantined` | — |
+| `attempt` | `smallint` | 0 = tratamiento original; 1 = reprocesado de la cuarentena. Forma parte de la clave primaria | 0 por defecto |
 | `produced_at` | `timestamptz` | `ingested_at` del mensaje: cuándo lo obtuvo el productor | Nulo si el mensaje no lo trae |
 | `processed_at` | `timestamptz` | Cuándo lo procesó el consumidor | — |
 

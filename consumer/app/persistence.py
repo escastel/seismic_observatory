@@ -31,7 +31,7 @@ ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING
 MESSAGE_LOG_SQL = """
 INSERT INTO message_log (kafka_topic, kafka_partition, kafka_offset, event_id, updated_at, outcome, produced_at)
 VALUES ($1, $2, $3, $4, $5, $6, $7)
-ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING
+ON CONFLICT (kafka_topic, kafka_partition, kafka_offset, attempt) DO NOTHING
 """
 
 
