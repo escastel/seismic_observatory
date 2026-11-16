@@ -1,0 +1,34 @@
+antes del reinicio: state=running sent=2525 de 5301
+$ docker compose restart consumer
+ Container seismic_observatory-consumer-1  Restarting
+ Container seismic_observatory-consumer-1  Started
+tras el reinicio: state=running sent=2726 de 5301
+Selección registrada: 5301 eventos, primero 2025-01-01T00:13:22Z, último 2025-04-30T23:56:05Z, extraction_id 562
+Reproducción terminada: 5301 eventos publicados
+start exit=0
+## huella tras el reinicio del consumidor (V2 fue: 5301 | 270575545300917288502)
+ events |       checksum        
+--------+-----------------------
+   5301 | 270575545300917288502
+(1 row)
+
+## resultados en message_log y versiones
+ outcome | count 
+---------+-------
+ new     |  5301
+(1 row)
+
+ versions | events 
+----------+--------
+     5301 |   5301
+(1 row)
+
+ quarantined 
+-------------
+           0
+(1 row)
+
+$ replay compare
+core idéntico a la instantánea: el aislamiento se mantiene
+exit=0
+líneas con traceback o ERROR en el log del consumidor (últimos 15 min): 0

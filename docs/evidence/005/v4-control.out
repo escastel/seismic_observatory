@@ -1,0 +1,38 @@
+running sent=63 remaining=1350
+$ replay start (segundo, mientras hay uno activo)
+Ya hay una reproducción activa: espere a que termine o ejecute `replay stop`
+
+exit=4
+$ replay reset (con reproducción activa)
+Hay una reproducción activa: no se puede ejecutar reset
+
+exit=4
+$ replay pause
+Orden enviada: pause
+segundos desde el retorno de pause hasta el estado paused: 0.41
+paused sent=207 remaining=1206
+paused sent=207 remaining=1206
+paused sent=207 remaining=1206
+$ replay status
+Estado: en pausa; enviados 207; restantes 1206; objetivo 20.0 eventos/s
+$ replay resume
+Orden enviada: resume
+running sent=292 remaining=1121
+$ replay stop
+Orden enviada: stop
+stopped sent=336 remaining=1077
+stopped sent=336 remaining=1077
+## docs/evidence/005/sql/v4-order-and-gaps.sql
+ messages | no_repeated_offsets | no_gaps | out_of_time_order 
+----------+---------------------+---------+-------------------
+      336 | t                   | t       |                 0
+(1 row)
+
+ replay_events | new_messages 
+---------------+--------------
+           336 |          336
+(1 row)
+
+Selección registrada: 1413 eventos, primero 2025-01-01T00:13:22Z, último 2025-01-31T23:57:39Z, extraction_id 560
+Reproducción detenida: 336 de 1413 eventos publicados
+start exit=0

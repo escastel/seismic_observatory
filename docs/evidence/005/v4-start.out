@@ -1,0 +1,5 @@
+ Container seismic_observatory-postgres-1  Running
+ Container seismic_observatory-kafka-1  Running
+Selección registrada: 1413 eventos, primero 2025-01-01T00:13:22Z, último 2025-01-31T23:57:39Z, extraction_id 560
+Reproducción detenida: 336 de 1413 eventos publicados
+start exit=0
