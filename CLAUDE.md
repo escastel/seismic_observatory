@@ -45,6 +45,29 @@ en ambos.
 - Piden confirmación explícita cada vez: `docker compose down -v` (borra la base local),
   `git push --force`, reescribir historia y borrar ramas o datos.
 
+## Orquestación de agentes (ahorro de tokens)
+
+Al implementar una spec (`/speckit-implement`), repartir el trabajo así. Esta norma es la
+petición expresa de la usuaria para lanzar agentes; no hace falta volver a pedirlo.
+
+- La sesión principal hace: plan, tareas, el modelo de datos, las fases que tocan el sistema
+  real (Docker, base de datos local), la memoria y las evidencias, y la integración final.
+- Agentes nuevos y en segundo plano, con un prompt corto y autocontenido que apunta a ficheros
+  (nunca pegar contenido ni usar `fork`, que hereda toda la conversación): Sonnet para código y
+  pruebas; Haiku para SQL, tablas y tareas mecánicas.
+- Cada tarea de `tasks.md` lleva una etiqueta de agente y la lista de ficheros que puede tocar.
+  Dos agentes a la vez solo si sus ficheros no se solapan.
+- Nunca dos ejecuciones de `tests/db` a la vez: comparten `observatory_test`, que el fixture de
+  sesión borra. Los agentes ejecutan solo sus ficheros; la suite completa la ejecuta la sesión
+  principal una vez.
+- Los agentes no hacen commit, no tocan `.env` y no ejecutan `down -v`. Informan en menos de 200
+  palabras; la sesión principal verifica lo entregado y hace el commit.
+- Si un agente corta por el límite de uso, reanudarlo con SendMessage en lugar de lanzar otro.
+- Si el prompt de la spec ya trae las decisiones, saltar `/speckit-clarify`.
+- Los ficheros largos se escriben con la herramienta Write, no con heredocs de shell (fallan en
+  Git Bash).
+- Una spec por sesión: empezar limpio evita releer contexto que ya no hace falta.
+
 ## Idioma
 
 Código, identificadores, nombres de ficheros y carpetas en inglés; documentación, specs,
