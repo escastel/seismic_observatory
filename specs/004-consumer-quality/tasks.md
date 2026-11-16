@@ -92,7 +92,7 @@ tareas y ejecuta únicamente sus pruebas; la ejecución completa la hace el orqu
 - [X] T022 [A0] V2: inyectar los casos sintéticos con el sistema real y comprobar los cinco resultados de la tabla del quickstart; repetir la inyección y comprobar que no cambia nada; guardar en `docs/evidence/004/acceptance.md`
 - [X] T023 [A0] V4: `quality-reprocess --dry-run`, ejecutar, repetir; comprobar las 2 filas reales (recuperadas), las sintéticas y la idempotencia; guardar en `docs/evidence/004/reprocess.md`. **Cuenta el antes y el después** de eventos actuales y de cuarentena
 - [X] T024 [A0] V3: publicar un lote de 1.000 mensajes sintéticos válidos, reiniciar el consumidor a mitad y comparar con una ejecución sin reinicio; guardar en `docs/evidence/004/restart.md`
-- [ ] T025 [A0] V5 y V6: país (ejecución de las pruebas y consulta de eventos sin país y con `ambiguous_country`, con el antes/después del cambio de regla) y recuentos (`quality.sql`); guardar en `docs/evidence/004/spatial-and-counts.md`
+- [X] T025 [A0] V5 y V6: país (ejecución de las pruebas y consulta de eventos sin país y con `ambiguous_country`, con el antes/después del cambio de regla) y recuentos (`quality.sql`); guardar en `docs/evidence/004/spatial-and-counts.md`
 
 ---
 
