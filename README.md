@@ -171,24 +171,138 @@ docker compose --profile tunnel stop tunnel
 
 Sin `--profile tunnel` el servicio no arranca, y los cinco obligatorios funcionan igual.
 
-## 6. API
+## 6. Consultar la API
 
-Base: `http://127.0.0.1:8000/api` (o la URL del túnel).
+Base: `http://127.0.0.1:8000/api` (o la URL del túnel del apartado 5, añadiendo la cabecera
+`-H "ngrok-skip-browser-warning: 1"`). Solo acepta `GET` y `OPTIONS`; cualquier otro método
+devuelve 405. Los tiempos son milisegundos Unix en UTC. Las fechas de entrada van en ISO 8601 con
+zona horaria (`2025-01-01T00:00:00Z`); sin zona devuelven 422. Un desfase como `+02:00` debe
+escribirse `%2B02:00` en la URL. El contrato completo está en
+[specs/006-query-api/contracts/api.md](specs/006-query-api/contracts/api.md).
+
+### Eventos
+
+Sin parámetros devuelve las últimas 24 horas (ventana por defecto, `metadata.period.default_applied`
+en `true`), todas las magnitudes y hasta 1.000 eventos:
 
 ```bash
-curl "http://127.0.0.1:8000/api/eventos?format=geojson&min_mag=4"
-curl "http://127.0.0.1:8000/api/estadisticas/paises"
-curl "http://127.0.0.1:8000/api/estadisticas/timeline?bucket=month"
+curl "http://127.0.0.1:8000/api/eventos"
 ```
 
-`/eventos` acepta `country`, `country_id`, `start`, `end`, `date_from`, `date_to`, `min_mag`,
-`min_magnitude`, `max_magnitude`, `limit` y `offset`. También están `/salud` y
-`/estadisticas`. Con `format=geojson` o `Accept: application/geo+json` devuelve un
-`FeatureCollection`. La magnitud, la profundidad y el país pueden ser nulos. Los rangos
-incompatibles devuelven HTTP 400 y la base no disponible, HTTP 503 sin detalles internos. CORS
-admite solo los orígenes de `CORS_ORIGINS` (sin comodín) y los métodos `GET` y `OPTIONS`.
+Con periodo, magnitud mínima y país. `start` es inclusivo y `end` exclusivo:
 
-El contrato definitivo de la API se rehace en la spec 006.
+```bash
+curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&min_mag=4&country_id=ESP"
+```
+
+Si solo se indica `end`, la ventana por defecto son las 24 horas anteriores a él.
+
+Paginación con `limit` (de 1 al máximo, 1.000 por defecto) y `offset` (0 o mayor). Para recorrer
+todos los resultados, se pide una página, se lee `metadata.next_offset` y se repite con ese valor
+como `offset`, con los mismos filtros, hasta que sea `null`. Si la primera página trajo 500
+eventos, la siguiente empieza en `offset=500`:
+
+```bash
+curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&limit=500&offset=0"
+curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&limit=500&offset=500"
+```
+
+### Estadísticas
+
+Admiten los mismos filtros (`start`, `end`, `min_mag`, `country_id`) y `baseline_year` (2025 por
+defecto), que fija el año de referencia de la comparación. Se calculan sobre el conjunto completo
+del filtro, no sobre una página. Su `total` coincide con `metadata.total` de `/eventos` con los
+mismos filtros; `comparison.ratio` vale `"ND"` si la media diaria de referencia es 0.
+
+```bash
+curl "http://127.0.0.1:8000/api/estadisticas?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&min_mag=4&country_id=ESP&baseline_year=2025"
+curl "http://127.0.0.1:8000/api/estadisticas?min_mag=4&country_id=ESP"
+```
+
+La segunda orden, sin periodo, usa las últimas 24 horas, igual que `/eventos`.
+
+### Salud
+
+```bash
+curl "http://127.0.0.1:8000/api/salud"
+```
+
+Responde siempre 200 con `status` `ok` o `degraded`. Con `degraded`, `database` o
+`replay_database` valen `unavailable` y `last_ingestion` es `null`. No muestra credenciales ni
+datos de conexión.
+
+### Modo reproducción
+
+Con `mode=replay` se consulta el esquema de reproducción en lugar de los datos reales, y no se
+aplica la ventana de 24 horas por defecto. `exclude_synthetic=true` quita los casos sintéticos; solo
+tiene efecto en este modo:
+
+```bash
+curl "http://127.0.0.1:8000/api/eventos?mode=replay&exclude_synthetic=true&limit=5"
+curl "http://127.0.0.1:8000/api/estadisticas?mode=replay&exclude_synthetic=true"
+```
+
+En la respuesta, `metadata.mode` es `"replay"`, `metadata.label` es `"REPRODUCCIÓN"` y
+`metadata.last_replayed_at` indica la última reproducción (milisegundos, o `null`). Cada `feature`
+añade `properties.replayed_at` (milisegundos) y `properties.synthetic` (booleano).
+`metadata.last_ingestion` sigue siendo la última consulta correcta a USGS. Ninguna respuesta
+mezcla los dos esquemas.
+
+### Errores
+
+Todos los errores devuelven JSON. Con `curl -i` se ve el código de estado:
+
+```bash
+curl -i "http://127.0.0.1:8000/api/eventos?mode=x&start=2025-01-01T00:00:00"
+```
+
+Parámetro inválido, HTTP 422. Aquí `mode` no es `live` ni `replay`, y `start` no lleva zona horaria:
+
+```json
+{"error": "invalid_parameters", "detail": [{"param": "mode", "message": "..."}, {"param": "start", "message": "..."}]}
+```
+
+Base de datos no disponible, pool sin abrir o tiempo agotado, HTTP 503:
+
+```json
+{"error": "database_unavailable", "detail": "..."}
+```
+
+La API no devuelve `features: []` con 200 por un fallo. Un error inesperado devuelve 500 con
+`{"error": "internal_error", "detail": "..."}`. Tras un 503, la API no necesita reiniciarse: en
+cuanto la base vuelve, las consultas funcionan y `/salud` pasa a `ok`.
+
+### Leer `metadata`
+
+| Campo | Significado |
+|---|---|
+| `generated` | Instante en que se generó la respuesta (ms). |
+| `last_ingestion` | Última consulta correcta a USGS (ms). Indica la frescura de los datos. |
+| `mode` | `live` o `replay`. |
+| `count` | Eventos en esta página. |
+| `total` | Eventos que cumplen los filtros, en todas las páginas. |
+| `limit`, `offset` | Página pedida. |
+| `truncated` | `true` si `offset + count < total`: quedan eventos por pedir. |
+| `next_offset` | `offset` de la página siguiente, o `null` si no quedan. |
+| `period` | Periodo efectivo de la consulta; `default_applied: true` si se aplicó la ventana de 24 horas. |
+| `null_magnitude` | Eventos con magnitud nula que cumplen el resto de filtros; `excluded: true` si hay `min_mag`, porque entonces no están en `features`. |
+| `quarantined` | Filas de cuarentena no sintéticas del modo; `invalid_geometry` es el subconjunto por geometría. |
+
+`generated` es cuándo respondió la API; `last_ingestion` es cuándo fue la última ingesta correcta.
+Una respuesta recién generada con un `last_ingestion` antiguo significa que USGS no se ha consultado
+con éxito desde hace tiempo. Para convertir un valor en fecha:
+
+```bash
+date -u -d @$((1793113140000/1000))
+```
+
+Los parámetros desconocidos se ignoran sin error. Por ejemplo, `format=geojson` no cambia nada: la
+respuesta sigue siendo un `FeatureCollection`. Esto significa que un parámetro mal escrito produce
+el resultado por defecto, no un aviso.
+
+Ya no existen los nombres de la API anterior: `date_from`, `min_magnitude`, `country`, `format`,
+`/estadisticas/paises`, `/estadisticas/timeline` y `/health`. Sus equivalentes son `start` y `end`,
+`min_mag`, `country_id`, la respuesta `FeatureCollection` por defecto, `/estadisticas` y `/salud`.
 
 ## 7. Datos
 
