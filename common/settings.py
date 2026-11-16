@@ -198,6 +198,31 @@ def catalog_loader(env: Mapping[str, str] | None = None) -> CatalogLoaderSetting
 
 
 @dataclass(frozen=True)
+class ReplaySettings:
+    database: DatabaseSettings
+    kafka: KafkaSettings
+    data_dir: str
+    default_rate: float
+
+
+def replay(env: Mapping[str, str] | None = None) -> ReplaySettings:
+    """Settings of the replay command; it needs neither the feed URL nor USGS."""
+    raw = optional("REPLAY_DEFAULT_RATE", "50", env)
+    try:
+        rate = float(raw)
+    except ValueError as exc:
+        raise SettingsError(f"Environment variable REPLAY_DEFAULT_RATE must be a number, got {raw!r}") from exc
+    if not rate > 0 or rate == float("inf"):
+        raise SettingsError(f"Environment variable REPLAY_DEFAULT_RATE must be greater than zero, got {raw!r}")
+    return ReplaySettings(
+        database=database("writer", env),
+        kafka=kafka(env),
+        data_dir=optional("DATA_DIR", "/data", env),
+        default_rate=rate,
+    )
+
+
+@dataclass(frozen=True)
 class ConsumerSettings:
     database: DatabaseSettings
     kafka: KafkaSettings
