@@ -293,6 +293,55 @@ Los mensajes van a `earthquakes.replay` y el consumidor los escribe en el esquem
 no puede modificar los datos reales de `core`. En Git Bash, anteponer `MSYS_NO_PATHCONV=1` si la
 ruta se convierte en una ruta de Windows. La reproducción completa se define en la spec 005.
 
+### Calidad de los datos
+
+El consumidor aplica reglas explícitas, cada una con un código estable
+([catálogo de reglas](specs/004-consumer-quality/contracts/rules-catalog.md)). Solo va a
+cuarentena lo que no puede tratarse (JSON ilegible, sin identificador, tiempo o versión,
+geometría que no es un punto, coordenadas imposibles, o una versión que el modelo rechaza), con
+**todos** los motivos y el mensaje original. La magnitud, la profundidad y el tipo de magnitud
+ausentes se guardan nulos, nunca como cero; las anomalías (profundidad negativa, valores fuera
+de rango, tiempo futuro…) se señalan en `quality_flags` sin rechazar el evento. El país se
+obtiene por punto en polígono; sin polígono queda nulo («Sin país asignado»).
+
+Los recuentos de cada regla se obtienen de lo almacenado, con el denominador explícito:
+
+```bash
+docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /queries/quality.sql'
+```
+
+El análisis completo, por dimensión, está en el apartado «Calidad de los datos» de
+[docs/report.md](docs/report.md).
+
+**Reprocesar la cuarentena** con las reglas vigentes (por ejemplo, tras retirar una regla):
+
+```bash
+docker compose run --rm quality-reprocess --dry-run     # solo lista lo que haría
+docker compose run --rm quality-reprocess
+```
+
+Es idempotente y no borra nada: cada fila de cuarentena queda marcada con la fecha y el
+resultado (`recovered_*` o `still_rejected`), y el registro de mensajes conserva el resultado
+original junto al del reprocesado.
+
+**Casos de prueba dañados a propósito.** Se inyectan en el sistema real, separados de los datos
+reales (prefijo `synthetic-` y marca `synthetic`), que las consultas de calidad excluyen:
+
+```bash
+docker compose -f compose.yaml -f compose.dev.yaml run --rm \
+  -e KAFKA_BOOTSTRAP_SERVERS=kafka:9092 -e KAFKA_TOPIC_LIVE=earthquakes.live \
+  -e KAFKA_TOPIC_CATALOG=earthquakes.catalog -e KAFKA_TOPIC_REPLAY=earthquakes.replay \
+  tests python -m tests.synthetic.inject --list      # sin --list los publica; repetirlo no duplica nada
+```
+
+**Base creada antes de la spec 004.** Los ficheros de `db/sql/` solo se ejecutan con el volumen
+vacío. Para añadir a una base existente las columnas de reprocesado sin recrearla:
+
+```bash
+MSYS_NO_PATHCONV=1 docker compose exec -T postgres sh -c \
+  'export PGUSER="$POSTGRES_USER"; /sql/apply.sh "$POSTGRES_DB" 041_consumer_quality.sql'
+```
+
 ## 8. Pruebas
 
 Las pruebas se ejecutan en un contenedor dentro de la red de Compose, contra una base temporal
