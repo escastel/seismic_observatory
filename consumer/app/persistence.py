@@ -15,7 +15,7 @@ from typing import Any
 
 import asyncpg
 
-from .quality import ValidatedEvent
+from .rules import Exclusion, Quarantine, ValidatedEvent
 
 APPLY_SQL = """
 SELECT apply_event_version($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13::jsonb, $14, $15, $16, $17)
@@ -23,9 +23,16 @@ SELECT apply_event_version($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $1
 
 QUARANTINE_SQL = """
 INSERT INTO quarantine (kafka_topic, kafka_partition, kafka_offset, event_id,
-                        reason_codes, reason_detail, payload, raw_text)
-VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8)
+                        reason_codes, reason_detail, payload, raw_text, is_synthetic)
+VALUES ($1, $2, $3, $4, $5, $6, $7::jsonb, $8, $9)
 ON CONFLICT (kafka_topic, kafka_partition, kafka_offset) DO NOTHING
+"""
+
+# The extraction is linked only when it exists: the foreign key must not fail a message.
+EXCLUDED_SQL = """
+INSERT INTO excluded_event (event_id, updated_at, event_type, reason_code, extraction_id, payload)
+VALUES ($1, $2, $3, $4, (SELECT extraction_id FROM core.extraction WHERE extraction_id = $5), $6::jsonb)
+ON CONFLICT (event_id, updated_at) DO NOTHING
 """
 
 MESSAGE_LOG_SQL = """
@@ -44,17 +51,6 @@ class Position:
     offset: int
 
 
-@dataclass(frozen=True)
-class Rejection:
-    """A message that goes to quarantine, with every reason found."""
-
-    reason_codes: list[str]
-    reason_detail: str
-    event_id: str | None = None
-    payload: Any = None          # decoded JSON, when the message was JSON
-    raw_text: str | None = None  # original text, when it was not
-
-
 def to_json(value: Any) -> str:
     """Strict JSON (no NaN or infinity), as PostgreSQL jsonb requires."""
     return json.dumps(value, allow_nan=False, ensure_ascii=False, separators=(",", ":"))
@@ -67,6 +63,7 @@ async def store_version(
     *,
     source: str,
     country_id: str | None,
+    flags: list[str],
     original: Any,
     replayed_at: datetime | None,
 ) -> str:
@@ -84,7 +81,7 @@ async def store_version(
         event.depth_km,
         event.place or None,
         country_id,
-        [],
+        flags,
         to_json(original),
         position.topic,
         position.partition,
@@ -93,20 +90,42 @@ async def store_version(
     )
 
 
-async def store_rejection(conn: asyncpg.Connection, position: Position, rejection: Rejection) -> str:
+async def store_rejection(conn: asyncpg.Connection, position: Position, rejection: Quarantine) -> str:
     """Quarantine row, once per message position; returns 'quarantined'."""
+    payload, raw_text = None, rejection.raw_text
+    if raw_text is None:
+        try:
+            payload = to_json(rejection.payload)
+        except ValueError:
+            # A literal like 1e999 decodes to infinity, which jsonb cannot hold: keep the text.
+            raw_text = json.dumps(rejection.payload, ensure_ascii=False)
     await conn.execute(
         QUARANTINE_SQL,
         position.topic,
         position.partition,
         position.offset,
         rejection.event_id,
-        rejection.reason_codes,
-        rejection.reason_detail,
-        to_json(rejection.payload) if rejection.raw_text is None else None,
-        rejection.raw_text,
+        rejection.reasons,
+        rejection.detail,
+        payload,
+        raw_text,
+        rejection.synthetic,
     )
     return "quarantined"
+
+
+async def store_exclusion(conn: asyncpg.Connection, exclusion: Exclusion, extraction_id: int | None) -> str:
+    """excluded_event row (once per event version); returns 'excluded'."""
+    await conn.execute(
+        EXCLUDED_SQL,
+        exclusion.event_id,
+        exclusion.updated_at,
+        exclusion.event_type,
+        exclusion.reason_code,
+        extraction_id,
+        to_json(exclusion.feature),
+    )
+    return "excluded"
 
 
 async def log_message(
