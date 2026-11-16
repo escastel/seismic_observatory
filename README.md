@@ -286,12 +286,119 @@ arrancar y cada 24 horas; las consultas registradas no se borran nunca.
 ### Reproducción acelerada
 
 ```bash
-docker compose run --rm producer python -m app.replay --path /seeds/historical_2025.jsonl --rate 10
+docker compose run --rm replay start --start 2025-01-01 --end 2025-04-01 --min-mag 4.0 --rate 200
 ```
 
 Los mensajes van a `earthquakes.replay` y el consumidor los escribe en el esquema `replay`, que
-no puede modificar los datos reales de `core`. En Git Bash, anteponer `MSYS_NO_PATHCONV=1` si la
-ruta se convierte en una ruta de Windows. La reproducción completa se define en la spec 005.
+no puede modificar los datos reales de `core`. La selección sale de lo ya descargado en
+`data/usgs/catalog/`; no se consulta a USGS. El procedimiento completo de la demostración de la
+defensa (pausar, reanudar, detener, repetir y comprobar el aislamiento) está en
+[Demostración de la defensa](#demostración-de-la-defensa).
+
+### Demostración de la defensa
+
+Sirve para enseñar el sistema con actividad aunque no ocurra ningún terremoto durante la defensa: se
+reproduce a velocidad acelerada una selección del histórico ya descargado, por el mismo camino que los
+datos reales (Kafka → consumidor → PostgreSQL), pero en el esquema `replay`, sin tocar `core`. No
+consulta a USGS. Los datos reproducidos se reconocen desde la base por estar en el esquema `replay` y
+tener `replayed_at`; el etiquetado «REPRODUCCIÓN» en la API y el panel llega con las specs 006 y 007.
+
+**Requisitos**: el stack levantado y sano (`docker compose up --build -d`) y el catálogo de 2025 con
+magnitud ≥ 4 descargado y registrado (`docker compose run --rm catalog-loader`, apartado
+[Cargar el histórico](#cargar-el-histórico)). En Linux, antes de empezar:
+`export LOADER_UID=$(id -u) LOADER_GID=$(id -g)` (la orden escribe sus ficheros de control en
+`./data/replay/`). Todas las órdenes se lanzan desde la raíz del repositorio y no necesitan
+`MSYS_NO_PATHCONV` en Git Bash.
+
+En el texto, «terminal 1» y «terminal 2» son dos terminales abiertas en la raíz del repositorio.
+
+**1. Ver la selección sin publicar** (terminal 1). Con enero a abril de 2025 y magnitud ≥ 4 salen
+5.301 eventos:
+
+```bash
+docker compose run --rm replay select --start 2025-01-01 --end 2025-05-01 --min-mag 4.0
+```
+
+Anota el `extraction_id`: la selección queda registrada en `core.extraction` con propósito
+`replay_selection`. Se rechaza, con código de salida 2, un periodo no descargado, una magnitud mínima
+inferior a la del catálogo o un fichero alterado. Para limitar a una zona, `--bbox=` con
+`min_lon,min_lat,max_lon,max_lat` (con el signo menos pegado: `--bbox=-125,32,-114,42`).
+
+**2. Preparar la comprobación de aislamiento** (opcional, recomendada). El feed real escribe en `core`
+por su cuenta, así que se para el productor mientras dura la comprobación y se toma una instantánea
+(recuento y suma de comprobación de cada tabla de `core`):
+
+```bash
+docker compose stop producer
+docker compose run --rm replay reset
+docker compose run --rm replay snapshot
+```
+
+**3. Reproducir** (terminal 1). `--rate` son eventos por segundo; `--speedup 3600` añadiría un factor
+sobre el tiempo original (con ambos, la cadencia nunca supera `--rate`). A 200 eventos/s, 5.301
+eventos tardan unos 27 s; a 20 se alarga lo bastante para enseñar el control:
+
+```bash
+docker compose run --rm replay start --start 2025-01-01 --end 2025-05-01 --min-mag 4.0 --rate 20
+```
+
+**4. Controlarla** (terminal 2, mientras corre la 1). Solo puede haber una reproducción activa:
+
+```bash
+docker compose run --rm replay status    # estado, enviados, restantes
+docker compose run --rm replay pause     # deja de publicar; el contador no avanza
+docker compose run --rm replay resume    # sigue por el siguiente evento, sin saltos
+docker compose run --rm replay stop      # termina; lo ya publicado se conserva
+```
+
+**5. Enseñar lo reproducido en la base** (cuando el consumidor esté al día):
+
+```bash
+docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*), min(replayed_at), max(replayed_at) FROM replay.event_current"'
+docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < docs/evidence/005/sql/v2-replayed-data.sql
+```
+
+La segunda consulta muestra que todo lo reproducido está en `replay`, que cada evento conserva su
+tiempo de ocurrencia original (`event_time` sigue siendo de 2025; solo `replayed_at` es de hoy) y que
+`core` no recibió nada del topic de reproducción.
+
+**6. Comprobar que `core` no cambió** (con el productor parado, paso 2):
+
+```bash
+docker compose run --rm replay compare   # "core idéntico a la instantánea", código de salida 0
+```
+
+**7. Repetir desde cero**: `reset` vacía solo las tablas de `replay` (no existe operación equivalente
+en `core`), y se vuelve a lanzar el paso 3. El resultado es idéntico al de la primera vez.
+
+```bash
+docker compose run --rm replay reset
+```
+
+**8. Casos sintéticos** (primera versión, repetición exacta, revisión, versión antigua tardía y un
+mensaje a cuarentena; 7 mensajes con resultado conocido):
+
+```bash
+docker compose run --rm replay reset
+docker compose run --rm replay start --synthetic-only
+docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB"' < docs/evidence/005/sql/v6-synthetic-cases.sql
+```
+
+Esperado: `new` 3, `duplicate` 1, `revised` 1, `stale` 1 y `quarantined` 1. Con `--synthetic` en lugar de
+`--synthetic-only`, los siete mensajes se añaden al final de una selección real.
+
+**9. Al terminar**: `docker compose start producer` para reanudar la ingesta real.
+
+Notas:
+
+- El consumidor puede reiniciarse a mitad de la reproducción (`docker compose restart consumer`): al
+  terminar, el resultado es el mismo que sin reinicio.
+- Si se crea un consumidor con un grupo nuevo, empieza por el principio del topic de reproducción
+  (retención de 168 h) y repuebla `replay` con reproducciones anteriores; no afecta a `core`.
+- Procedimiento detallado y evidencia de cada escenario en
+  [specs/005-historical-replay/quickstart.md](specs/005-historical-replay/quickstart.md) y
+  [docs/evidence/005/](docs/evidence/005/README.md); explicación y resultados medidos en
+  [docs/report.md](docs/report.md#reproducción-histórica).
 
 ### Calidad de los datos
 
@@ -350,6 +457,7 @@ Las pruebas se ejecutan en un contenedor dentro de la red de Compose, contra una
 ```bash
 docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/db -v
 docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/unit tests/contract -v
+docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/unit/test_replay_*.py -v
 ```
 
 `tests/db` cubre la secuencia de duplicados y revisiones de la FAQ 12, nulos y rangos,

@@ -1,0 +1,134 @@
+## lag antes (productor parado)
+
+observatorio-consumer earthquakes.replay  0          -               0               -               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+observatorio-consumer earthquakes.catalog 0          32533           32533           0               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+observatorio-consumer earthquakes.live    0          1681            1681            0               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+$ docker compose run --rm replay reset
+Tablas de replay vaciadas; core no se ha tocado. Vuelva a ejecutar `replay start`
+exit=0
+
+$ docker compose run --rm replay snapshot
+Instantánea de core guardada en /data/replay/core-snapshot.json: 10 tablas
+exit=0
+
+inicio 2026-11-16T17:53:34Z
+$ docker compose run --rm replay start --start 2025-01-01 --end 2025-05-01 --min-mag 4.0 --rate 200
+Selección registrada: 5301 eventos, primero 2025-01-01T00:13:22Z, último 2025-04-30T23:56:05Z, extraction_id 559
+Reproducción terminada: 5301 eventos publicados
+exit=0
+
+fin 2026-11-16T17:54:03Z
+segundos totales (incluye arranque del contenedor): 29.4
+{"run": "07f7f3fedee242dfabaa51cce0918ec4", "state": "finished", "total": 5301, "sent": 5301, "remaining": 0, "rate_target": 200.0, "speedup": null, "started_at": "2026-11-16T17:53:36.161376+00:00", "updated_at": "2026-11-16T17:54:03.088961+00:00", "extraction_id": 559, "error": null}
+## lag tras la reproducción
+
+observatorio-consumer earthquakes.replay  0          5301            5301            0               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+observatorio-consumer earthquakes.catalog 0          32533           32533           0               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+observatorio-consumer earthquakes.live    0          1681            1681            0               aiokafka-0.12.0-bed1c506-262d-4668-bd0e-be71e571958b /172.19.0.3     aiokafka-0.12.0
+$ replay compare
+core idéntico a la instantánea: el aislamiento se mantiene
+exit=0
+## instantánea de core (recuento y suma de comprobación por tabla)
+{
+  "replay_selection_rows": 4,
+  "tables": {
+    "dim_country": {
+      "checksum": "-26611577126076400752",
+      "rows": 177
+    },
+    "dim_date": {
+      "checksum": "671410811425927883479",
+      "rows": 49673
+    },
+    "event_current": {
+      "checksum": "-1145854898388608694362",
+      "rows": 34037
+    },
+    "event_version": {
+      "checksum": "167926245368415266023",
+      "rows": 34196
+    },
+    "excluded_event": {
+      "checksum": "-7683590486452695179",
+      "rows": 2
+    },
+    "extraction": {
+      "checksum": "-29197715535812813759",
+      "rows": 495
+    },
+    "message_log": {
+      "checksum": "646113686205474144138",
+      "rows": 34232
+    },
+    "publish_state": {
+      "checksum": "-325851869206893070975",
+      "rows": 33024
+    },
+    "quarantine": {
+      "checksum": "-33325887935704952421",
+      "rows": 18
+    },
+    "raw_payload": {
+      "checksum": "-124569341472404124979",
+      "rows": 158
+    }
+  }
+}
+## docs/evidence/005/sql/v2-replayed-data.sql
+== eventos distintos y versiones en replay
+ event_current | event_version | quarantine | excluded 
+---------------+---------------+------------+----------
+          5301 |          5301 |          0 |        0
+(1 row)
+
+== identificabilidad: sin replayed_at nulo, todo viene del topic de reproducción
+ without_replayed_at |       first_replayed_at       |       last_replayed_at        
+---------------------+-------------------------------+-------------------------------
+                   0 | 2026-11-16 17:53:36.171432+00 | 2026-11-16 17:54:03.085918+00
+(1 row)
+
+    kafka_topic     | count 
+--------------------+-------
+ earthquakes.replay |  5301
+(1 row)
+
+    kafka_topic     | outcome | count 
+--------------------+---------+-------
+ earthquakes.replay | new     |  5301
+(1 row)
+
+== core no recibió nada de la reproducción (replayed_at siempre nulo en core)
+ core_rows_with_replayed_at 
+----------------------------
+                          0
+(1 row)
+
+ core_versions_from_replay_topic 
+---------------------------------
+                               0
+(1 row)
+
+== el mismo identificador en core y en replay (valores propios en cada esquema)
+   event_id   | core_magnitude | replay_magnitude | same_event_time | core_not_replayed | replay_is_replayed 
+--------------+----------------+------------------+-----------------+-------------------+--------------------
+ ak0251doqqfp |            5.2 |              5.2 | t               | t                 | t
+ ak0251kc24k9 |            4.6 |              4.6 | t               | t                 | t
+ ak0251lyi1dl |              4 |                4 | t               | t                 | t
+ ak0251m0a5o8 |            4.6 |              4.6 | t               | t                 | t
+ ak0251no5hd4 |            4.1 |              4.1 | t               | t                 | t
+(5 rows)
+
+ ids_in_both_schemas 
+---------------------
+                5301
+(1 row)
+
+$ python3 docs/evidence/005/check_original_times.py data/usgs/catalog data/replay/replay_times.csv
+coinciden: 5301; difieren: 0; sin original: 0
+exit=0
+## huella del estado de replay tras la primera reproducción (V2)
+ events |       checksum        
+--------+-----------------------
+   5301 | 270575545300917288502
+(1 row)
+

@@ -1,0 +1,37 @@
+$ docker compose run --rm replay select --start 2025-01-01 --end 2025-05-01 --min-mag 4.0
+Selección registrada: 5301 eventos, primero 2025-01-01T00:13:22Z, último 2025-04-30T23:56:05Z, extraction_id 556
+exit=0
+
+$ docker compose run --rm replay select --start 2024-06-01 --end 2024-07-01 --min-mag 4.0
+Selección rechazada: El periodo no está cubierto por las cargas del catálogo registradas: falta desde 2024-06-01T00:00:00Z. Cargue el periodo con catalog-loader antes de reproducirlo.
+
+exit=2
+
+$ docker compose run --rm replay select --start 2025-01-01 --end 2025-02-01 --min-mag 2.5
+Selección rechazada: La magnitud mínima pedida (2.5) es inferior a la de la carga del catálogo (4): faltarían eventos. Pida 4 o más, o cargue el periodo con menos filtro.
+
+exit=2
+
+$ docker compose run --rm replay select --start 2025-01-01 --end 2025-02-01 --min-mag 9.9
+Selección registrada: 0 eventos, primero —, último —, extraction_id 557
+Aviso: la selección está vacía; no hay nada que reproducir
+exit=0
+
+$ docker compose run --rm replay select --start 2025-01-01 --end 2025-02-01 --min-mag 4.0 --bbox=-125,32,-114,42
+Selección registrada: 3 eventos, primero 2025-01-02T02:34:04Z, último 2025-01-26T14:03:01Z, extraction_id 558
+exit=0
+
+$ docker compose run --rm -e DATA_DIR=/data/v1-copy replay select --start 2025-01-01 --end 2025-02-01 --min-mag 4.0
+Selección rechazada: El fichero usgs/catalog/2025-01-01T000000Z_2025-02-01T000000Z_m4_earthquake_d6d8d7e96509.geojson no coincide con su huella registrada: ha sido alterado.
+
+exit=2
+
+--- core.extraction replay_selection rows (docs/evidence/005/sql/v1-registered-selections.sql)
+ extraction_id |     purpose      |           request_url           | outcome | window_start | window_end | record_count | earthquake_count | published_count | min_magnitude |             bbox             | files 
+---------------+------------------+---------------------------------+---------+--------------+------------+--------------+------------------+-----------------+---------------+------------------------------+-------
+           554 | replay_selection | local-catalog:data/usgs/catalog | ok      | 2025-01-01   | 2025-04-01 |         3985 |             3985 |                 | 4.0           |                              |     3
+           556 | replay_selection | local-catalog:data/usgs/catalog | ok      | 2025-01-01   | 2025-05-01 |         5301 |             5301 |                 | 4.0           |                              |     4
+           557 | replay_selection | local-catalog:data/usgs/catalog | ok      | 2025-01-01   | 2025-02-01 |            0 |                0 |                 | 9.9           |                              |     1
+           558 | replay_selection | local-catalog:data/usgs/catalog | ok      | 2025-01-01   | 2025-02-01 |            3 |                3 |                 | 4.0           | [-125.0, 32.0, -114.0, 42.0] |     1
+(4 rows)
+

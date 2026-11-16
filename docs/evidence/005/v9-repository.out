@@ -1,0 +1,56 @@
+$ git ls-files db/seeds
+db/seeds/.gitkeep
+db/seeds/README.md
+
+$ git ls-files data | wc -l  (ficheros versionados bajo data/, esperado: solo .gitkeep)
+data/.gitkeep
+
+$ git check-ignore -v data/replay/status.json data/usgs/catalog/x.geojson db/seeds/historical_2026.jsonl
+.gitignore:76:data/*	data/replay/status.json
+.gitignore:76:data/*	data/usgs/catalog/x.geojson
+.gitignore:78:db/seeds/*.jsonl	db/seeds/historical_2026.jsonl
+
+$ git status --short (sin .env, data/ ni copias *.bak/*.orig)
+ M .env.example
+ M .gitignore
+ M README.md
+ M common/settings.py
+ M compose.yaml
+ M consumer/app/main.py
+ M db/seeds/README.md
+D  db/seeds/historical_1900.jsonl
+D  db/seeds/historical_2025.jsonl
+ M docs/calidad.md
+ D producer/app/replay.py
+ M tests/integration/load_test.py
+ M tests/unit/test_common_settings.py
+ D tests/unit/test_history.py
+ D tests/unit/test_replay.py
+?? docs/evidence/005/
+?? producer/app/replay/
+?? specs/005-historical-replay/
+?? tests/db/test_replay_consumer_restart.py
+?? tests/db/test_replay_control_flow.py
+?? tests/db/test_replay_end_to_end.py
+?? tests/db/test_replay_isolation_check.py
+?? tests/db/test_replay_lock.py
+?? tests/db/test_replay_replayed_at.py
+?? tests/db/test_replay_selection.py
+?? tests/db/test_replay_synthetic.py
+?? tests/unit/test_replay_cli.py
+?? tests/unit/test_replay_control.py
+?? tests/unit/test_replay_message.py
+?? tests/unit/test_replay_pacing.py
+?? tests/unit/test_replay_runner.py
+?? tests/unit/test_replay_selection.py
+?? tests/unit/test_replay_service_layout.py
+?? tests/unit/test_replay_synthetic.py
+
+$ ficheros nuevos o modificados mayores de 500 kB (esperado: ninguno)
+(fin)
+
+$ copias *.bak / *.orig en db/seeds
+ninguna
+
+$ git ls-files | grep -E "(^|/)\.env$"
+ningún .env versionado

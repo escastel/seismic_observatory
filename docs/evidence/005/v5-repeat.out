@@ -1,0 +1,25 @@
+$ docker compose run --rm replay compare
+core idéntico a la instantánea: el aislamiento se mantiene
+exit=0
+
+$ docker compose run --rm replay reset
+Tablas de replay vaciadas; core no se ha tocado. Vuelva a ejecutar `replay start`
+exit=0
+
+$ SELECT count(*) FROM replay.event_current  (tras reset)
+0
+$ docker compose run --rm replay start --start 2025-01-01 --end 2025-05-01 --min-mag 4.0 --rate 200
+Selección registrada: 5301 eventos, primero 2025-01-01T00:13:22Z, último 2025-04-30T23:56:05Z, extraction_id 561
+Reproducción terminada: 5301 eventos publicados
+exit=0
+
+$ docker compose run --rm replay compare
+core idéntico a la instantánea: el aislamiento se mantiene
+exit=0
+
+## huella tras la repetición (V2 fue: 5301 | 270575545300917288502)
+ events |       checksum        
+--------+-----------------------
+   5301 | 270575545300917288502
+(1 row)
+

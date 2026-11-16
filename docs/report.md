@@ -352,6 +352,122 @@ excluyen; la variante `-synthetic-only` de cada una los cuenta aparte: 1.013 eve
 - Los eventos sin magnitud no aparecen en el histórico de 2025 y 2026 porque se cargó con
   magnitud ≥ 4; la recuperación de un hueco, que trae todas las magnitudes, sí los puede traer.
 
+## Reproducción histórica
+
+Esta sección documenta la reproducción acelerada de una selección histórica (spec 005). Sirve para
+demostrar el sistema con actividad aunque no ocurra ningún terremoto durante la defensa (enunciado
+§11, prueba «Reproducción histórica»; FAQ 32), sin mezclarla nunca con los datos reales (principio VI
+de la constitución). El etiquetado «REPRODUCCIÓN» en la API y en el panel corresponde a las specs 006
+y 007; aquí se garantiza la parte de datos: circulación por Kafka, aislamiento e identificabilidad.
+
+### Qué es y qué no es
+
+| Es | No es |
+|---|---|
+| Una orden (`replay`) que publica en `earthquakes.replay` una selección de lo **ya descargado** en `data/usgs/catalog/` | Una consulta a USGS: no hay ninguna durante la reproducción |
+| Un flujo por Kafka → mismo consumidor → esquema `replay` | Un camino aparte con código propio: el consumidor es el de la spec 004 |
+| Una demostración repetible (`reset` y repetir) | Una prueba de carga: las cifras de cadencia son de conformidad, no de rendimiento |
+
+### Diseño
+
+```text
+data/usgs/catalog/*.geojson ──► selección (periodo, magnitud mínima, recuadro opcional)
+        │                         · verifica huella contra core.raw_payload (principio V)
+        │                         · registra la consulta en core.extraction (purpose = replay_selection)
+        ▼
+ orden `replay start`  ──► Kafka earthquakes.replay (mode "replay", clave = id del evento,
+        │                  time y updated originales, replayed_at nuevo)
+        ▼
+ consumidor (spec 004) ──► esquema replay  (core no se toca)
+```
+
+- **Selección**: sale de los ficheros descargados y se ordena por tiempo de ocurrencia. Falla sin
+  publicar nada si un fichero no coincide con su huella, si el periodo no está cubierto por cargas
+  registradas o si la magnitud mínima pedida es menor que la de la carga (una selección que se quedara
+  corta en silencio daría datos que parecen reales). Un evento repetido entre ficheros se publica una
+  vez con su `updated` mayor. Las magnitudes nulas no cumplen un filtro de magnitud mínima y se cuentan.
+- **Zona**: recuadro geográfico opcional (`--bbox=min_lon,min_lat,max_lon,max_lat`), sin cruce del
+  antimeridiano. No es un filtro por país: el país lo asigna después el consumidor por punto en polígono
+  (principio IV), y asignarlo en la selección habría duplicado esa integración.
+- **Cadencia**: `--rate` (eventos por segundo) y `--speedup` opcional sobre el tiempo original; con
+  ambos, la cadencia nunca supera la velocidad indicada. Los plazos son absolutos para que el retraso del
+  envío no se acumule, y tras una pausa se rebasan para no emitir en ráfaga.
+- **Control**: `pause`, `resume`, `stop`, `status` y `reset` mediante un fichero en `data/replay/`
+  (sin puertos ni servicio nuevo). Solo una reproducción activa a la vez, con un bloqueo asesor de
+  PostgreSQL que se libera solo si el proceso muere.
+- **Tiempo**: `time` y `updated` viajan como los publicó USGS; se añade `replayed_at` (instante real de
+  la publicación). Nunca se alteran fechas para que parezcan recientes.
+- **Mensaje y modelo**: sin cambios de modelo. Un único cambio en el consumidor de la spec 004: usa el
+  `replayed_at` que trae el mensaje (antes ponía la hora de lectura), para que el valor no cambie si el
+  consumidor se reinicia y relee.
+
+### Aislamiento
+
+Los eventos reproducidos solo terminan en el esquema `replay`, que es lo que decide el topic de origen.
+Un mismo identificador puede existir en `core` y en `replay` con valores distintos sin interferir. La
+comprobación (`replay snapshot` y `replay compare`) toma, para cada tabla de `core` descubierta en el
+catálogo de PostgreSQL, el recuento y la suma de `hashtextextended` de cada fila, y los compara antes y
+después. La única diferencia admitida es la fila que cada selección deja en `core.extraction`
+(propósito `replay_selection`), que es la constancia que exige la spec y que la comparación cuenta
+aparte. Debe hacerse con el productor en vivo parado, porque el feed real escribe en `core` por su
+cuenta.
+
+Desde la base, un dato es de reproducción si está en el esquema `replay`, si `replayed_at` no es nulo
+(la restricción del modelo lo obliga en `replay` y lo prohíbe en `core`) y si su `kafka_topic` es el de
+reproducción. El modo `"replay"` viaja en el mensaje de Kafka; el modelo no guarda el mensaje completo
+(solo el `Feature` original), por lo que no se usa como criterio desde la base.
+
+### Casos sintéticos
+
+Siete mensajes, cinco casos, con fechas fijas y la convención de la spec 004 (`synthetic-replay-…`,
+marca `synthetic`): primera versión, repetición exacta, revisión, versión antigua tardía y un mensaje
+que va a cuarentena. Se publican con `replay start --synthetic` (tras la selección) o
+`--synthetic-only`.
+
+| Caso | Resultado esperado | Observado |
+|---|---|---|
+| Primera versión | `new` | `new` |
+| Repetición exacta | `duplicate` | `duplicate` |
+| Revisión posterior | `revised` (el estado actual toma la nueva, el historial conserva ambas) | `revised`, 2 versiones |
+| Versión antigua tardía | `stale` (el estado actual no retrocede) | `stale`, `updated_at` sin retroceder |
+| Coordenadas imposibles | `quarantined` con `coordinates_out_of_range` | cuarentena sintética con el original |
+
+### Resultados de la verificación
+
+Medidos el 2026-11-16 en un equipo Windows 11 con Docker Desktop, con el catálogo 2025 de magnitud ≥ 4
+ya descargado (detalle y salidas en [docs/evidence/005/](evidence/005/README.md)):
+
+| Medida | Resultado |
+|---|---|
+| Selección de enero a abril de 2025, magnitud ≥ 4 | 5.301 eventos, registrados en `core.extraction` |
+| Reproducción a 200 eventos/s | 5.301 eventos en 26,9 s (196,8 eventos/s, −1,6 % del objetivo) |
+| Tiempo original | 5.301 de 5.301 coinciden con los ficheros descargados (0 diferencias) |
+| Aislamiento | 10 tablas de `core` idénticas (recuento y suma) tras cada uno de los cinco escenarios |
+| Pausa | efectiva 0,41 s después de volver la orden; el contador no avanza en pausa |
+| Repetición tras `reset` | huella idéntica a la primera ejecución (`5301 · 270575545300917288502`) |
+| Reinicio del consumidor a mitad (2.525 de 5.301) | huella idéntica; 5.301 mensajes `new`, ninguno duplicado, 0 en cuarentena |
+| Pruebas automáticas | 682 pasan en el contenedor (`pytest tests`) |
+
+**Supuestos y límites** (no medidos): la cadencia se mide hasta la confirmación de Kafka por mensaje y
+no es un banco de pruebas de rendimiento (no cubre tres tamaños de entrada ni memoria); se ejecutó en un
+solo equipo; el equipo Linux no se ha usado para esta verificación aunque el flujo es el mismo en
+Docker; un grupo nuevo del consumidor empezaría desde el principio del topic de reproducción (retención
+de 168 h) y repoblaría `replay` con reproducciones anteriores, sin afectar a `core`.
+
+### Material heredado
+
+`producer/app/replay.py` se sustituyó por el paquete `producer/app/replay/`.
+`db/seeds/historical_2025.jsonl` (seis eventos ficticios) y `db/seeds/historical_1900.jsonl` (35
+eventos reales descargados) se retiraron de Git: los casos de prueba los cubre el conjunto sintético y
+los datos descargados no se versionan (se regeneran con `docker compose run --rm catalog-loader`).
+Material de apoyo reutilizado frente a desarrollado: el catálogo, el consumidor y el modelo son de las
+specs anteriores; la selección, la orden, el control, la comprobación de aislamiento y los casos
+sintéticos son desarrollo de esta spec.
+
+### Cómo ejecutar la demostración
+
+Paso a paso en el [README](../README.md#demostración-de-la-defensa).
+
 ## Modelo conceptual
 
 ```mermaid

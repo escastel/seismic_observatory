@@ -2,8 +2,8 @@
 
 ## Alcance y fuente
 
-La fuente operacional es el GeoJSON `all_day.geojson` de USGS; el replay usa
-`db/seeds/historical_2025.jsonl`. La evidencia se obtiene mediante consultas
+La fuente operacional es el GeoJSON `all_day.geojson` de USGS; la reproducción
+(spec 005) usa el catálogo descargado en `data/usgs/catalog/`. La evidencia se obtiene mediante consultas
 SQL sobre PostgreSQL y se registra manualmente para evitar crear un generador
 automático de informes, conforme a la constitución.
 

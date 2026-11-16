@@ -1,0 +1,62 @@
+$ docker compose run --rm replay reset
+Tablas de replay vaciadas; core no se ha tocado. Vuelva a ejecutar `replay start`
+exit=0
+
+$ docker compose run --rm replay start --synthetic-only
+Reproducción terminada: 7 eventos publicados
+exit=0
+
+== resultado de cada mensaje, en orden de llegada
+ kafka_offset |             event_id             |       updated_at       |   outcome   
+--------------+----------------------------------+------------------------+-------------
+        10938 | synthetic-replay-first           | 2025-06-15 12:10:00+00 | new
+        10939 | synthetic-replay-first           | 2025-06-15 12:10:00+00 | duplicate
+        10940 | synthetic-replay-revised         | 2025-06-15 12:10:00+00 | new
+        10941 | synthetic-replay-revised         | 2025-06-15 13:30:00+00 | revised
+        10942 | synthetic-replay-stale           | 2025-06-15 13:30:00+00 | new
+        10943 | synthetic-replay-stale           | 2025-06-15 12:10:00+00 | stale
+        10944 | synthetic-replay-bad-coordinates |                        | quarantined
+(7 rows)
+
+== recuento por resultado (esperado: duplicate 1, new 3, quarantined 1, revised 1, stale 1)
+   outcome   | count 
+-------------+-------
+ duplicate   |     1
+ new         |     3
+ quarantined |     1
+ revised     |     1
+ stale       |     1
+(5 rows)
+
+== estado actual: la revisión tomó la versión nueva y la antigua tardía no retrocedió (updated_at = U2 = 13:30)
+         event_id         | magnitude |       updated_at       | quality_flags 
+--------------------------+-----------+------------------------+---------------
+ synthetic-replay-first   |       4.1 | 2025-06-15 12:10:00+00 | {synthetic}
+ synthetic-replay-revised |       4.4 | 2025-06-15 13:30:00+00 | {synthetic}
+ synthetic-replay-stale   |       4.1 | 2025-06-15 13:30:00+00 | {synthetic}
+(3 rows)
+
+== versiones conservadas (esperado: first 1, revised 2, stale 2)
+         event_id         | versions 
+--------------------------+----------
+ synthetic-replay-first   |        1
+ synthetic-replay-revised |        2
+ synthetic-replay-stale   |        2
+(3 rows)
+
+== cuarentena (esperado: 1 fila sintética con coordinates_out_of_range y el original)
+             event_id             |        reason_codes        | is_synthetic | has_original 
+----------------------------------+----------------------------+--------------+--------------
+ synthetic-replay-bad-coordinates | {coordinates_out_of_range} | t            | t
+(1 row)
+
+== nada sintético en core (esperado: 0 en cada tabla)
+ event_current | event_version | quarantine | message_log 
+---------------+---------------+------------+-------------
+             0 |             0 |          0 |           0
+(1 row)
+
+$ docker compose run --rm replay compare
+core idéntico a la instantánea: el aislamiento se mantiene
+exit=0
+

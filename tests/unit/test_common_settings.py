@@ -126,3 +126,17 @@ def test_catalog_loader_does_not_need_the_feed_url() -> None:
     assert loader.data_dir == "/data"
     assert loader.database.user == "observatory_writer"
     assert loader.gap_margin_minutes == 60
+
+
+def test_replay_settings_need_neither_feed_url_nor_usgs() -> None:
+    env = {key: value for key, value in BASE.items() if key != "USGS_FEED_URL"}
+    replay = settings.replay(env)
+    assert (replay.data_dir, replay.default_rate) == ("/data", 50.0)
+    assert replay.database.user == "observatory_writer"
+    assert settings.replay({**env, "REPLAY_DEFAULT_RATE": "12.5"}).default_rate == 12.5
+
+
+@pytest.mark.parametrize("value", ["0", "-1", "fast", "inf", "nan"])
+def test_replay_default_rate_must_be_positive_and_finite(value: str) -> None:
+    with pytest.raises(SettingsError, match="REPLAY_DEFAULT_RATE"):
+        settings.replay({**BASE, "REPLAY_DEFAULT_RATE": value})

@@ -135,6 +135,18 @@ def _produced_at(decoded: dict[str, Any]) -> datetime | None:
     return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
 
 
+def _replayed_at(decoded: dict[str, Any]) -> datetime | None:
+    """replayed_at of a replay message (spec 005, research R1), or None when absent or unreadable."""
+    value = decoded.get("replayed_at")
+    if not isinstance(value, str):
+        return None
+    try:
+        parsed = datetime.fromisoformat(value)
+    except ValueError:
+        return None
+    return parsed if parsed.tzinfo else parsed.replace(tzinfo=timezone.utc)
+
+
 SYNTHETIC_KEY_PREFIX = b"synthetic-"
 
 
@@ -177,7 +189,10 @@ class MessageHandler:
         if ambiguous:
             result = replace(result, flags=sorted({*result.flags, "ambiguous_country"}))
         try:
-            return await self._write(search_path, position, result, country_id=country_id, produced_at=produced_at)
+            return await self._write(
+                search_path, position, result, country_id=country_id, produced_at=produced_at,
+                replayed_at=_replayed_at(decoded),
+            )
         except PERMANENT_DATABASE_ERRORS as exc:
             # The model refused a version the rules accepted (for example a date
             # outside dim_date). Retrying would block the topic forever
@@ -205,8 +220,10 @@ class MessageHandler:
         country_id: str | None = None,
         produced_at: datetime | None = None,
         extraction_id: int | None = None,
+        replayed_at: datetime | None = None,
     ) -> str:
-        replayed_at = datetime.now(timezone.utc) if position.topic == self.topics.replay else None
+        # The replay command stamps replayed_at in the message; reading time is the fallback (R1).
+        replayed_at = (replayed_at or datetime.now(timezone.utc)) if position.topic == self.topics.replay else None
         updated_at: datetime | None = None
         async with self.pools[search_path].acquire() as conn:
             async with conn.transaction():
