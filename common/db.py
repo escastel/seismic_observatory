@@ -29,6 +29,7 @@ async def open_pool(
     application_name: str,
     min_size: int = 1,
     max_size: int = 5,
+    command_timeout: float | None = None,
 ) -> asyncpg.Pool:
     """Create a pool once; every connection gets the given search_path.
 
@@ -39,6 +40,7 @@ async def open_pool(
         settings.dsn(),
         min_size=min_size,
         max_size=max_size,
+        command_timeout=command_timeout,
         server_settings={"search_path": search_path, "application_name": application_name},
     )
 
@@ -50,11 +52,17 @@ async def create_pool(
     application_name: str,
     min_size: int = 1,
     max_size: int = 5,
+    command_timeout: float | None = None,
 ) -> asyncpg.Pool:
     """open_pool, retried with exponential backoff until PostgreSQL answers."""
     return await retry(
         lambda: open_pool(
-            settings, search_path, application_name=application_name, min_size=min_size, max_size=max_size
+            settings,
+            search_path,
+            application_name=application_name,
+            min_size=min_size,
+            max_size=max_size,
+            command_timeout=command_timeout,
         ),
         description=f"connecting to PostgreSQL {settings.host}:{settings.port} as {settings.user} ({search_path})",
         retry_on=TRANSIENT_ERRORS,

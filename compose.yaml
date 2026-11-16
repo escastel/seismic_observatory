@@ -258,6 +258,7 @@ services:
       POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
       DB_READER_PASSWORD: ${DB_READER_PASSWORD:?set DB_READER_PASSWORD in .env}
       CORS_ORIGINS: ${CORS_ORIGINS:?set CORS_ORIGINS in .env}
+      API_MAX_FEATURES: ${API_MAX_FEATURES:-1000}
     depends_on:
       postgres:
         condition: service_healthy

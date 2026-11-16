@@ -61,6 +61,20 @@ def test_cors_origins_are_an_exact_list() -> None:
     assert settings.api(BASE).cors_origins == ["https://observatorio.netlify.app", "http://localhost:4200"]
 
 
+def test_max_features_defaults_to_one_thousand() -> None:
+    assert settings.api(BASE).max_features == 1000
+
+
+def test_max_features_can_be_configured() -> None:
+    assert settings.api({**BASE, "API_MAX_FEATURES": "250"}).max_features == 250
+
+
+@pytest.mark.parametrize("value", ["0", "-5", "many", "10001"])
+def test_max_features_rejects_invalid_values(value: str) -> None:
+    with pytest.raises(SettingsError):
+        settings.api({**BASE, "API_MAX_FEATURES": value})
+
+
 def test_each_role_gets_its_own_user_and_password() -> None:
     writer = settings.producer(BASE).database
     reader = settings.api(BASE).database

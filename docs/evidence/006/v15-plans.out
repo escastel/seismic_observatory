@@ -1,0 +1,155 @@
+SET
+== Q1 ventana por defecto (24 h), página de 1000
+                                                       QUERY PLAN                                                       
+------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=196 loops=1)
+   Buffers: shared hit=149
+   ->  Incremental Sort (actual rows=196 loops=1)
+         Sort Key: f.event_time DESC, f.event_id
+         Presorted Key: f.event_time
+         Full-sort Groups: 7  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+         Buffers: shared hit=149
+         ->  Index Scan Backward using event_current_event_time_idx on event_current f (actual rows=196 loops=1)
+               Index Cond: (event_time >= (now() - '24:00:00'::interval))
+               Filter: ((NOT starts_with(event_id, 'synthetic-'::text)) AND ('synthetic'::text <> ALL (quality_flags)))
+               Rows Removed by Filter: 1013
+               Buffers: shared hit=140
+ Planning:
+   Buffers: shared hit=198
+ Planning Time: 0.518 ms
+ Execution Time: 0.458 ms
+(16 rows)
+
+== Q2 año 2025 con min_mag, página de 1000
+                                                                              QUERY PLAN                                                                              
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1000 loops=1)
+   Buffers: shared hit=400 read=33
+   ->  Incremental Sort (actual rows=1000 loops=1)
+         Sort Key: f.event_time DESC, f.event_id
+         Presorted Key: f.event_time
+         Full-sort Groups: 32  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+         Buffers: shared hit=400 read=33
+         ->  Index Scan Backward using event_current_event_time_idx on event_current f (actual rows=1001 loops=1)
+               Index Cond: ((event_time >= '2025-01-01 00:00:00+00'::timestamp with time zone) AND (event_time < '2026-01-01 00:00:00+00'::timestamp with time zone))
+               Filter: ((magnitude >= '4'::double precision) AND (NOT starts_with(event_id, 'synthetic-'::text)) AND ('synthetic'::text <> ALL (quality_flags)))
+               Buffers: shared hit=400 read=33
+ Planning:
+   Buffers: shared hit=10 read=2
+ Planning Time: 0.233 ms
+ Execution Time: 2.077 ms
+(15 rows)
+
+== Q3 país + periodo (total)
+                                                                                             QUERY PLAN                                                                                              
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual rows=1 loops=1)
+   Buffers: shared hit=10 read=96
+   ->  Bitmap Heap Scan on event_current f (actual rows=129 loops=1)
+         Recheck Cond: ((country_id = 'JPN'::text) AND (event_time >= '2025-01-01 00:00:00+00'::timestamp with time zone) AND (event_time < '2026-01-01 00:00:00+00'::timestamp with time zone))
+         Filter: ((NOT starts_with(event_id, 'synthetic-'::text)) AND ('synthetic'::text <> ALL (quality_flags)))
+         Heap Blocks: exact=103
+         Buffers: shared hit=10 read=96
+         ->  Bitmap Index Scan on event_current_country_event_time_idx (actual rows=129 loops=1)
+               Index Cond: ((country_id = 'JPN'::text) AND (event_time >= '2025-01-01 00:00:00+00'::timestamp with time zone) AND (event_time < '2026-01-01 00:00:00+00'::timestamp with time zone))
+               Buffers: shared hit=1 read=2
+ Planning:
+   Buffers: shared hit=7
+ Planning Time: 0.103 ms
+ Execution Time: 4.930 ms
+(14 rows)
+
+== Q4 solo magnitud (sin periodo), total
+                                                    QUERY PLAN                                                    
+------------------------------------------------------------------------------------------------------------------
+ Aggregate (actual rows=1 loops=1)
+   Buffers: shared hit=49 read=173
+   ->  Bitmap Heap Scan on event_current f (actual rows=272 loops=1)
+         Recheck Cond: (magnitude >= '6'::double precision)
+         Filter: ((NOT starts_with(event_id, 'synthetic-'::text)) AND ('synthetic'::text <> ALL (quality_flags)))
+         Rows Removed by Filter: 161
+         Heap Blocks: exact=218
+         Buffers: shared hit=49 read=173
+         ->  Bitmap Index Scan on event_current_magnitude_event_time_idx (actual rows=433 loops=1)
+               Index Cond: (magnitude >= '6'::double precision)
+               Buffers: shared hit=2 read=2
+ Planning Time: 0.108 ms
+ Execution Time: 7.522 ms
+(13 rows)
+
+== Q5 estadísticas por hora, año 2025
+                                                                                                                                               QUERY PLAN                                                                                                                                               
+--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ HashAggregate (actual rows=7210 loops=1)
+   Group Key: date_bin('01:00:00'::interval, event_time, '2000-01-01 00:00:00+00'::timestamp with time zone)
+   Batches: 1  Memory Usage: 1297kB
+   Buffers: shared hit=324 read=476
+   ->  Seq Scan on event_current f (actual rows=18302 loops=1)
+         Filter: ((event_time >= '2025-01-01 00:00:00+00'::timestamp with time zone) AND (event_time < '2026-01-01 00:00:00+00'::timestamp with time zone) AND (magnitude >= '4'::double precision) AND (NOT starts_with(event_id, 'synthetic-'::text)) AND ('synthetic'::text <> ALL (quality_flags)))
+         Rows Removed by Filter: 15776
+         Buffers: shared hit=324 read=476
+ Planning:
+   Buffers: shared hit=4
+ Planning Time: 0.144 ms
+ Execution Time: 27.230 ms
+(12 rows)
+
+== Q6 última ingesta
+                                                   QUERY PLAN                                                   
+----------------------------------------------------------------------------------------------------------------
+ Result (actual rows=1 loops=1)
+   Buffers: shared hit=4
+   InitPlan 1 (returns $0)
+     ->  Limit (actual rows=1 loops=1)
+           Buffers: shared hit=4
+           ->  Index Only Scan Backward using extraction_last_ok_feed_idx on extraction (actual rows=1 loops=1)
+                 Index Cond: (requested_at IS NOT NULL)
+                 Heap Fetches: 1
+                 Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=55
+ Planning Time: 0.307 ms
+ Execution Time: 0.032 ms
+(13 rows)
+
+== Q7 cuarentena
+                      QUERY PLAN                      
+------------------------------------------------------
+ Aggregate (actual rows=1 loops=1)
+   Buffers: shared hit=4
+   ->  Seq Scan on quarantine (actual rows=2 loops=1)
+         Filter: (NOT is_synthetic)
+         Rows Removed by Filter: 16
+         Buffers: shared hit=4
+ Planning:
+   Buffers: shared hit=67
+ Planning Time: 0.262 ms
+ Execution Time: 0.053 ms
+(10 rows)
+
+== Q8 reproducción: página sin periodo
+SET
+                                                    QUERY PLAN                                                    
+------------------------------------------------------------------------------------------------------------------
+ Limit (actual rows=1000 loops=1)
+   Buffers: shared hit=3 read=30
+   ->  Incremental Sort (actual rows=1000 loops=1)
+         Sort Key: event_time DESC, event_id
+         Presorted Key: event_time
+         Full-sort Groups: 32  Sort Method: quicksort  Average Memory: 27kB  Peak Memory: 27kB
+         Buffers: shared hit=3 read=30
+         ->  Index Scan Backward using event_current_event_time_idx on event_current f (actual rows=1001 loops=1)
+               Buffers: shared hit=3 read=30
+ Planning:
+   Buffers: shared hit=59 read=5
+ Planning Time: 0.637 ms
+ Execution Time: 1.833 ms
+(13 rows)
+
+       dato       | count 
+------------------+-------
+ filas core       | 34078
+ filas replay     | 2807
+ filas extraction | 687
+(3 rows)
+

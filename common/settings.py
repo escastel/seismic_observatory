@@ -244,8 +244,20 @@ class ApiSettings:
     database: DatabaseSettings
     cors_origins: list[str]
     api_prefix: str
+    max_features: int
+
+
+MAX_FEATURES_LIMIT = 10000
 
 
 def api(env: Mapping[str, str] | None = None) -> ApiSettings:
     prefix = "/" + optional("API_PREFIX", "/api", env).strip("/")
-    return ApiSettings(database=database("reader", env), cors_origins=cors_origins(env), api_prefix=prefix)
+    max_features = positive_int("API_MAX_FEATURES", 1000, env)
+    if max_features > MAX_FEATURES_LIMIT:
+        raise SettingsError(f"API_MAX_FEATURES must be at most {MAX_FEATURES_LIMIT}, got {max_features}")
+    return ApiSettings(
+        database=database("reader", env),
+        cors_origins=cors_origins(env),
+        api_prefix=prefix,
+        max_features=max_features,
+    )

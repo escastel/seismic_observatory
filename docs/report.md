@@ -468,6 +468,96 @@ sintéticos son desarrollo de esta spec.
 
 Paso a paso en el [README](../README.md#demostración-de-la-defensa).
 
+## API de consulta
+
+Esta sección documenta la API conforme al contrato (spec 006). Cierra el principio VIII de la
+constitución: `resources/observatorio-sismico/CONTRATO-API.md` es la fuente de verdad y prevalece sobre
+la API heredada de la spec 001, que se ajustó sin reescribirla desde cero. Contrato HTTP completo en
+[specs/006-query-api/contracts/api.md](../specs/006-query-api/contracts/api.md) y ejemplos de consulta en el
+[README](../README.md#6-consultar-la-api). Evidencia en [docs/evidence/006/](evidence/006/README.md).
+
+### Contrato implementado
+
+| Endpoint | Resultado |
+|---|---|
+| `GET /api/eventos` | Siempre un `FeatureCollection` con `metadata` (`generated`, `last_ingestion`, `mode`, `count`, `total`, `truncated`, `limit`, `offset`, `next_offset`, `period`, `null_magnitude`, `quarantined`). Una versión vigente por evento, tiempos en milisegundos Unix UTC, coordenadas `[longitud, latitud, profundidad]`, `null` y nunca NaN o infinito. Sin eventos: 200 con `features: []`. |
+| `GET /api/estadisticas` | Conteos por ventana fija de una hora UTC (extremo final excluido, horas vacías con 0) y por país (con «Sin país asignado»), distribuciones de magnitud y profundidad con los nulos aparte, y comparación histórica. Periodo, filtros, unidad y registros sin valor en cada resultado. |
+| `GET /api/salud` | Estado de la API y de las dos conexiones a la base, y última consulta correcta a USGS. Siempre 200; `degraded` si la base falla. |
+
+Filtros: `start` (inclusivo), `end` (exclusivo), `min_mag`, `country_id`, `mode` (`live` por defecto o
+`replay`) y `exclude_synthetic`. Máximo de 1.000 puntos por respuesta (`API_MAX_FEATURES`), con `limit`,
+`offset` y `next_offset`. Errores: 422 con el parámetro y el motivo; 503 con cuerpo JSON si la base no
+responde (nunca «cero eventos» como respuesta válida).
+
+### Decisiones
+
+| Decisión | Motivo |
+|---|---|
+| El modo elige **la conexión**, no el texto de la consulta: `core` para `live` y `replay, core` para `replay` | Una petición solo usa un esquema, así que no puede mezclar datos reales y de reproducción; las consultas son idénticas en ambos modos |
+| En modo real se excluye siempre lo sintético (`synthetic-` o la marca `synthetic`) | El `core` local contiene 1.013 eventos sintéticos de las pruebas de escala de la spec 002; la API no puede suponer que no hay ninguno |
+| En `replay` no se aplica la ventana de 24 horas, y la respuesta lleva `label: "REPRODUCCIÓN"`, `last_replayed_at` y `replayed_at` en cada evento | Los datos son históricos (principio VI); `last_ingestion` sigue siendo la última consulta real a USGS |
+| `last_ingestion` sale de `core.extraction` (consultas al feed registradas), no de `event_current.ingested_at` | Una recarga o un reproceso mueven la última fila escrita sin que USGS haya sido consultado |
+| Mapa y estadísticas usan **un único constructor de filtros** y una instantánea de lectura (`REPEATABLE READ`) | Los filtros son exactamente los mismos (principio VII) y las cifras de una respuesta son coherentes entre sí |
+| Todo se calcula desde `event_current`, sin contadores incrementales | Una revisión cambia las agregaciones afectadas y una versión antigua tardía no las altera |
+| Con `end` y sin `start`, la ventana por defecto son las 24 horas anteriores a `end` | Con la ventana «hasta ahora» una consulta con `end` en el pasado devolvería siempre vacío |
+
+### Desviaciones (decisión: se mantienen)
+
+Se revisaron y se mantienen por los motivos que siguen; la 1 y la 2 se pueden revertir con un cambio pequeño si la defensa lo exigiera.
+
+1. **`not_modified` cuenta como consulta correcta.** El encargo hablaba de la consulta `ok`; una respuesta
+   `not_modified` significa que USGS contestó y no había cambios, y excluirla haría parecer parada una
+   ingesta sana durante un tramo tranquilo. Cambiarlo a solo `ok` es una línea
+   (`LAST_INGESTION_SQL` en `api/app/queries.py`).
+2. **Estadísticas con respuesta truncada.** En lugar de rechazarlas, se calculan siempre sobre el total real
+   de la base (nunca sobre la página) y la respuesta indica `scope: "complete"` y `map_truncated`. Así no
+   hay «estadística global sobre una muestra truncada» y las estadísticas no desaparecen cuando hay más datos.
+3. **Geometría inválida.** El modelo impide que un evento sin punto válido esté en el estado actual (va a
+   cuarentena, spec 004), de modo que la API nunca lo devuelve; se muestra en `metadata.quarantined`.
+4. **CORS en el sistema local.** La lista `CORS_ORIGINS` del `.env` local no incluye
+   `http://localhost:4200`; el contrato pide ambos orígenes. La comprobación positiva se hizo con una
+   segunda instancia con orígenes de ejemplo (V13). Hay que añadir el origen de desarrollo al `.env` si se
+   quiere usar el panel en local.
+
+### Lo retirado de la API heredada y traspasos
+
+| Retirado | Motivo |
+|---|---|
+| `date_from`, `date_to`, `min_magnitude`, `max_magnitude`, `format=json` y la respuesta `{items, count, limit, offset}` | No están en el contrato y ningún cliente los usa |
+| `/api/estadisticas/paises`, `/api/estadisticas/timeline` y `/api/health` | Sus datos están en `/api/estadisticas`; Compose usa `/api/salud` |
+| `country` (por nombre) y la propiedad `country` del `Feature` | El contrato filtra por `country_id` y expone `country_name` |
+| Swagger UI y ReDoc | No son contrato y cargan recursos externos; se conserva `/api/openapi.json` |
+
+El frontend entregado envía `format=geojson` (ignorado sin error) y `country` (ignorado: el filtro por
+país deja de aplicarse); el popup lee `p.country`. **Traspaso a la spec 007**: migrar a `country_id` y a
+`country_name`. Detalle en [v14-surface.md](evidence/006/v14-surface.md).
+
+### Rendimiento
+
+Con 34.045 eventos en `core` y 18.302 de 2025 con magnitud ≥ 4 (equipo y procedimiento en
+[v16-latency.md](evidence/006/v16-latency.md)):
+
+| Tamaño de resultado | Mediana | p95 |
+|---|---|---|
+| Página pequeña (`limit=10`, 33 eventos) | 3,0 ms | 3,6 ms |
+| Página de 1.000 sobre 2025 (18.302 eventos) | 20,4 ms | 22,5 ms |
+| Estadísticas de un año (18.302 eventos, 8.760 ventanas) | 80,8 ms | 94,5 ms |
+
+Las consultas usan los índices existentes sin cambios de modelo (planes en
+[v15-plans.md](evidence/006/v15-plans.md)); la ordenación por `(event_time, event_id)` se apoya en el
+índice por tiempo con ordenación incremental. Las ventanas son fijas de una hora UTC porque son
+reproducibles, no dependen del instante de la petición y se resuelven en una pasada (justificación
+completa en V16). No se midió con el esquema de 1.000.000 de filas de la spec 002 (no está cargado en
+este equipo).
+
+### Pruebas y evidencia
+
+Pruebas de comportamiento con la aplicación real contra la base de pruebas (`tests/query_api/`, 75
+pruebas) y de contrato sin base (`tests/contract/`); escenarios V1 a V16 con el sistema levantado en
+[docs/evidence/006/](evidence/006/README.md): evento nuevo, mensaje repetido, revisión, versión antigua
+tardía, magnitud nula, coordenadas inválidas, evento marítimo, truncado con paginación, base caída,
+reproducción identificada y conteos reales idénticos antes y después de reproducir.
+
 ## Modelo conceptual
 
 ```mermaid

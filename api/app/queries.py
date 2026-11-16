@@ -1,202 +1,98 @@
-"""Parameterized SQL queries for API endpoints.
+"""Parameterized SQL of the event endpoint and the metadata around it.
 
-They read event_current with the search_path of the pool (core for live
-data), joined to dim_country; a NULL country_id means «Sin país asignado».
+Statements are unqualified (event_current, quarantine): the search_path of the pool decides
+whether they read core (live) or replay. The only qualified table is core.extraction, which
+exists only in core. Every value is a bound parameter.
 """
 
 from __future__ import annotations
 
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 from datetime import datetime
-from typing import Any, Sequence
+from typing import Any
 
 import asyncpg
 
-from .schemas import EventFilters
+from .filters import SYNTHETIC_SQL, Where
+
+# Quarantine reason codes (consumer/app/rules.py) that mean «no valid point».
+GEOMETRY_REASONS = [
+    "geometry_missing",
+    "geometry_not_point",
+    "coordinates_missing",
+    "coordinates_not_numeric",
+    "coordinates_not_finite",
+    "coordinates_out_of_range",
+]
+
+LAST_INGESTION_SQL = """
+    SELECT max(requested_at)
+    FROM core.extraction
+    WHERE source = 'usgs_feed' AND outcome IN ('ok', 'not_modified')
+"""
 
 
-def _event_conditions(filters: EventFilters) -> tuple[list[str], list[Any]]:
-    conditions: list[str] = []
-    values: list[Any] = []
-
-    def add(condition: str, value: Any) -> None:
-        values.append(value)
-        conditions.append(condition.replace("?", f"${len(values)}"))
-
-    if filters.country is not None:
-        add("g.name_es = ?", filters.country)
-    if filters.country_id is not None:
-        add("f.country_id = ?", filters.country_id)
-    if filters.date_from is not None:
-        add("f.event_time >= ?", filters.date_from)
-    if filters.date_to is not None:
-        add(
-            "f.event_time < ?" if filters.end_exclusive else "f.event_time <= ?",
-            filters.date_to,
-        )
-    if filters.min_magnitude is not None:
-        add("f.magnitude >= ?", filters.min_magnitude)
-    if filters.max_magnitude is not None:
-        add("f.magnitude <= ?", filters.max_magnitude)
-    return conditions, values
+@asynccontextmanager
+async def snapshot(pool: asyncpg.Pool) -> AsyncIterator[asyncpg.Connection]:
+    """One read-only snapshot: every query of a response sees the same state."""
+    async with pool.acquire() as conn:
+        async with conn.transaction(isolation="repeatable_read", readonly=True):
+            yield conn
 
 
-async def fetch_events(pool: asyncpg.Pool, filters: EventFilters) -> list[asyncpg.Record]:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    limit_index = len(values) + 1
-    offset_index = len(values) + 2
-    values.extend([filters.limit, filters.offset])
-    return await pool.fetch(
+def _and(where: Where, condition: str) -> str:
+    return f"{where.sql} AND {condition}" if where.sql else f"WHERE {condition}"
+
+
+async def fetch_page(
+    conn: asyncpg.Connection, where: Where, limit: int, offset: int, *, replay: bool
+) -> list[asyncpg.Record]:
+    extra = f", f.replayed_at, {SYNTHETIC_SQL} AS is_synthetic" if replay else ""
+    values: list[Any] = [*where.values, limit, offset]
+    return await conn.fetch(
         f"""
         SELECT f.event_id AS id, f.updated_at AS updated, f.event_time AS time,
                f.magnitude AS mag, f.mag_type, f.place, f.longitude, f.latitude, f.depth_km,
-               g.name_es AS country, g.name_es AS country_name, g.continent, g.subregion, f.country_id,
-               f.source
+               f.country_id, g.name_es AS country_name, g.continent, g.subregion{extra}
         FROM event_current f
-        LEFT JOIN dim_country g ON g.country_id = f.country_id
-        {where}
-        ORDER BY f.event_time DESC, f.event_id
-        LIMIT ${limit_index} OFFSET ${offset_index}
+        LEFT JOIN core.dim_country g ON g.country_id = f.country_id
+        {where.sql}
+        ORDER BY f.event_time DESC, f.event_id ASC
+        LIMIT ${len(where.values) + 1} OFFSET ${len(where.values) + 2}
         """,
         *values,
     )
 
 
-async def count_events(pool: asyncpg.Pool, filters: EventFilters) -> int:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    return int(
-        await pool.fetchval(
-            f"""
-            SELECT COUNT(*)
-            FROM event_current f
-            LEFT JOIN dim_country g ON g.country_id = f.country_id
-            {where}
-            """,
-            *values,
-        )
-    )
+async def count_total(conn: asyncpg.Connection, where: Where) -> int:
+    return int(await conn.fetchval(f"SELECT count(*) FROM event_current f {where.sql}", *where.values))
 
 
-async def country_stats(pool: asyncpg.Pool, filters: EventFilters) -> list[asyncpg.Record]:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    return await pool.fetch(
-        f"""
-        SELECT g.name_es AS country, COUNT(*)::int AS count
-        FROM event_current f
-        LEFT JOIN dim_country g ON g.country_id = f.country_id
-        {where}
-        GROUP BY g.name_es
-        ORDER BY count DESC, g.name_es NULLS LAST
+async def count_null_magnitude(conn: asyncpg.Connection, where_without_min_mag: Where) -> int:
+    """Events with a null magnitude that satisfy every filter except min_mag."""
+    sql = f"SELECT count(*) FROM event_current f {_and(where_without_min_mag, 'f.magnitude IS NULL')}"
+    return int(await conn.fetchval(sql, *where_without_min_mag.values))
+
+
+async def quarantine_counts(conn: asyncpg.Connection) -> dict[str, int]:
+    """Non-synthetic quarantined messages of the schema of the pool; geometry subset apart."""
+    row = await conn.fetchrow(
+        """
+        SELECT count(*)::int AS total,
+               (count(*) FILTER (WHERE reason_codes && $1::text[]))::int AS invalid_geometry
+        FROM quarantine
+        WHERE NOT is_synthetic
         """,
-        *values,
+        GEOMETRY_REASONS,
     )
+    return {"total": row["total"], "invalid_geometry": row["invalid_geometry"]}
 
 
-async def timeline_stats(
-    pool: asyncpg.Pool,
-    filters: EventFilters,
-    bucket: str,
-) -> list[asyncpg.Record]:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    expression = {
-        "day": "date_trunc('day', f.event_time)",
-        "week": "date_trunc('week', f.event_time)",
-        "month": "date_trunc('month', f.event_time)",
-    }[bucket]
-    return await pool.fetch(
-        f"""
-        SELECT {expression} AS period, COUNT(*)::int AS count
-        FROM event_current f
-        LEFT JOIN dim_country g ON g.country_id = f.country_id
-        {where}
-        GROUP BY period
-        ORDER BY period
-        """,
-        *values,
-    )
+async def last_ingestion(conn: asyncpg.Connection) -> datetime | None:
+    """Last correct query to the USGS feed, registered by the producer. Always from core."""
+    return await conn.fetchval(LAST_INGESTION_SQL)
 
 
-async def magnitude_stats(
-    pool: asyncpg.Pool,
-    filters: EventFilters,
-) -> list[asyncpg.Record]:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    return await pool.fetch(
-        f"""
-        SELECT COALESCE(f.magnitude::text, 'null') AS bucket, COUNT(*)::int AS count
-        FROM event_current f
-        LEFT JOIN dim_country g ON g.country_id = f.country_id
-        {where}
-        GROUP BY bucket
-        ORDER BY bucket
-        """,
-        *values,
-    )
-
-
-async def depth_stats(
-    pool: asyncpg.Pool,
-    filters: EventFilters,
-) -> list[asyncpg.Record]:
-    conditions, values = _event_conditions(filters)
-    where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
-    return await pool.fetch(
-        f"""
-        SELECT CASE WHEN f.depth_km IS NULL THEN 'unknown'
-               WHEN f.depth_km < 70 THEN 'shallow'
-               WHEN f.depth_km < 300 THEN 'intermediate'
-               ELSE 'deep' END AS bucket, COUNT(*)::int AS count
-        FROM event_current f
-        LEFT JOIN dim_country g ON g.country_id = f.country_id
-        {where}
-        GROUP BY bucket
-        ORDER BY bucket
-        """,
-        *values,
-    )
-
-
-async def daily_average_2025(
-    pool: asyncpg.Pool,
-    filters: EventFilters,
-) -> float:
-    conditions, values = _event_conditions(filters)
-    conditions.append("EXTRACT(YEAR FROM f.event_time) = 2025")
-    where = f"WHERE {' AND '.join(conditions)}"
-    value = await pool.fetchval(
-        f"""
-        SELECT COALESCE(AVG(day_count), 0) FROM (
-            SELECT DATE_TRUNC('day', f.event_time), COUNT(*)::numeric AS day_count
-            FROM event_current f
-            LEFT JOIN dim_country g ON g.country_id = f.country_id
-            {where}
-            GROUP BY DATE_TRUNC('day', f.event_time)
-        ) daily
-        """,
-        *values,
-    )
-    return float(value or 0)
-
-
-async def missing_magnitude(
-    pool: asyncpg.Pool,
-    filters: EventFilters,
-) -> int:
-    conditions, values = _event_conditions(filters)
-    conditions.append("f.magnitude IS NULL")
-    where = f"WHERE {' AND '.join(conditions)}"
-    return int(
-        await pool.fetchval(
-            f"""
-            SELECT COUNT(*)
-            FROM event_current f
-            LEFT JOIN dim_country g ON g.country_id = f.country_id
-            {where}
-            """,
-            *values,
-        )
-    )
+async def last_replayed_at(conn: asyncpg.Connection) -> datetime | None:
+    return await conn.fetchval("SELECT max(replayed_at) FROM event_current")
