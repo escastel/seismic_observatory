@@ -1,0 +1,102 @@
+<form class="filters" (submit)="onSubmit($event)" (reset)="onReset($event)" novalidate>
+  <fieldset class="field mode">
+    <legend>Modo de datos</legend>
+    <label class="radio">
+      <input type="radio" name="mode" value="live" [checked]="!isReplay()" (change)="onMode($event)" />
+      Real
+    </label>
+    <label class="radio">
+      <input type="radio" name="mode" value="replay" [checked]="isReplay()" (change)="onMode($event)" />
+      Reproducción
+    </label>
+  </fieldset>
+
+  <div class="field">
+    <label for="f-start">Desde (UTC)</label>
+    <input
+      id="f-start"
+      type="datetime-local"
+      [value]="start()"
+      (input)="start.set(value($event))"
+      [attr.aria-invalid]="errors().start ? 'true' : null"
+      aria-describedby="f-period-hint f-start-err"
+    />
+    @if (errors().start; as msg) {
+      <p id="f-start-err" class="error" role="alert">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="f-end">Hasta (UTC)</label>
+    <input
+      id="f-end"
+      type="datetime-local"
+      [value]="end()"
+      (input)="end.set(value($event))"
+      [attr.aria-invalid]="errors().end ? 'true' : null"
+      aria-describedby="f-period-hint f-end-err"
+    />
+    @if (errors().end; as msg) {
+      <p id="f-end-err" class="error" role="alert">{{ msg }}</p>
+    }
+  </div>
+  <p id="f-period-hint" class="hint period-hint">Horas en UTC: inicio inclusivo, fin exclusivo.</p>
+
+  <div class="field">
+    <label for="f-mag">Magnitud mínima</label>
+    <input
+      id="f-mag"
+      type="number"
+      step="0.1"
+      inputmode="decimal"
+      [value]="minMag()"
+      (input)="minMag.set(value($event))"
+      [attr.aria-invalid]="errors().minMag ? 'true' : null"
+      aria-describedby="f-mag-err"
+    />
+    @if (errors().minMag; as msg) {
+      <p id="f-mag-err" class="error" role="alert">{{ msg }}</p>
+    }
+  </div>
+
+  <div class="field">
+    <label for="f-country">País</label>
+    <select
+      id="f-country"
+      [value]="countryId()"
+      (change)="countryId.set(value($event))"
+      [attr.aria-invalid]="errors().countryId ? 'true' : null"
+      aria-describedby="f-country-hint f-country-err"
+    >
+      <option value="" [selected]="countryId() === ''">Todos los países</option>
+      @for (c of countries(); track c.id) {
+        <option [value]="c.id" [selected]="c.id === countryId()">{{ c.name }}</option>
+      }
+    </select>
+    <p id="f-country-hint" class="hint">
+      «Sin país asignado» no se puede filtrar, porque la API filtra por identificador de país
+      (country_id); sí aparece en la tarjeta, la tabla y el análisis.
+    </p>
+    @if (errors().countryId; as msg) {
+      <p id="f-country-err" class="error" role="alert">{{ msg }}</p>
+    }
+  </div>
+
+  @if (isReplay()) {
+    <div class="field check">
+      <label class="radio">
+        <input
+          type="checkbox"
+          [checked]="excludeSynthetic()"
+          (change)="excludeSynthetic.set($any($event.target).checked)"
+        />
+        Excluir datos sintéticos
+      </label>
+    </div>
+  }
+
+  <div class="actions">
+    <button type="submit" class="primary">Aplicar filtros</button>
+    <button type="reset">Restablecer</button>
+  </div>
+</form>

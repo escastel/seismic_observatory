@@ -1,0 +1,99 @@
+:host {
+  display: block;
+}
+
+.filters {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr));
+  gap: 0.75rem 1rem;
+  align-items: start;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  border: 0;
+  margin: 0;
+  padding: 0;
+  min-width: 0;
+}
+
+.field > label,
+legend {
+  font-weight: 600;
+  color: #1f2933;
+  padding: 0;
+}
+
+.radio {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-right: 1rem;
+  font-weight: 400;
+  color: #1f2933;
+}
+
+input[type='datetime-local'],
+input[type='number'],
+select {
+  font: inherit;
+  padding: 0.4rem 0.5rem;
+  border: 1px solid #52606d;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2933;
+}
+
+input[aria-invalid='true'],
+select[aria-invalid='true'] {
+  border-color: #a4161a;
+  border-width: 2px;
+}
+
+:focus-visible {
+  outline: 3px solid #0b5cad;
+  outline-offset: 2px;
+}
+
+.hint {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #3e4c59;
+}
+
+.period-hint {
+  grid-column: 1 / -1;
+  margin-top: -0.25rem;
+}
+
+.error {
+  margin: 0;
+  font-size: 0.85rem;
+  color: #a4161a;
+  font-weight: 600;
+}
+
+.actions {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 1px solid #52606d;
+  border-radius: 4px;
+  background: #fff;
+  color: #1f2933;
+  cursor: pointer;
+}
+
+button.primary {
+  background: #0b5cad;
+  border-color: #0b5cad;
+  color: #fff;
+}

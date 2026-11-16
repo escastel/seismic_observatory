@@ -558,6 +558,84 @@ pruebas) y de contrato sin base (`tests/contract/`); escenarios V1 a V16 con el 
 tardía, magnitud nula, coordenadas inválidas, evento marítimo, truncado con paginación, base caída,
 reproducción identificada y conteos reales idénticos antes y después de reproducir.
 
+## Panel Angular (spec 007)
+
+Este apartado cierra el panel de la spec 007. El panel lee solo la API de la spec 006 y sustituye al de
+la entrega inicial, que leía un formato anterior de la API. La evidencia está en
+[docs/evidence/007/](evidence/007/README.md) y el procedimiento de la defensa en el
+[README](../README.md#10-panel-angular-y-defensa-spec-007).
+
+### Qué muestra el panel
+
+- **Mapa** con los eventos del periodo y las fronteras de `paises.geojson`. **Tabla** recorrible con «Cargar más» y el texto «Mostrando N de TOTAL».
+- **Análisis**: gráficos de ventanas horarias, países, distribuciones de magnitud y profundidad y
+  comparación histórica, cada uno con su tabla de valores. Las cifras son las de `/api/estadisticas`; el
+  panel no las recalcula.
+- **Estado**: hora de la lectura, `generated` y `last_ingestion` por separado, y avisos de desactualizado,
+  degradado, base no disponible, parámetros no válidos, backend inaccesible y sin eventos. Si el backend
+  no responde, se muestra la última lectura correcta con su hora.
+- **Filtros** (modo, fechas en UTC, magnitud mínima, país y excluir sintéticos): mapa, tabla y análisis
+  usan los mismos filtros con una sola petición.
+
+### Decisiones
+
+| Decisión | Alternativa descartada | Razón |
+|---|---|---|
+| Lógica pura (adaptación, formato, filtros, estado) en `lib/`, probada con Vitest 3.2.7 | Karma y Jasmine | Corre en Node sin navegador ni Chrome y es igual en Windows y Linux. Vitest 3.2.7 es la versión compatible con `@angular/build` 20.3 |
+| Una sola petición de filtros (`QueryFilters`) para eventos y estadísticas | Dos constructores de parámetros | Mapa, tabla y gráficos no pueden desalinearse (principio VII) |
+| Estado derivado por una función pura (lectura, fallo, salud, reloj → estado) | Estado escrito a mano en cada componente | Los avisos se calculan igual en todas las vistas y se prueban sin navegador |
+| Ciclo de refresco con una sola petición en vuelo, tiempo máximo de 15 s y secuencia por consulta | `setInterval` | Evita solapes y descarta las respuestas tardías de filtros anteriores |
+| Gráficos en HTML y SVG propios, sin biblioteca | Chart.js o ngx-charts | Ninguna dependencia nueva; cada gráfico tiene su tabla accesible |
+| Catálogo de países desde `paises.geojson` (`ADM0_A3` = `country_id`) | Endpoint de catálogo en la API | Sin superficie nueva: el fichero ya se descarga para las fronteras |
+| «Sin país asignado» visible, no filtrable | Filtrar sin país en el cliente | La API no lo filtra; el cliente no puede dar totales distintos |
+| Modo demo retirado | Mantenerlo con etiqueta | Un conjunto sintético no puede confundirse con datos reales (US7) |
+
+### Divergencia resuelta
+
+Durante la verificación V1 con la API real, el panel falló con «depth.from»: la API entrega tramos de
+profundidad abiertos (`from: null` en «<0» y `to: null` en «>=300») y el adaptador de la entrega inicial
+los rechazaba. Se corrigió en `adapt.ts`, que acepta los extremos nulos como tramos abiertos, con una
+prueba de regresión en `adapt.test.ts`. Con la corrección, V1 pasa con 195 eventos. El traspaso de la 006
+(`country_id` y `country_name` en lugar de `country`) queda cubierto: el filtro por país coincide con la
+API en V7.
+
+### Resultados de la verificación
+
+Estado tomado de [docs/evidence/007/README.md](evidence/007/README.md). «Real» indica la API de la 006 del
+stack local; «simulador» indica un servidor fuera del repositorio que habla el contrato de la 006.
+
+| Id | Qué comprueba | Origen | Estado |
+|---|---|---|---|
+| V1 | Carga con la API de la 006 | real | Superada (tras corregir la profundidad abierta) |
+| V2 | Evento nuevo sin recargar | real | Superada |
+| V3 | Nulos como ND | simulador | Superada |
+| V4 | Evento marítimo: «Sin país asignado» | real | Superada |
+| V5 | Texto como texto y coordenadas no válidas | simulador | Superada |
+| V6 | Truncado y paginación | real (2025) y simulador (2.500) | Superada |
+| V7 | Filtros coherentes entre mapa, tabla y análisis | real | Superada |
+| V8 | Filtros inválidos | real | Superada |
+| V9 | Reproducción etiquetada | real | Superada |
+| V10 | Aislamiento de la reproducción | real | Superada |
+| V11 | Cerrar y reabrir el túnel | simulador y bloqueo de red del navegador | Superada solo con el simulador; el túnel ngrok real está pendiente |
+| V12 | Mensajes distintos para 503, degradado, 422 y desactualizado | simulador | Superada |
+| V13 | Sin solapes y umbral de 15 s | simulador | Superada |
+| V14 | Teclado, lector de pantalla y axe-core | real | Superada; el contraste no se ha medido a mano |
+| V15 | `npm run build` y ausencia de secretos | local | Superada |
+
+Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en verde.
+
+### Límites
+
+- **Pendiente de la usuaria**: el túnel ngrok real (cerrarlo y reabrirlo) y la publicación en Netlify.
+- **Pendiente**: la prueba en Linux.
+- **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
+  casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
+  que prohíbe la spec 006. Esos mismos casos de la API están en [docs/evidence/006/](evidence/006/README.md).
+- El refresco automático de 60 s solo se comprobó en V2. Los demás escenarios de fallo forzaron el refresco
+  con «Aplicar filtros».
+- En el navegador sin interfaz, OpenStreetMap rechazó varias teselas (400): el fondo del mapa no se ha
+  comprobado en un navegador con interfaz; sí que se dibujan fronteras y eventos.
+
 ## Modelo conceptual
 
 ```mermaid

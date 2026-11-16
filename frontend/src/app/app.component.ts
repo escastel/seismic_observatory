@@ -1,151 +1,52 @@
-import { CommonModule } from '@angular/common';
-import { Component, OnDestroy, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { LeafletDirective } from '@bluehalo/ngx-leaflet';
-import * as L from 'leaflet';
-import type { FeatureCollection, Point } from 'geojson';
-
-type Properties = {
-  mag: number | null;
-  place: string;
-  time: number | string;
-  updated: number | string;
-  country?: string | null;
-  country_id?: string | null;
-  country_name?: string | null;
-  continent?: string | null;
-  subregion?: string | null;
-  source_topic?: string;
-  magType?: string | null;
-};
-type Events = FeatureCollection<Point, Properties> & { metadata?: { generated?: number; last_ingestion?: number; mode?: string; count?: number; total?: number; truncated?: boolean } };
-type Config = { mode: 'demo' | 'api'; apiUrl: string; refreshMs: number; skipNgrokWarning: boolean };
-type Statistics = {
-  countries: Array<{ country: string; count: number }>;
-  timeline: Array<{ period: string; count: number }>;
-  magnitude_distribution?: Array<{ bucket: string; count: number }>;
-  depth_distribution?: Array<{ bucket: string; count: number }>;
-  daily_average_2025?: number;
-};
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import type { FeatureCollection } from 'geojson';
+import { ObservatoryService } from './data/observatory.service';
+import { FiltersComponent } from './filters/filters.component';
+import { MapComponent } from './map/map.component';
+import { StatusComponent } from './status/status.component';
+import { TableComponent } from './table/table.component';
+import { ChartsComponent } from './charts/charts.component';
+import type { Mode, QueryFilters } from './lib/api-types';
+import { buildCountryCatalog } from './lib/countries';
 
 @Component({
-  selector: 'app-root', standalone: true, imports: [CommonModule, FormsModule, LeafletDirective],
-  templateUrl: './app.component.html', styleUrl: './app.component.css'
+  selector: 'app-root',
+  standalone: true,
+  imports: [FiltersComponent, MapComponent, StatusComponent, TableComponent, ChartsComponent],
+  templateUrl: './app.component.html',
+  styleUrl: './app.component.css',
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class AppComponent implements OnDestroy {
-  readonly mode = signal('Cargando configuración');
-  readonly status = signal('Preparando el mapa…');
-  readonly lastRead = signal('Sin lectura');
-  readonly generated = signal('Sin información');
-  readonly lastIngestion = signal('Sin información');
-  readonly count = signal(0);
-  readonly omitted = signal(0);
-  readonly countriesStatus = signal('Cargando catálogo');
-  readonly countryFilter = signal('');
-  readonly startFilter = signal('');
-  readonly endFilter = signal('');
-  readonly minMagnitudeFilter = signal('');
-  readonly truncated = signal(false);
-  readonly statistics = signal<Statistics>({ countries: [], timeline: [], magnitude_distribution: [], depth_distribution: [], daily_average_2025: 0 });
-  readonly tableFeatures = signal<Array<FeatureCollection<Point, Properties>['features'][number]>>([]);
-  private activeConfig?: Config;
-  readonly options: L.MapOptions = { center: L.latLng(18, 0), zoom: 2, minZoom: 2, maxZoom: 8, preferCanvas: true, worldCopyJump: false };
-  private map?: L.Map;
-  private events = L.layerGroup();
-  private timer?: ReturnType<typeof setTimeout>;
-  private controller = new AbortController();
-  private destroyed = false;
+export class AppComponent implements OnInit {
+  protected readonly service = inject(ObservatoryService);
+  protected readonly borders = signal<FeatureCollection | null>(null);
+  protected readonly bordersError = signal(false);
+  protected readonly countries = computed(() => buildCountryCatalog(this.borders()));
 
-  async onMapReady(map: L.Map): Promise<void> {
-    this.map = map;
-    const base = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      maxZoom: 19, noWrap: true, attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-    const borders = L.geoJSON(undefined, { style: { color: '#334155', weight: 1, fill: false },
-      onEachFeature: (feature, layer) => {
-        const name = document.createElement('span');
-        name.textContent = feature.properties?.NAME_ES ?? feature.properties?.ADMIN ?? 'Sin nombre';
-        layer.bindTooltip(name);
-      }
-    }).addTo(map);
-    this.events.addTo(map);
-    L.control.layers({ 'OpenStreetMap': base }, { 'Países (Natural Earth)': borders, 'Terremotos': this.events }).addTo(map);
-    map.attributionControl.addAttribution('Fronteras: Natural Earth · Datos reales: USGS');
-    try {
-      borders.addData(await this.readJson<FeatureCollection>('datos/paises.geojson'));
-      this.countriesStatus.set('Catálogo de países cargado');
-    } catch { this.countriesStatus.set('No se pudo cargar el catálogo de países'); }
-    if (this.destroyed) return;
-    try {
-      const config = await this.readJson<Config>('config.json');
-      if (!['demo', 'api'].includes(config.mode)) throw new Error('Modo inválido');
-      this.mode.set(config.mode === 'demo' ? 'DEMOSTRACIÓN · datos ficticios' : 'API · datos del backend');
-      this.activeConfig = config;
-      await this.refresh(config);
-    } catch { this.status.set('Error: revisa public/config.json'); }
+  protected readonly events = computed(() => this.service.reading()?.events ?? []);
+  protected readonly metadata = computed(() => this.service.reading()?.metadata ?? null);
+  protected readonly mode = computed<Mode>(() => this.service.filters().mode);
+
+  async ngOnInit(): Promise<void> {
+    void this.loadBorders();
+    await this.service.start();
   }
 
-  private async readJson<T>(url: string, headers: Record<string, string> = {}): Promise<T> {
-    const response = await fetch(url, { headers, cache: 'no-store',
-      signal: AbortSignal.any([this.controller.signal, AbortSignal.timeout(15000)]) });
-    if (!response.ok) throw new Error(`HTTP ${response.status}`);
-    return response.json() as Promise<T>;
-  }
-
-  async applyFilters(): Promise<void> {
-    if (this.activeConfig) await this.refresh(this.activeConfig);
-  }
-
-  private async refresh(config: Config): Promise<void> {
+  private async loadBorders(): Promise<void> {
     try {
-      const params = new URLSearchParams({ format: 'geojson', limit: '1000' });
-      if (this.countryFilter()) params.set('country', this.countryFilter());
-      if (this.startFilter()) params.set('start', new Date(this.startFilter()).toISOString());
-      if (this.endFilter()) params.set('end', new Date(this.endFilter()).toISOString());
-      if (this.minMagnitudeFilter()) params.set('min_mag', this.minMagnitudeFilter());
-      const url = config.mode === 'demo' ? 'datos/terremotos-demo.geojson' : `${config.apiUrl.replace(/\/$/, '')}/api/eventos?${params}`;
-      const headers: Record<string, string> = {};
-      if (config.mode === 'api' && config.skipNgrokWarning) headers['ngrok-skip-browser-warning'] = '1';
-      const data = await this.readJson<Events>(url, headers);
-      if (this.destroyed) return;
-      if (data.type !== 'FeatureCollection' || !Array.isArray(data.features)) throw new Error('Se esperaba FeatureCollection');
-      // Construir primero la nueva capa: si falla, conservar la anterior.
-      const next = L.layerGroup(); let omitted = 0; let count = 0;
-      for (const feature of data.features) {
-        const p = feature.properties;
-        const c = feature.geometry?.type === 'Point' ? feature.geometry.coordinates : [];
-        const [lon, lat, depth] = c;
-        if (!p || !Number.isFinite(lon) || !Number.isFinite(lat) || Math.abs(lon) > 180 || Math.abs(lat) > 90) { omitted++; continue; }
-        const magnitude = typeof p.mag === 'number' && Number.isFinite(p.mag) ? p.mag : null;
-        const depthOk = typeof depth === 'number' && Number.isFinite(depth);
-        const color = !depthOk ? '#64748b' : depth < 70 ? '#e8a317' : depth < 300 ? '#e35b37' : '#7b3fb6';
-        const popup = document.createElement('div');
-        popup.textContent = `${p.place ?? 'Sin descripción'}\nMagnitud: ${magnitude ?? 'ND'}\nProfundidad: ${depthOk ? depth + ' km' : 'ND'}\nFecha UTC: ${this.date(p.time)}\nPaís: ${p.country ?? 'Sin país asignado'}\nContinente: ${p.continent ?? 'Sin continente asignado'}\nSubregión: ${p.subregion ?? 'Sin subregión asignada'}\nID: ${feature.id ?? 'ND'}`;
-        L.circleMarker([lat, lon], { radius: magnitude === null ? 4 : Math.max(3, Math.min(18, 3 + (magnitude + 1) * 2)), color, fillColor: color, fillOpacity: .75, weight: 1 }).bindPopup(popup).addTo(next);
-        count++;
-      }
-      this.events.clearLayers(); this.events.addLayer(next);
-      this.count.set(count); this.omitted.set(omitted);
-      this.tableFeatures.set(data.features.slice(0, 100));
-      this.truncated.set(Boolean(data.metadata?.truncated));
-      this.lastRead.set(new Date().toISOString());
-      this.generated.set(this.date(data.metadata?.generated));
-      this.lastIngestion.set(this.date(data.metadata?.last_ingestion));
-      if (config.mode === 'api') {
-        const stats = await this.readJson<Statistics>(`${config.apiUrl.replace(/\/$/, '')}/api/estadisticas?${params}`, headers);
-        this.statistics.set(stats);
-      }
-      this.status.set(config.mode === 'demo' ? 'Ejemplo estático: no representa actividad real' : 'API accesible · consulta completada');
+      const response = await fetch('datos/paises.geojson');
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      this.borders.set((await response.json()) as FeatureCollection);
     } catch {
-      if (!this.destroyed) this.status.set('No se pudo actualizar: se conserva la última lectura. Revisa API, túnel y CORS.');
-    } finally {
-      if (!this.destroyed && config.mode === 'api') this.timer = setTimeout(() => void this.refresh(config), Math.max(30000, Number(config.refreshMs) || 60000));
+      this.bordersError.set(true);
     }
   }
-  private date(value: unknown): string {
-    if (typeof value !== 'number' && typeof value !== 'string') return 'ND';
-    const d = new Date(value);
-    return Number.isNaN(d.getTime()) ? 'ND' : d.toISOString();
+
+  protected apply(filters: QueryFilters): void {
+    void this.service.applyFilters(filters);
   }
-  ngOnDestroy(): void { this.destroyed = true; clearTimeout(this.timer); this.controller.abort(); }
+
+  protected changeMode(mode: Mode): void {
+    void this.service.setMode(mode);
+  }
 }

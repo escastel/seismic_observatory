@@ -1,0 +1,41 @@
+<section class="map-section">
+  <p class="map-counts" aria-live="polite">
+    {{ drawnCount() }} eventos dibujados · {{ omittedCount() }} omitidos por coordenadas no válidas
+    @if (label() !== null) {
+      <span class="label-badge">{{ label() }}</span>
+    }
+  </p>
+
+  <div
+    class="map-container"
+    role="region"
+    aria-label="Mapa interactivo de terremotos"
+    leaflet
+    [leafletOptions]="options"
+    (leafletMapReady)="onMapReady($event)"
+  ></div>
+
+  <p class="map-note">La tabla situada debajo del mapa es la alternativa accesible con los mismos datos.</p>
+
+  <div class="legend" aria-label="Leyenda del mapa">
+    <p class="legend-title">Profundidad (color)</p>
+    <ul class="legend-list">
+      @for (item of legend; track item.key) {
+        <li>
+          <span
+            class="swatch"
+            [class.dashed]="item.dashed"
+            [style.background-color]="item.color"
+            [style.border-color]="item.color"
+            aria-hidden="true"
+          ></span>
+          {{ item.label }}
+        </li>
+      }
+    </ul>
+    <p class="legend-size">
+      Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
+      con el radio mínimo y borde discontinuo.
+    </p>
+  </div>
+</section>

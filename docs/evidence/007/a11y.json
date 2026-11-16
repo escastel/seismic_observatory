@@ -1,0 +1,34 @@
+{
+ "lang": "es",
+ "axeViolations": [],
+ "focusOrder": [
+  "a \"Saltar a la tabla de eventos\" outline:solid 3px",
+  "input \"live\" outline:solid 3px",
+  "input#f-start \"\" outline:solid 3px",
+  "input#f-start \"\" outline:solid 3px",
+  "input#f-start \"\" outline:solid 3px",
+  "input#f-start \"\" outline:solid 3px",
+  "input#f-start \"\" outline:solid 3px",
+  "input#f-start \"\" outline:none 3px",
+  "input#f-end \"\" outline:solid 3px",
+  "input#f-end \"\" outline:solid 3px",
+  "input#f-end \"\" outline:solid 3px",
+  "input#f-end \"\" outline:solid 3px",
+  "input#f-end \"\" outline:solid 3px",
+  "input#f-end \"\" outline:none 3px",
+  "input#f-mag \"\" outline:solid 3px",
+  "select#f-country \"Todos los países Afganistán Albania Alem\" outline:solid 3px",
+  "button \"Aplicar filtros\" outline:solid 3px",
+  "button \"Restablecer\" outline:solid 3px",
+  "div \"+ −  Leaflet | © OpenStreetMap contribut\" outline:auto 1px",
+  "a \"+\" outline:auto 1px",
+  "a \"−\" outline:auto 1px",
+  "a \"\" outline:auto 1px"
+ ],
+ "liveRegions": [
+  "div aria-live=polite role=status",
+  "p aria-live=polite role=null",
+  "p aria-live=polite role=null"
+ ],
+ "modeSwitchedByKeyboard": true
+}

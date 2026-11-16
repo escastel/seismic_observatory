@@ -1,6 +1,8 @@
 {
-  "mode": "api",
+  "mode": "live",
   "apiUrl": "https://modular-guidance-daybreak.ngrok-free.dev",
   "refreshMs": 60000,
+  "requestTimeoutMs": 15000,
+  "staleAfterMs": 900000,
   "skipNgrokWarning": true
 }

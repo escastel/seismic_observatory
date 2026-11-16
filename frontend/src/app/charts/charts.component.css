@@ -1,0 +1,185 @@
+:host {
+  display: block;
+}
+
+.charts {
+  padding: 0.75rem 1rem;
+  border: 1px solid #5c5c5c;
+  border-radius: 6px;
+  background: #ffffff;
+  color: #1a1a1a;
+}
+
+.charts :focus-visible {
+  outline: 3px solid #0b57d0;
+  outline-offset: 2px;
+}
+
+.charts__title {
+  margin: 0 0 0.5rem;
+  font-size: 1.2rem;
+}
+
+.charts__label {
+  display: inline-block;
+  margin: 0 0 0.5rem;
+  padding: 0.25rem 0.75rem;
+  border: 2px solid #1a1a1a;
+  border-radius: 4px;
+  background: #fff3c4;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+}
+
+.charts__note,
+.charts__empty,
+.chart__meta,
+.chart__unvalued {
+  margin: 0.25rem 0 0.5rem;
+  color: #333333;
+}
+
+.charts__failure {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border: 2px solid #8a1c1c;
+  border-radius: 4px;
+  background: #fdecea;
+  color: #5c0f0f;
+}
+
+.charts__notice,
+.chart__notice,
+.chart__warning {
+  margin: 0.5rem 0;
+  padding: 0.5rem 0.75rem;
+  border-left: 4px solid #7a4b00;
+  background: #fff3c4;
+  color: #1a1a1a;
+}
+
+.charts__meta {
+  margin: 0.5rem 0 1rem;
+  padding-left: 1.25rem;
+}
+
+.chart {
+  margin-top: 1.5rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid #c4c4c4;
+}
+
+.chart h3 {
+  margin: 0 0 0.25rem;
+  font-size: 1.05rem;
+}
+
+.bars {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  margin: 0.5rem 0;
+}
+
+.bars--scroll {
+  max-height: 22rem;
+  overflow-y: auto;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: minmax(6rem, 12rem) 1fr 4rem;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.bar__label {
+  overflow-wrap: anywhere;
+  font-size: 0.9rem;
+}
+
+.bar__track {
+  display: block;
+  height: 1rem;
+  border: 1px solid #5c5c5c;
+  background: #f2f2f2;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  background: #0b57d0;
+}
+
+.bar__value {
+  font-variant-numeric: tabular-nums;
+  font-weight: 700;
+  text-align: right;
+}
+
+.comparison {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.comparison dt {
+  font-size: 0.9rem;
+  color: #333333;
+}
+
+.comparison dd {
+  margin: 0;
+  font-size: 1.3rem;
+  font-weight: 700;
+}
+
+details {
+  margin-top: 0.5rem;
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 600;
+  color: #0b3d91;
+}
+
+table {
+  width: 100%;
+  margin-top: 0.5rem;
+  border-collapse: collapse;
+}
+
+caption {
+  text-align: left;
+  font-weight: 600;
+  padding-bottom: 0.25rem;
+}
+
+th,
+td {
+  padding: 0.25rem 0.5rem;
+  border: 1px solid #8a8a8a;
+  text-align: left;
+}
+
+th {
+  background: #e8e8e8;
+}
+
+td:last-child,
+th:last-child {
+  text-align: right;
+}
+
+@media (max-width: 40rem) {
+  .bar {
+    grid-template-columns: 1fr 3rem;
+  }
+
+  .bar__track {
+    grid-column: 1 / -1;
+    grid-row: 2;
+  }
+}
