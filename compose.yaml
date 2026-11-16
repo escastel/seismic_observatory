@@ -15,6 +15,7 @@ services:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init:/docker-entrypoint-initdb.d:ro
       - ./db/sql:/sql:ro
+      - ./db/queries:/queries:ro
       - ./frontend/public/datos/paises.geojson:/catalog/paises.geojson:ro
     healthcheck:
       # TCP, not the local socket: during initialisation the server only
@@ -179,6 +180,36 @@ services:
       retries: 3
       start_period: 60s
     restart: unless-stopped
+    networks:
+      - observatorio
+
+  # Reprocess the quarantine with the current rules (contracts/reprocess.md of spec 004).
+  # Not started by `docker compose up`; run it on demand:
+  #   docker compose run --rm quality-reprocess [--dry-run]
+  quality-reprocess:
+    profiles: ["tools"]
+    build:
+      context: .
+      dockerfile: consumer/Dockerfile
+    entrypoint: ["python", "-m", "app.reprocess"]
+    environment:
+      DB_HOST: ${DB_HOST:-postgres}
+      DB_PORT: ${DB_PORT:-5432}
+      POSTGRES_DB: ${POSTGRES_DB:?set POSTGRES_DB in .env}
+      DB_WRITER_PASSWORD: ${DB_WRITER_PASSWORD:?set DB_WRITER_PASSWORD in .env}
+      KAFKA_BOOTSTRAP_SERVERS: ${KAFKA_BOOTSTRAP_SERVERS:-kafka:9092}
+      KAFKA_TOPIC_LIVE: ${KAFKA_TOPIC_LIVE:-earthquakes.live}
+      KAFKA_TOPIC_CATALOG: ${KAFKA_TOPIC_CATALOG:-earthquakes.catalog}
+      KAFKA_TOPIC_REPLAY: ${KAFKA_TOPIC_REPLAY:-earthquakes.replay}
+      KAFKA_RETENTION_HOURS: ${KAFKA_RETENTION_HOURS:-168}
+      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-observatory-consumer}
+      COUNTRIES_GEOJSON_PATH: /catalog/paises.geojson
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - ./frontend/public/datos/paises.geojson:/catalog/paises.geojson:ro
+    restart: "no"
     networks:
       - observatorio
 
