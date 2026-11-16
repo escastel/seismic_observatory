@@ -105,8 +105,8 @@ tareas y ejecuta únicamente sus pruebas; la ejecución completa la hace el orqu
 
 ## Phase 9: Cierre
 
-- [ ] T028 [A0] V9: `pytest tests/db tests/unit tests/contract -v` completo, salida en `docs/evidence/004/tests.txt`; comprobar `git diff 003-usgs-ingestion --stat -- producer api frontend common` vacío
-- [ ] T029 [A0] Completar `docs/evidence/004/README.md` con la tabla de V1 a V9 y la revisión constitucional (principios II, III, IV, VI, VII, IX e idioma; el III queda cerrado), ejecutar `scan-evidence.sh` y revisar `git status` antes del commit final
+- [X] T028 [A0] V9: `pytest tests/db tests/unit tests/contract -v` completo, salida en `docs/evidence/004/tests.txt`; comprobar `git diff 003-usgs-ingestion --stat -- producer api frontend common` vacío
+- [X] T029 [A0] Completar `docs/evidence/004/README.md` con la tabla de V1 a V9 y la revisión constitucional (principios II, III, IV, VI, VII, IX e idioma; el III queda cerrado), ejecutar `scan-evidence.sh` y revisar `git status` antes del commit final
 
 ---
 
