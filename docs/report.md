@@ -943,9 +943,7 @@ figura como superada si su evidencia tiene resultado esperado y observado ejecut
 | 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
 
 Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pendientes de la usuaria** (procedimientos en
-[user-gaps.md](evidence/008/user-gaps.md)): G1 puertos cerrados desde otro dispositivo (002 V2), G2 arranque por una persona ajena
-(002 T057) y G3 pruebas en Linux de las specs 002, 003 (T050), 005 y 006. G4 (panel desde un móvil con datos móviles) se hizo el 2026-11-17 con capturas; G1 y G2 constan como declarados completados por la usuaria el 2026-11-17 sin evidencia guardada, y G3 estaba en ejecución. Mientras no se
-ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo.
+[user-gaps.md](evidence/008/user-gaps.md)): G3, pruebas en Linux de las specs 002, 003 (T050), 005 y 006, en ejecución el 2026-11-17. G4 (panel desde un móvil con datos móviles) se hizo el 2026-11-17 con capturas. G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron del seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en [su README](evidence/002/README.md). Mientras G3 no se ejecute, no se afirma que esas pruebas pasen en Linux.
 
 ### Entregables de §12
 

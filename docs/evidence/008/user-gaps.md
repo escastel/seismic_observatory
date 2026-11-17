@@ -1,29 +1,12 @@
 # Huecos que ejecuta la usuaria (T027)
 
 Comprobaciones que necesitan otro equipo, otro dispositivo u otra persona. **Ninguna pendiente figura como superada**: cada una tiene su
-procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17 con capturas. G1 y G2 constan como declarados completados por la usuaria, sin evidencia guardada: no se marcan como superados con resultado esperado y observado. Cada procedimiento se puede hacer en menos de 30 minutos.
+procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17 con capturas. G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron de este seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en `docs/evidence/002/README.md`. Cada procedimiento se puede hacer en menos de 30 minutos.
 
 | Id | Hueco | Origen | Dónde |
 |---|---|---|---|
-| G1 | Puertos 5432, 9092 y 8000 cerrados desde otro dispositivo de la red | 002 V2 (SC-008) | **Declarado completado por la usuaria el 2026-11-17, sin salida ni evidencia guardada** (un intento con `nc` desde el Linux expiró también en el puerto de control, así que no fue concluyente y se descartó) |
-| G2 | Arranque desde cero por una persona ajena al proyecto, solo con `README.md` | 002 T057 (SC-001) | **Declarado completado por la usuaria el 2026-11-17, sin tiempo ni observaciones guardados** |
 | G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003 T050, 005, 006 | equipo Linux |
 | G4 | Panel desde otro dispositivo físico (túnel y Netlify) | 007; §11 pruebas 9 y 10 | **HECHO el 2026-11-17** (móvil con datos móviles; [007 M1 a M3](../007/README.md)) |
-
-## G1 · Puertos cerrados desde otro dispositivo (002 V2)
-
-1. En el equipo del stack: `docker compose up -d` y `ipconfig` (Windows) o `ip addr` (Linux) para anotar su IP de red local, `IP`.
-2. Desde el otro dispositivo (móvil con una app de escaneo de puertos, u otro portátil con `nc -vz IP 5432`, `9092` y `8000`).
-3. **Esperado**: los tres puertos rechazan o no responden (la API solo escucha en `127.0.0.1:8000`).
-4. Registrar fecha, dispositivo, orden y salida en la fila V2 de [docs/evidence/002/README.md](../002/README.md) y marcarla superada.
-
-## G2 · Arranque por una persona ajena (002 T057)
-
-1. Dar a otra persona el repositorio y que arranque el sistema solo con `README.md` (copiar `.env.example` a `.env`,
-   `docker compose up --build -d`).
-2. Anotar el tiempo hasta que `docker compose ps` muestra los servicios en `healthy` y cualquier duda o paso que no estuviera claro.
-3. **Esperado**: el sistema arranca en menos de 3 minutos con imágenes ya descargadas, sin pasos no documentados.
-4. Registrar en [docs/evidence/002/README.md](../002/README.md) y marcar T057.
 
 ## G3 · Linux (specs 002, 003, 005, 006)
 
