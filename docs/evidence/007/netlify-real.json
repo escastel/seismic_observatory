@@ -1,0 +1,70 @@
+{
+ "load": {
+  "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:22:32 UTC | Generación de la respuesta (API) | 2026-11-17 14:22:32 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:22:20 UTC | Modo | Tiempo real | Periodo consultado | 2026-11-16 14:22:",
+  "rows": 164,
+  "table": "Mostrando 164 de 164 eventos",
+  "map": "164 eventos dibujados · 0 omitidos por coordenadas no válidas",
+  "statsTotal": "164",
+  "banner": []
+ },
+ "errors": [],
+ "api": [
+  "200 OPTIONS /api/eventos",
+  "200 OPTIONS /api/salud",
+  "200 OPTIONS /api/estadisticas",
+  "200 GET /api/eventos",
+  "200 GET /api/salud",
+  "200 GET /api/estadisticas"
+ ],
+ "replay": {
+  "status": "Estado del panel | ⚠ Modo: REPRODUCCIÓN | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:22:38 UTC | Generación de la respuesta (API) | 2026-11-17 14:22:37 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:22:20 UTC | Modo | Reproducción | Última reprodu",
+  "rows": 1000,
+  "table": "Mostrando 1000 de 2807 eventos",
+  "map": "1000 eventos dibujados · 0 omitidos por coordenadas no válidas REPRODUCCIÓN",
+  "statsTotal": "2807",
+  "banner": [],
+  "labelEverywhere": [
+   true,
+   true,
+   true,
+   true
+  ]
+ },
+ "backToLive": {
+  "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:22:41 UTC | Generación de la respuesta (API) | 2026-11-17 14:22:41 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:22:20 UTC | Modo | Tiempo real | Periodo consultado | 2026-11-16 14:22:",
+  "rows": 164,
+  "table": "Mostrando 164 de 164 eventos",
+  "map": "164 eventos dibujados · 0 omitidos por coordenadas no válidas",
+  "statsTotal": "164",
+  "banner": []
+ },
+ "tunnelClosed": {
+  "status": "Estado del panel | Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 14:22:41 UTC. | Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco. | Última lectura correcta del panel | 2026-11-17 14:22:41 UTC | Ge",
+  "rows": 164,
+  "table": "Mostrando 164 de 164 eventos",
+  "map": "164 eventos dibujados · 0 omitidos por coordenadas no válidas",
+  "statsTotal": "164",
+  "banner": [
+   "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+  ],
+  "afterMs": 60553
+ },
+ "tunnelReopened": {
+  "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:24:41 UTC | Generación de la respuesta (API) | 2026-11-17 14:24:41 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:24:21 UTC | Modo | Tiempo real | Periodo consultado | 2026-11-16 14:24:",
+  "rows": 167,
+  "table": "Mostrando 167 de 167 eventos",
+  "map": "167 eventos dibujados · 0 omitidos por coordenadas no válidas",
+  "statsTotal": "167",
+  "banner": [],
+  "afterMs": 56469
+ },
+ "navigations": 1,
+ "errorsAtEnd": [
+  "Access to fetch at 'https://modular-guidance-daybreak.ngrok-free.dev/api/eventos?mode=live&limit=1000&offset=0' from origin 'https://seismicobservatoryecr.netlify.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://modular-guidance-daybreak.ngrok-free.dev/api/salud' from origin 'https://seismicobservatoryecr.netlify.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  "Failed to load resource: net::ERR_FAILED",
+  "Access to fetch at 'https://modular-guidance-daybreak.ngrok-free.dev/api/estadisticas?mode=live' from origin 'https://seismicobservatoryecr.netlify.app' has been blocked by CORS policy: No 'Access-Control-Allow-Origin' header is present on the requested resource.",
+  "Failed to load resource: net::ERR_FAILED"
+ ]
+}

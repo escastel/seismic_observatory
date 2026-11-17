@@ -1,0 +1,548 @@
+{
+  "synthetic": true,
+  "environment": {
+    "date_utc": "2026-11-17T14:56:35Z",
+    "postgres": "PostgreSQL 16.4 (Debian 16.4-1.pgdg120+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14) 12.2.0, 64-bit",
+    "shared_buffers": "128MB",
+    "work_mem": "4MB",
+    "client": "Linux 6.18.58.1-microsoft-standard-WSL2 x86_64, Python 3.11.10",
+    "cpus": "12",
+    "memory": "7.6 GiB",
+    "host_note": "",
+    "cpu": "11th Gen Intel(R) Core(TM) i5-11400H @ 2.70GHz"
+  },
+  "versions": {
+    "shapely": "2.0.6",
+    "geopandas": "1.0.1",
+    "numpy": "2.4.6",
+    "psycopg": "3.2.3",
+    "python": "3.11.10"
+  },
+  "parameters": {
+    "sizes": [
+      10000,
+      100000,
+      1000000
+    ],
+    "repeats": 5,
+    "warmup": 1,
+    "lookups": 100,
+    "seed": 20250101
+  },
+  "results": [
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 10.500 versiones",
+      "size": 10000,
+      "identical": true,
+      "variant": "list_scan",
+      "label": "lista, búsqueda secuencial",
+      "median_ms": 17.986732999816013,
+      "runs_ms": [
+        19.3542450001587,
+        17.986732999816013,
+        19.581981000101223,
+        17.32952100019247,
+        17.29604299998755
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.09281799975724425,
+      "peak_python_kib": 88.8984375,
+      "plan": null,
+      "digest": "d8833a86fdf4d9f9"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 10.500 versiones",
+      "size": 10000,
+      "identical": true,
+      "variant": "dict",
+      "label": "diccionario por event_id",
+      "median_ms": 0.0075220000326226,
+      "runs_ms": [
+        0.01032799991662614,
+        0.008837999757815851,
+        0.0075220000326226,
+        0.007469000138371484,
+        0.007374999768217094
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 1.439656999991712,
+      "peak_python_kib": 1059.2265625,
+      "plan": null,
+      "digest": "d8833a86fdf4d9f9"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 10.500 versiones",
+      "size": 10000,
+      "identical": true,
+      "variant": "sql_no_key",
+      "label": "SQL sin clave primaria",
+      "median_ms": 67.48010600040288,
+      "runs_ms": [
+        62.02684399977443,
+        65.25803500016991,
+        67.49998500026777,
+        67.48010600040288,
+        67.51467399999456
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0013150001905160025,
+      "peak_python_kib": null,
+      "plan": "Sort → Seq Scan",
+      "digest": "d8833a86fdf4d9f9"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 10.500 versiones",
+      "size": 10000,
+      "identical": true,
+      "variant": "sql_primary_key",
+      "label": "SQL con clave primaria (event_id, updated_s)",
+      "median_ms": 11.126216999855387,
+      "runs_ms": [
+        11.132564000035927,
+        11.67854699997406,
+        11.126216999855387,
+        10.807410999859712,
+        10.647025000253052
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0011520000953169074,
+      "peak_python_kib": null,
+      "plan": "Index Scan using versions_pk_pkey",
+      "digest": "d8833a86fdf4d9f9"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 10.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 10000,
+      "identical": true,
+      "variant": "naive_polygons",
+      "label": "bucle ingenuo sobre todos los polígonos",
+      "median_ms": 5091.116808999686,
+      "runs_ms": [
+        5222.971824000069,
+        4757.902706000095,
+        5091.116808999686,
+        4896.472326000094,
+        5163.117659999898
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 1.364125999771204,
+      "peak_python_kib": 781.765625,
+      "plan": null,
+      "digest": "65b215937371057a"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 10.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 10000,
+      "identical": true,
+      "variant": "strtree",
+      "label": "índice espacial STRtree",
+      "median_ms": 19.188708999990922,
+      "runs_ms": [
+        18.421930999920733,
+        19.580732000122225,
+        18.760747000214906,
+        19.188708999990922,
+        19.817098999737937
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 1.2395479998303927,
+      "peak_python_kib": 840.3994140625,
+      "plan": null,
+      "digest": "65b215937371057a"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 10.000 eventos de 2025",
+      "size": 10000,
+      "identical": true,
+      "variant": "python_dict",
+      "label": "bucle Python con diccionario",
+      "median_ms": 14.654168000106438,
+      "runs_ms": [
+        14.654168000106438,
+        14.690460000110761,
+        14.174603000356,
+        14.227097999992111,
+        20.246137999947678
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.002256000243505696,
+      "peak_python_kib": 1042.12109375,
+      "plan": null,
+      "digest": "74cff3cfe3bc9edf"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 10.000 eventos de 2025",
+      "size": 10000,
+      "identical": true,
+      "variant": "sql_date_bin",
+      "label": "SQL GROUP BY con date_bin",
+      "median_ms": 7.409800000004907,
+      "runs_ms": [
+        8.972411999820906,
+        45.80445299961866,
+        7.157690999974875,
+        7.409800000004907,
+        7.144574999983888
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0020229999790899456,
+      "peak_python_kib": null,
+      "plan": "Aggregate → Sort → Seq Scan",
+      "digest": "74cff3cfe3bc9edf"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 105.000 versiones",
+      "size": 100000,
+      "identical": true,
+      "variant": "list_scan",
+      "label": "lista, búsqueda secuencial",
+      "median_ms": 362.37845699997706,
+      "runs_ms": [
+        388.843801999883,
+        362.37845699997706,
+        320.1954440000918
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "build_ms": 1.313822000156506,
+      "peak_python_kib": 827.1953125,
+      "plan": null,
+      "digest": "834c57fc4339fe6b"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 105.000 versiones",
+      "size": 100000,
+      "identical": true,
+      "variant": "dict",
+      "label": "diccionario por event_id",
+      "median_ms": 0.007712999831710476,
+      "runs_ms": [
+        0.008844999683788046,
+        0.011278999863861827,
+        0.007712999831710476,
+        0.007211000138340751,
+        0.00728799977878225
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 61.66247300006944,
+      "peak_python_kib": 13137.078125,
+      "plan": null,
+      "digest": "834c57fc4339fe6b"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 105.000 versiones",
+      "size": 100000,
+      "identical": true,
+      "variant": "sql_no_key",
+      "label": "SQL sin clave primaria",
+      "median_ms": 492.6122099996064,
+      "runs_ms": [
+        522.4618020001799,
+        492.6122099996064,
+        438.09146000012333
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "build_ms": 0.002114999915647786,
+      "peak_python_kib": null,
+      "plan": "Sort → Seq Scan",
+      "digest": "834c57fc4339fe6b"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 105.000 versiones",
+      "size": 100000,
+      "identical": true,
+      "variant": "sql_primary_key",
+      "label": "SQL con clave primaria (event_id, updated_s)",
+      "median_ms": 12.543453000034788,
+      "runs_ms": [
+        12.738423000428156,
+        13.31458399999974,
+        11.886727000273822,
+        11.49441100005788,
+        12.543453000034788
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0015390000953630079,
+      "peak_python_kib": null,
+      "plan": "Index Scan using versions_pk_pkey",
+      "digest": "834c57fc4339fe6b"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 100.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 100000,
+      "identical": true,
+      "variant": "naive_polygons",
+      "label": "bucle ingenuo sobre todos los polígonos",
+      "median_ms": 50319.412839000055,
+      "runs_ms": [
+        50174.80326699979,
+        50319.412839000055,
+        50575.23467300007
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "build_ms": 41.29615300007572,
+      "peak_python_kib": 7813.015625,
+      "plan": null,
+      "digest": "595fd3054791b61d"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 100.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 100000,
+      "identical": true,
+      "variant": "strtree",
+      "label": "índice espacial STRtree",
+      "median_ms": 194.70984800000224,
+      "runs_ms": [
+        204.34984500025166,
+        181.52537900004972,
+        194.70984800000224,
+        202.0076329999938,
+        186.1939559998973
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 41.118823000033444,
+      "peak_python_kib": 8337.6259765625,
+      "plan": null,
+      "digest": "595fd3054791b61d"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 100.000 eventos de 2025",
+      "size": 100000,
+      "identical": true,
+      "variant": "python_dict",
+      "label": "bucle Python con diccionario",
+      "median_ms": 118.6734200000501,
+      "runs_ms": [
+        106.86326799987,
+        104.94246400003249,
+        122.61815600004411,
+        123.72441599973172,
+        118.6734200000501
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0010969997674692422,
+      "peak_python_kib": 1450.60546875,
+      "plan": null,
+      "digest": "df8f0708ab2d7f69"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 100.000 eventos de 2025",
+      "size": 100000,
+      "identical": true,
+      "variant": "sql_date_bin",
+      "label": "SQL GROUP BY con date_bin",
+      "median_ms": 34.94740999985879,
+      "runs_ms": [
+        59.88283600026989,
+        33.228837000024214,
+        37.53826299998764,
+        34.94740999985879,
+        33.947601999898325
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.002516000222385628,
+      "peak_python_kib": null,
+      "plan": "Aggregate → Sort → Seq Scan",
+      "digest": "df8f0708ab2d7f69"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 1.050.000 versiones",
+      "size": 1000000,
+      "identical": true,
+      "variant": "list_scan",
+      "label": "lista, búsqueda secuencial",
+      "median_ms": 2767.7407009996386,
+      "runs_ms": [
+        2767.7407009996386,
+        2691.3124950001475,
+        2846.495948000211
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "build_ms": 14.259549000144034,
+      "peak_python_kib": 8210.0,
+      "plan": null,
+      "digest": "325e8ac6ff848cdf"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 1.050.000 versiones",
+      "size": 1000000,
+      "identical": true,
+      "variant": "dict",
+      "label": "diccionario por event_id",
+      "median_ms": 0.008283999704872258,
+      "runs_ms": [
+        0.009967000096366974,
+        0.010020999980042689,
+        0.008283999704872258,
+        0.007442999958584551,
+        0.007106000339263119
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 1047.152947000086,
+      "peak_python_kib": 115976.78125,
+      "plan": null,
+      "digest": "325e8ac6ff848cdf"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 1.050.000 versiones",
+      "size": 1000000,
+      "identical": true,
+      "variant": "sql_no_key",
+      "label": "SQL sin clave primaria",
+      "median_ms": 2334.5762580001974,
+      "runs_ms": [
+        2334.5762580001974,
+        2645.773497999926,
+        2182.0256699998026
+      ],
+      "repeats": 3,
+      "warmup": 1,
+      "build_ms": 0.0030199998946045525,
+      "peak_python_kib": null,
+      "plan": "Sort → Gather → Seq Scan",
+      "digest": "325e8ac6ff848cdf"
+    },
+    {
+      "operation": "search",
+      "description": "Versiones de 101 identificadores (uno inexistente) entre 1.050.000 versiones",
+      "size": 1000000,
+      "identical": true,
+      "variant": "sql_primary_key",
+      "label": "SQL con clave primaria (event_id, updated_s)",
+      "median_ms": 11.71816799978842,
+      "runs_ms": [
+        11.956804999954329,
+        11.71816799978842,
+        10.635321000336262,
+        9.977445999993506,
+        12.936856000123953
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0018790001377055887,
+      "peak_python_kib": null,
+      "plan": "Index Scan using versions_pk_pkey",
+      "digest": "325e8ac6ff848cdf"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 1.000.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 1000000,
+      "identical": true,
+      "variant": "naive_polygons",
+      "label": "bucle ingenuo sobre todos los polígonos",
+      "median_ms": 504088.1971939998,
+      "runs_ms": [
+        504088.1971939998
+      ],
+      "repeats": 1,
+      "warmup": 0,
+      "build_ms": 555.6911460002993,
+      "peak_python_kib": null,
+      "plan": null,
+      "digest": "7e474855b7a207a5"
+    },
+    {
+      "operation": "geo",
+      "description": "País de 1.000.000 puntos aleatorios entre 177 polígonos de Natural Earth",
+      "size": 1000000,
+      "identical": true,
+      "variant": "strtree",
+      "label": "índice espacial STRtree",
+      "median_ms": 1836.8789959999958,
+      "runs_ms": [
+        1784.8626370000602,
+        1897.4491260000832,
+        1836.8789959999958,
+        1826.8293599999197,
+        1858.52468999974
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 599.7274729998026,
+      "peak_python_kib": 83747.2666015625,
+      "plan": null,
+      "digest": "7e474855b7a207a5"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 1.000.000 eventos de 2025",
+      "size": 1000000,
+      "identical": true,
+      "variant": "python_dict",
+      "label": "bucle Python con diccionario",
+      "median_ms": 1092.7555499997652,
+      "runs_ms": [
+        1074.9370860003182,
+        1146.3155330002337,
+        1082.548855999903,
+        1092.7555499997652,
+        1123.6621319999358
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.001856000380939804,
+      "peak_python_kib": 1451.06640625,
+      "plan": null,
+      "digest": "122f0e9d5e870ebf"
+    },
+    {
+      "operation": "hourly",
+      "description": "Eventos por hora UTC entre 1.000.000 eventos de 2025",
+      "size": 1000000,
+      "identical": true,
+      "variant": "sql_date_bin",
+      "label": "SQL GROUP BY con date_bin",
+      "median_ms": 330.68777600010435,
+      "runs_ms": [
+        344.5621369996843,
+        330.68777600010435,
+        322.82065400022475,
+        320.9376559998418,
+        350.0283739999759
+      ],
+      "repeats": 5,
+      "warmup": 1,
+      "build_ms": 0.0033639998946455307,
+      "peak_python_kib": null,
+      "plan": "Aggregate → Sort → Seq Scan",
+      "digest": "122f0e9d5e870ebf"
+    }
+  ]
+}

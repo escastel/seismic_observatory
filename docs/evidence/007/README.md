@@ -40,11 +40,23 @@ Hecha desde esta sesión con el servicio `tunnel` de Compose y el dominio reserv
 | T2 | **Cerrar y reabrir el túnel** (V11 real, refresco de 60 s sin forzar) | aviso de inaccesible con la última lectura rotulada; recuperación sin recargar | con el panel abierto se paró el túnel: el aviso apareció a los 55 s (siguiente refresco) con los 165 eventos conservados y «los datos mostrados son la última lectura correcta, del 14:01:26 UTC»; al reabrirlo, el panel volvió a «Datos al día» a los 61 s sin recargar (1 navegación en toda la prueba) ([túnel abierto](T1-tunnel-open.png), [cerrado](T2-tunnel-closed.png), [reabierto](T3-tunnel-reopened.png), [datos](tunnel-real.json)) | SUPERADA |
 | T3 | Build de producción contra el túnel | el paquete `dist/observatorio/browser`, servido como sitio estático con la misma regla SPA que `_redirects`, lee del túnel | 165 eventos dibujados y 165 en tabla, sin NG0900, peticiones `GET` 200 a `https://modular-guidance-daybreak.ngrok-free.dev/api/...` ([captura](T4-prod-build-tunnel.png), [datos](prod-build-real-tunnel.json)) | SUPERADA |
 
-**Sigue pendiente: Netlify.** No hay CLI ni conector de Netlify en esta sesión y publicar exige iniciar sesión en la cuenta de la usuaria, así que **no se ha publicado ni probado desde un dominio `netlify.app`**. Para cerrarlo: publicar con el procedimiento del README (sección 10), añadir el origen exacto del sitio a `CORS_ORIGINS`, recrear la API (`docker compose up -d api`) y abrir el sitio desde otro dispositivo. La comprobación de T3 demuestra que el paquete funciona contra el túnel; lo que falta es solo el origen de Netlify en CORS.
+## Prueba desde Netlify (2026-11-17)
+
+Sitio publicado por la usuaria: `https://seismicobservatoryecr.netlify.app`, con el panel de la spec 007 (su `config.json` apunta al dominio del túnel) y el origen exacto del sitio añadido a `CORS_ORIGINS` (preflight comprobado: el sitio y `http://localhost:4200` reciben 200 con su origen; un origen ajeno, 400). Navegador automatizado sobre la URL pública, API real a través del túnel ngrok real. Datos en bruto: [netlify-real.json](netlify-real.json).
+
+| Id | Qué comprueba | Esperado | Observado | Estado |
+|---|---|---|---|---|
+| N1 | Carga desde Netlify | sin NG0900 ni errores; peticiones a la API por el túnel con CORS | sin errores de consola; `OPTIONS` y `GET` 200 a `/api/eventos`, `/api/estadisticas` y `/api/salud`; 164 eventos en mapa, 164 en tabla y total 164 en estadísticas ([captura](N1-netlify-load.png)) | SUPERADA |
+| N2 | Reproducción desde Netlify | «REPRODUCCIÓN» en las cuatro zonas; datos aislados | etiqueta en estado, mapa, tabla y gráficos; «Mostrando 1000 de 2807»; estadísticas 2.807; al volver a modo real, 164 de 164 igual que antes ([captura](N2-netlify-replay.png)) | SUPERADA |
+| N3 | **Cerrar y reabrir el túnel con el sitio de Netlify abierto** | aviso con la última lectura conservada; recuperación sin recargar | túnel parado: aviso a los 60 s (refresco de 60 s) con los 164 eventos conservados y la hora de la última lectura correcta; reabierto: «Datos al día» a los 56 s con datos nuevos (167 eventos), una sola navegación en toda la prueba ([cerrado](N3-netlify-tunnel-closed.png), [reabierto](N4-netlify-tunnel-reopened.png)) | SUPERADA |
+
+Los únicos errores de CORS de consola aparecen mientras el túnel está cerrado (la página de «endpoint offline» de ngrok no lleva cabeceras CORS) y se tratan como backend inaccesible, como se espera.
+
+**Sigue sin probarse**: el acceso desde otro dispositivo físico (la prueba usa un navegador automatizado de este equipo contra la URL pública) y Linux.
 
 ## Notas y límites (lo que NO se ha demostrado)
 
-- **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. El túnel ngrok real sí se cerró y reabrió después (sección «Prueba con el túnel ngrok real»); el despliegue en Netlify sigue sin probarse. El umbral de 15 s se ha comprobado con una respuesta retrasada.
+- **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. El túnel ngrok real sí se cerró y reabrió después (sección «Prueba con el túnel ngrok real»); la prueba desde el sitio de Netlify está en su sección. El umbral de 15 s se ha comprobado con una respuesta retrasada.
 - **Refresco de 60 s**: V2 mostró la actualización automática real (≈3 min hasta que llegó un evento). Los escenarios de fallo forzaron el refresco con «Aplicar filtros» para no esperar 60 s por caso; el ciclo temporizado es el mismo código (`refresh()` rearma el temporizador al terminar).
 - **Teselas de OpenStreetMap**: el navegador sin interfaz recibe 400 en varias teselas (política de uso de OpenStreetMap ante clientes automatizados); no se ha comprobado el fondo en un navegador con interfaz, solo que fronteras y eventos se dibujan.
 - **Prueba en Linux**: pendiente (ver memoria); no se espera diferencia porque todo es TypeScript y Node.

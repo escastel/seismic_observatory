@@ -1,14 +1,31 @@
 # Memoria del Observatorio Sísmico
 
-Este documento reúne las decisiones de diseño del observatorio y su justificación. Se completa
-funcionalidad a funcionalidad; esta versión contiene los apartados de la plataforma y el modelo
-de datos (spec 002). Las cifras citadas proceden de mediciones guardadas en
-[docs/evidence/002/](evidence/002/).
+Este documento reúne las decisiones de diseño del observatorio, su justificación y las evidencias de cada
+funcionalidad (specs 002 a 008). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
+indica el instante en que se obtuvieron, porque la base crece con el feed en vivo (por ejemplo, `core` tenía 34.045 eventos el
+2026-11-16, 34.207 el 2026-11-17 y 32.978 terremotos reales en la medición de calidad del 2026-11-16: no son contradicciones, son
+instantes distintos). Los datos sintéticos y de reproducción quedan fuera de todo análisis de datos reales.
+
+**Índice**
+
+1. [Alcance y decisiones](#alcance-y-decisiones)
+2. [Fuentes y extracción](#fuentes-y-extracción)
+3. [Calidad de los datos](#calidad-de-los-datos) (más detalle en [calidad.md](calidad.md))
+4. [Reproducción histórica](#reproducción-histórica)
+5. [API de consulta](#api-de-consulta)
+6. [Panel Angular (spec 007)](#panel-angular-spec-007)
+7. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
+8. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
+9. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
+10. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
+11. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
+12. [Diccionario de datos](#diccionario-de-datos)
+13. [Índices](#índices)
 
 ## Alcance y decisiones
 
 **Datos que el sistema debe guardar.** El enunciado exige el histórico mundial de 2025 con
-magnitud ≥ 4 y tipo terremoto (unos 16.000 eventos) y el feed en vivo de USGS de las últimas
+magnitud ≥ 4 y tipo terremoto (unos 16.000 según el enunciado; el catálogo real cargado tiene 18.302) y el feed en vivo de USGS de las últimas
 24 horas, consultado cada minuto (unos 200 eventos nuevos y hasta 10.080 consultas por semana).
 El histórico de 2025 es dato real: se guarda en el esquema `core`, distinguido del feed por su
 procedencia (`source = 'usgs_catalog'`), y no en el de reproducción. El modelo no impide cargar
@@ -626,7 +643,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente de la usuaria**: la publicación en Netlify y la prueba desde su dominio (hace falta su origen exacto en `CORS_ORIGINS`); el túnel ngrok real ya se probó.
+- **Pendiente**: la prueba desde otro dispositivo físico y en Linux. El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
 - **Pendiente**: la prueba en Linux.
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
@@ -635,6 +652,331 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
   con «Aplicar filtros».
 - En el navegador sin interfaz, OpenStreetMap rechazó varias teselas (400): el fondo del mapa no se ha
   comprobado en un navegador con interfaz; sí que se dibujan fronteras y eventos.
+
+## Análisis y conclusiones (spec 008)
+
+Cuatro conclusiones sobre datos **reales** (esquema `core`; reproducción y datos sintéticos excluidos: 1.013
+eventos `synthetic-%` de pruebas de escala, que de no excluirlos darían 516 eventos M ≥ 4 el 16-nov en lugar de 15).
+Cada cifra se regenera con [tests/analysis/queries.sql](../tests/analysis/queries.sql) (salida literal en
+[evidence/008/analysis-queries.out](evidence/008/analysis-queries.out)) o con la llamada a la API indicada, y se
+contrastó entre ambas ([evidence/008/analysis-queries.md](evidence/008/analysis-queries.md)). **Ejecución:
+2026-11-17 14:34–14:38 UTC**; los datos en vivo cambian, así que las cifras del periodo reciente varían con el
+instante, y las de 2025 no.
+
+**Advertencias que valen para todas.** (1) Son descripciones del pasado, no una predicción de terremotos ni una
+evaluación de riesgo. (2) El catálogo cargado de 2025 contiene solo magnitud ≥ 4 (mínimo observado 4,0), por lo que
+toda comparación usa ese mismo filtro. (3) El periodo reciente puede estar incompleto: USGS añade y revisa eventos
+durante horas. (4) La cobertura de detección y los tipos de magnitud varían entre regiones y épocas (abajo, Q6).
+(5) Sin valor: en el conjunto real no hay ningún evento con magnitud o profundidad nulas (los 2 de `core` sin
+magnitud y el 1 sin profundidad son casos sintéticos, excluidos); cada conclusión lo declara igualmente.
+
+### C1 · Casi cuatro de cada cinco terremotos de M ≥ 4 de 2025 no caen en ningún país
+
+- **Cifras**: 14.350 de 18.302 eventos (**78,4 %**) con «Sin país asignado»; el mayor país es China con 354 (1,9 %),
+  seguido de Chile (348), Indonesia (306), Etiopía (265) y Argentina (236).
+- **Filtros y periodo**: modo real, `min_mag=4`, de 2025-01-01 00:00 UTC (incl.) a 2026-01-01 00:00 UTC (excl.). Unidad:
+  eventos. Sin valor: 0.
+- **No es un artefacto de las magnitudes bajas**: la proporción sin país es 77,6 % (M 4–5), 84,8 % (5–6), 84,5 % (6–7),
+  80,0 % (7–8) y 1 de 1 (8–9).
+- **Lectura**: el país se obtiene por punto dentro de polígono sobre Natural Earth (constitución IV); un epicentro en
+  mar abierto o fuera de la costa de las entidades no tiene país y permanece en el análisis, sin asignarlo al más
+  cercano. La cifra describe dónde caen los epicentros respecto a los polígonos de tierra, no el peligro de ningún país.
+- **Regenerar**: `queries.sql` Q2 y Q2b; `GET /api/estadisticas?min_mag=4&start=2025-01-01T00:00:00Z&end=2026-01-01T00:00:00Z`
+  (`by_country`, 14.350).
+- **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (filtros: 01/01/2025 a 01/01/2026, magnitud mínima 4, todos
+  los países).
+
+### C2 · Con la comparación equivalente, el día más reciente completo está por debajo de la media de 2025 (no 3,9 veces por encima)
+
+| Comparación | Periodo reciente | Eventos | Media diaria 2025 | Razón | ¿Equivalente? |
+|---|---|---:|---:|---:|---|
+| Sin filtro (la que mostró 3,87) | últimas 24 h (14:34 UTC) | 169 | 50,14 | 3,37 | **No** |
+| `min_mag=4` | últimas 24 h (14:34 UTC) | 14 | 50,14 | **0,28** | Sí |
+| `min_mag=4` | día UTC completo 2026-11-16 | 15 | 50,14 | **0,30** | Sí (periodo cerrado) |
+
+- **Por qué la primera no vale**: el feed en vivo incluye todas las magnitudes y el catálogo de 2025 solo M ≥ 4. De los
+  169 eventos de las últimas 24 h, 155 son de M < 4 y 131 son de Estados Unidos (red de detección local densa): el
+  numerador cuenta eventos que el denominador no puede contener. El 3,87 del panel es esta misma comparación en otro
+  instante.
+- **Denominador**: 365 días de 2025, incluidos los días sin eventos (en 2025 con M ≥ 4 no hay ninguno, y la regla se
+  aplica igualmente; con media 0 el panel muestra ND). 18.302 / 365 = 50,14.
+- **Contexto de la media**: la media está inflada por días de enjambre (máximo diario 645; mediana 43, desv. típica
+  41,1; mínimo 20). Frente a la mediana (43) el día 2026-11-16 (15) sigue siendo bajo, y es de los más bajos de 2026:
+  2026-11-04 (14), 2026-11-08 (15) y 2026-11-16 (15) son los únicos días de 2026 con 15 o menos (media 2026-01-01 a 11-14:
+  44,7; mínimo 14).
+- **Comprobación de que no es un hueco de carga**: el servicio `count` de USGS devuelve 14, 15 y 15 para esos tres días,
+  los mismos valores que la base (consulta del 2026-11-17 14:36 UTC).
+- **Límite**: no se interpreta como tendencia de actividad sísmica ni se infiere nada de tres días bajos; el periodo
+  reciente puede revisarse al alza, y la comparación contra la media de un único año no define «lo normal».
+- **Regenerar**: `queries.sql` Q3, Q3b, Q3c y Q3d; `GET /api/estadisticas?min_mag=4` (`comparison.ratio`, instante de
+  la ventana por defecto) y `GET /api/estadisticas?min_mag=4&start=2026-11-16T00:00:00Z&end=2026-11-17T00:00:00Z`.
+- **Capturas**: [C2a-24h-m4.png](evidence/008/C2a-24h-m4.png) (24 h, magnitud mínima 4) y
+  [C2b-24h-nofilter.png](evidence/008/C2b-24h-nofilter.png) (24 h sin filtro: la comparación no equivalente).
+
+### C3 · Casi la mitad de las profundidades de 2025 valen exactamente 10 km, y las medianas por región dependen de ello
+
+- **Cifras** (M ≥ 4, 2025, 18.302 eventos): **8.258 (45,1 %) con profundidad exactamente 10 km**, valor que USGS asigna
+  habitualmente cuando no puede determinarla; el reparto por tramos es 0–70 km: 13.689 (74,8 %), 70–300 km: 3.511
+  (19,2 %), ≥ 300 km: 1.102 (6,0 %); 0 profundidades negativas.
+- **Por subregión** (mediana de profundidad; subregiones con ≥ 100 eventos): Sudamérica 117,1 km (973 eventos),
+  Melanesia 86,1 (216), Europa oriental 52,3 (168), Centroamérica 57,9 (143), Sin país asignado 22,0 (14.350), y 10,0 km
+  en Asia oriental, Asia meridional, África oriental, Asia central y Asia occidental: la mediana de 10,0 km coincide con el
+  valor fijado, así que en esas regiones la mediana no distingue profundidad real.
+- **Lectura**: donde las profundidades se determinan mejor (subducción andina, Melanesia) las medianas son mayores; en
+  otras la mediana refleja sobre todo la convención de profundidad fijada. Cualquier conclusión sobre «terremotos
+  superficiales» debe tener esto en cuenta. No se evalúa riesgo.
+- **Filtros y periodo**: igual que C1. Sin valor: 0 (profundidad nula).
+- **Regenerar**: `queries.sql` Q5 y Q7; `GET /api/estadisticas?min_mag=4&start=2025-01-01T00:00:00Z&end=2026-01-01T00:00:00Z`
+  (`depth_distribution`).
+- **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (sección «Distribución de profundidad»; mismos filtros que C1).
+
+### C4 · No hay un patrón horario marcado en los terremotos de M ≥ 4 de 2025
+
+- **Cifras**: por hora UTC, entre 681 (15 h) y 832 (03 h) eventos, con media 762,6 (cociente máximo/mínimo 1,22; entre
+  −10,7 % y +9,1 % respecto a la media). χ² frente a una distribución uniforme = 41,1 con 23 grados de libertad.
+- **Lectura**: la variación es modesta. El χ² supera formalmente el valor crítico del 5 % (35,2), pero la prueba supone
+  eventos independientes y los terremotos se agrupan en secuencias de réplicas (día máximo: 645 eventos), así que ese
+  resultado no se toma como significativo. Un terremoto no depende de la hora del día en UTC; lo que se mide es el
+  reparto de lo registrado por el catálogo.
+- **Filtros y periodo**: igual que C1. Ventanas de una hora UTC sobre el tiempo de ocurrencia. Sin valor: 0.
+- **Regenerar**: `queries.sql` Q4 y Q8.
+- **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (el gráfico «Eventos por hora UTC» solo dibuja las últimas
+  168 ventanas; la tabla de datos contiene las 8.760).
+
+### Q6 · Tipos de magnitud: la comparación entre muestras solo es válida con el mismo filtro
+
+- Catálogo 2025, M ≥ 4: mb 16.332 (89,2 %), mww 1.476, mwr 354, ml 76, mw 29, md 29, mwb 6.
+- Feed del 10 al 17 de noviembre de 2026, todas las magnitudes: ml 384, md 145, mb 131, mww 25, mwr 2, mb_lg 2.
+- El tipo de magnitud depende del rango y de la red que mide; por eso se fija M ≥ 4 en ambos lados de C2 y no se
+  comparan magnitudes entre tipos distintos sin advertirlo.
+
+### Datos que quedan fuera de este apartado
+
+La reproducción (`replay`, 2.807 eventos el 2026-11-17; el recuento cambia con cada reproducción: 5.301 en la verificación de la 005) y los datos sintéticos (1.013 en `core`, más los del esquema `bench` de las
+mediciones de escala) no entran en ninguna cifra. El panel en modo «REPRODUCCIÓN» se comprobó en
+[docs/evidence/007/](evidence/007/README.md) (V9 y V10).
+
+## Complejidad y rendimiento (spec 008)
+
+Las tablas de «Medido» salen de ejecuciones guardadas en `docs/evidence/008/`; las de «Supuesto» son razonamiento o extrapolación y
+nunca se mezclan con ellas. **Todos los datos de escala son sintéticos** (semilla fija, esquema `bench`, eliminado al terminar) y no
+entran en ninguna cifra del análisis real. Equipo y procedimiento: Windows 11 Pro, Intel Core i5-11400H (2,70 GHz, 12 hilos), 15,7 GB
+de RAM (7,6 GiB visibles para Docker/WSL2), PostgreSQL 16.4 con `shared_buffers` 128 MB y `work_mem` 4 MB, Python 3.11.10, Shapely 2.0.6.
+Tiempo: mediana de 5 repeticiones tras una de calentamiento con `time.perf_counter` (menos repeticiones en las variantes lentas, marcadas
+en la evidencia); memoria: pico de `tracemalloc` (solo Python y NumPy, no GEOS ni PostgreSQL). Detalle completo y orden de ejecución:
+[evidence/008/structure-benchmark.md](evidence/008/structure-benchmark.md). La medición de **índices** con 1.000.000 de filas ya está en
+[evidence/002/index-benchmark.md](evidence/002/index-benchmark.md) y no se repite aquí (resumen en «Índices»).
+
+### Coste teórico de las tres operaciones
+
+| Operación | Variante | Coste medio | Peor caso | Memoria |
+|---|---|---|---|---|
+| Versiones de un evento por identificador (`event_version`, n filas) | lista, búsqueda secuencial | O(n) (n/2 comparaciones si existe) | O(n) (no existe) | O(n) |
+| | diccionario (tabla hash) | O(1) | O(n) con colisiones adversarias (en la práctica no ocurre con 26 caracteres de identificador) | O(n) |
+| | PostgreSQL sin clave | O(n), lectura secuencial | O(n) | O(1) en la aplicación |
+| | PostgreSQL con clave primaria `(event_id, updated_at)` (B-tree) | O(log n) | O(log n): el árbol está equilibrado | O(1); el índice ocupa espacio en disco |
+| Integración geográfica (país de n puntos, P = 177 polígonos con V vértices) | bucle sobre todos los polígonos (regla del consumidor) | O(n · P · V̄) con descarte por rectángulo | igual con polígonos muy solapados | O(P · V̄) |
+| | índice espacial STRtree | O(P log P) en construir; O(log P + k) por punto (k = candidatos) | O(P) por punto si el punto cae en muchos rectángulos | O(P) |
+| Agregación por ventanas de una hora UTC (n eventos, w ventanas) | bucle con diccionario | O(n + w) | O(n + w) | O(w) |
+| | `GROUP BY` con `date_bin` en PostgreSQL | O(n) con agregación por hash; O(n log n) con ordenación | O(n log n) | O(w) |
+| | idem con rango de `event_time` indexado | O(log n + k), k eventos del rango | O(n) si el rango es todo | O(w) |
+
+### Medido: tres operaciones, tres tamaños
+
+Mediana en ms (en «Pico» la memoria de Python en KiB; `—` = no medible con `tracemalloc`). Todos los resultados idénticos entre variantes.
+
+| Operación (tamaño de entrada n) | Variante | 10.000 | 100.000 | 1.000.000 | Pico a 1.000.000 |
+|---|---|---:|---:|---:|---:|
+| Versiones: 101 identificadores | lista secuencial | 18,0 | 362,4 | 2.767,7 | 8.210 KiB |
+| | diccionario (consulta) | 0,008 | 0,008 | 0,008 | 115.977 KiB |
+| | diccionario (construirlo, una vez) | 1,4 | 61,7 | 1.047,2 | — |
+| | SQL sin clave | 67,5 | 492,6 | 2.334,6 | — |
+| | SQL con clave primaria | 11,1 | 12,5 | 11,7 | — |
+| Integración geográfica: n puntos | bucle sobre los 177 polígonos | 5.091,1 | 50.319,4 | 504.088,2 (1 ejecución) | — |
+| | STRtree | 19,2 | 194,7 | 1.836,9 | 83.747 KiB |
+| Agregación por hora UTC: n eventos | bucle con diccionario | 14,7 | 118,7 | 1.092,8 | 1.451 KiB |
+| | `GROUP BY` con `date_bin` | 7,4 | 34,9 | 330,7 | — |
+
+**Lectura (medido)**:
+
+- **Búsqueda de versiones**: la lista y el SQL sin clave crecen con n (a 1.000.000, 27 ms y 23 ms por identificador); el diccionario y la
+  clave primaria no dependen de n (el diccionario tarda 8 µs en las 101 búsquedas, y la clave primaria ≈ 0,12 ms por identificador,
+  dominada por el viaje a la base). El SQL con clave es ×199 más rápido que el SQL sin clave a 1.000.000. El diccionario cuesta 1,05 s
+  en construirse y 116 MB: se amortiza tras unas 38 búsquedas, y no cabe en memoria a escala mayor.
+- **Integración geográfica**: el bucle ingenuo crece linealmente (×10 por cada ×10: 5,1 s, 50,3 s, 504 s) y el STRtree también pero con
+  una constante ×274 menor (1,8 µs por punto frente a 504 µs a 1.000.000). El consumidor procesa los eventos de uno en uno, donde el
+  coste del bucle ingenuo por evento (≈ 0,5 ms) cabe de sobra en el ritmo de ingesta; la carga de un histórico completo sí se beneficiaría
+  del índice espacial.
+- **Agregación por ventanas**: crece linealmente en las dos variantes; PostgreSQL es ×3,3 más rápido que el bucle (330,7 frente a
+  1.092,8 ms a 1.000.000) y además no tiene que mover las filas a Python (la medición del bucle parte de las filas ya en memoria, así que
+  su ventaja real es mayor).
+
+### Medido: la API de consulta con 1.000.000 de filas sintéticas
+
+(La medición de la 006 con 34.045 eventos está en [evidence/006/v16-latency.md](evidence/006/v16-latency.md); aquí se completa lo que
+dejó pendiente.) Se importa la aplicación de la API en proceso (sin red ni túnel, igual que la 006) en modo `replay`, con la ruta de
+búsqueda sustituida en memoria por el esquema sintético `bench` (el código de `api/` no se modifica; ver
+[evidence/008/00-environment.md](evidence/008/00-environment.md)). 5 peticiones de calentamiento y 30 medidas por consulta, con el resto
+de servicios activos.
+
+| Consulta (modo `replay` sobre `bench`) | Sin índices secundarios: mediana / p95 | Con los tres índices de `event_current`: mediana / p95 |
+|---|---|---|
+| `/api/eventos?limit=10` | 468,4 / 523,2 | 166,8 / 182,9 |
+| `/api/eventos?limit=1000` | 494,9 / 703,9 | 182,0 / 194,4 |
+| `/api/eventos?limit=1000` de 2025 | 539,9 / 605,8 | 190,6 / 208,6 |
+| `/api/estadisticas` de 2025, sin filtro | 1.056,4 / 1.142,4 | 1.276,4 / 1.333,7 |
+| `/api/estadisticas` de 2025, `min_mag=4` (≈ 1.000 filas) | 607,2 / 665,2 | 449,1 / 487,0 |
+
+Máxima mediana: 1.276,4 ms (límite de la 006: 2.000 ms), 0 fallos. Con los índices las páginas de eventos son ≈ ×3 más rápidas; la
+estadística de un año completo sin filtro es la consulta más cara y los índices no la mejoran (agrega todas las filas). `bench` se crea sin los
+índices secundarios, así que la primera columna es el peor caso y la segunda lo que tienen `core` y `replay`. Con 1.000.000 de filas el
+sistema sigue dentro del objetivo, pero con otras formas de uso (estadísticas de años enteros sin filtro) sería lo primero en degradarse.
+Detalle, procedimiento y comprobación de aislamiento: [evidence/008/api-latency-1m.md](evidence/008/api-latency-1m.md).
+
+### Supuesto: qué ocurriría con 100 millones de registros
+
+**No medido**: extrapolación lineal de las mediciones de 1.000.000 (factor ×100), sin contar la caché ni el disco, que empeoran el
+resultado. La de los índices con 1.000.000 de filas está en «Índices» y sigue siendo válida.
+
+| Operación | Extrapolación a 100.000.000 | Consecuencia |
+|---|---|---|
+| Búsqueda secuencial en lista | ≈ 277 s por 101 identificadores (≈ 2,7 s por identificador) | inviable |
+| Diccionario | consulta O(1), pero ≈ 11,6 GB de memoria (116 MB × 100) frente a 7,6 GiB visibles | no cabe: hace falta el índice de la base de datos |
+| SQL con clave primaria | el B-tree gana a lo sumo uno o dos niveles; se esperan tiempos del mismo orden si el índice cabe en memoria, y de disco si no | es la estructura que escala |
+| Bucle ingenuo de polígonos | ≈ 50.400 s (14 h) para 100 millones de puntos | inviable |
+| STRtree | ≈ 184 s en total si se procesa por lotes (≈ 8,4 GB si se cargaran todos los puntos a la vez) | viable por lotes |
+| Agregación por hora en SQL | ≈ 33 s con lectura secuencial de la tabla (≈ 16 GB de búferes leídos) | aceptable offline; para el panel, agregados previos |
+
+Con esa escala harían falta, además de lo ya razonado en «Índices» (particionado por año, BRIN en particiones antiguas, agregados diarios
+recalculados desde el estado actual y más memoria para PostgreSQL), procesar la integración geográfica por lotes y no cargar índices ni
+diccionarios completos en la memoria de un proceso.
+
+## Costes, escalado y mejoras (spec 008)
+
+Una **medida** tiene enlace a una evidencia ejecutada; un **supuesto** lleva su valor y su razón. Ningún supuesto procede de una
+medición. Fuente de todo: [evidence/008/cost-measurements.md](evidence/008/cost-measurements.md),
+[cost-table.md](evidence/008/cost-table.md) y [free-tier-limits.md](evidence/008/free-tier-limits.md).
+
+### Qué se ha medido (2026-11-17)
+
+| Concepto | Medida |
+|---|---|
+| Base de datos PostgreSQL | 83 MB (34.207 eventos en `core`, 2.807 en `replay`); volumen Docker 195 MB |
+| Topics de Kafka | 108 MB de disco realmente ocupado; `docker system df` muestra 1,244 GB porque cuenta el tamaño aparente de los ficheros de índice dispersos (ver abajo) |
+| Memoria en reposo del stack | ≈ 1,1 GiB: Kafka 879 MiB, consumidor 82, API 48, PostgreSQL 46, productor 37, túnel 15 |
+| Respuestas de la API | eventos 24 h: 59.238 bytes; estadísticas 24 h: 2.675; salud: 111; 1.000 eventos de 2025: 307.772 |
+| Uso del túnel ngrok en noviembre | 191 MB de 1.000 MB incluidos (17 días); 5.282 peticiones |
+| Panel compilado | 1,2 MB |
+
+### Partidas de coste (supuestos)
+
+| Partida | Supuesto | Importe |
+|---|---|---:|
+| Hardware | portátil de 900 € (valor de trabajo, no el pagado) amortizado en 4 años, imputado al 100 % | 225 €/año |
+| Electricidad | 35 W de media (no medidos) × 8.760 h × 0,20 €/kWh | 61,32 €/año (5,04 €/mes) |
+| Almacenamiento | 1,44 GB de volúmenes medidos × 0,20 €/GB de SSD | 0,29 € (una vez) |
+| Transferencia | dentro de las cuotas gratuitas (ver abajo) | 0 € mientras no se superen |
+| Mantenimiento | 2 h/mes × 20 €/h | 480 €/año |
+| Desarrollo | 100 h × 20 €/h (la usuaria debe poner sus horas reales) | 2.000 € (una vez) |
+| **Total primer año** | | **2.766,61 €** |
+| **Recurrente** | | **766,32 €/año** |
+
+Valor actual de los costes a cinco años con una tasa de descuento supuesta del 10 %: **4.905,2 €** (5.831,9 € sin descontar). Lo
+dominante es el trabajo humano (desarrollo y mantenimiento: 2.480 € del primer año de 2.766,61 €), no la infraestructura (≈ 287 €).
+Con el stack encendido solo durante demostraciones, la electricidad baja en proporción a las horas.
+
+### Las cuotas gratuitas no son coste cero
+
+| Servicio | Límite | Qué pasa al superarlo | Situación medida o estimada |
+|---|---|---|---|
+| ngrok (gratuito) | 1 GB de salida al mes; 100 conexiones simultáneas; 3 endpoints; 4.000 conexiones HTTP/min | el túnel deja de servir hasta el mes siguiente (`ERR_NGROK_725`) y el panel muestra «backend inaccesible» | **medido**: 191 MB usados (19 %) |
+| Netlify (gratuito, créditos) | 300 créditos al mes, límite duro; 20 créditos/GB y 15 por despliegue a producción | los proyectos se pausan hasta el siguiente ciclo | **supuesto** con tarifas publicadas el 2026-11-17: 1.000 visitas ≈ 24 créditos; cuentas anteriores al 4-sep-2025: 100 GB y 300 min de compilación |
+
+Un panel abierto 24 h con el refresco de 60 s transfiere ≈ 89 MB/día (**derivado** de 62.024 bytes por refresco × 1.440): agotaría el
+GB de ngrok en unos 11 días. En una defensa de unas horas no se alcanza, pero un panel olvidado abierto sí podría agotarlo.
+
+### ROI
+
+**No se estima.** El observatorio no define un beneficio económico medible y justificable, y el principio IX prohíbe inventarlo. La
+evaluación anterior (VAN 10.730,74 €, TIR 38,5 %) se retiró porque sus flujos no tenían supuesto trazable
+([evaluacion-financiera.md](evaluacion-financiera.md)). Lo que sí se afirma: para que el VAN fuera 0 haría falta un beneficio de
+1.294,0 €/año; un beneficio válido debería definirse con una unidad medible (por ejemplo, horas manuales evitadas por mes) y una
+fuente.
+
+### Propuesta de escalado y mejoras
+
+Ordenadas por lo que las mediciones muestran, de menor a mayor esfuerzo; ninguna se ha implementado.
+
+1. **Compresión de las respuestas de la API (gzip)**: el JSON de 1.000 eventos (307.772 bytes) es muy compresible y reduciría la
+   transferencia por el túnel, que es el único límite próximo (1 GB). Exige un cambio en la API (fuera del alcance de la 008).
+2. **Refresco condicional**: pedir al panel que solo pida eventos si la última ingesta cambió (campo `last_ingestion` de
+   `/api/salud`, de 111 bytes) en lugar de descargar 59 kB cada minuto.
+3. **Medir la potencia real** del equipo con un vatímetro para sustituir el supuesto de 35 W, y las horas reales de desarrollo
+   para sustituir las 100 h.
+4. **Reducir la retención de Kafka** de `earthquakes.catalog` y `earthquakes.replay` (53 y 37 MB), que son reproducibles desde `data/`. La diferencia de 1,244 GB frente a 108 MB está explicada: Kafka crea para cada partición (56 en total) dos ficheros de índice dispersos de 10 MB que ocupan 1,19 GB de tamaño aparente (`du --apparent-size`) y 110 MB en disco; no hay nada que limpiar.
+5. **A 100 millones de registros**: particionar `event_current` y `event_version` por año, BRIN para las particiones antiguas,
+   agregados diarios por país recalculados desde el estado actual y más memoria para PostgreSQL
+   (ver «Razonamiento para 100 millones de registros» en «Índices»).
+6. **Si el objetivo pasara a ser un servicio permanente**: servidor propio o cloud pequeño (fuera del stack permitido para esta
+   entrega) y un túnel de pago o dominio propio; su coste no se estima aquí porque no se ha consultado ningún precio.
+
+## Trazabilidad y cierre de entregables (spec 008)
+
+Matrices completas, con todos los enlaces y los huecos: [evidence/008/matrix-11.md](evidence/008/matrix-11.md),
+[evidence/008/matrix-12-13.md](evidence/008/matrix-12-13.md) y [evidence/008/user-gaps.md](evidence/008/user-gaps.md). Una prueba solo
+figura como superada si su evidencia tiene resultado esperado y observado ejecutados.
+
+### Pruebas de aceptación de §11
+
+| # | Prueba | Estado | Evidencia principal | Hueco |
+|---|---|---|---|---|
+| 1 | Evento nuevo | superada | [006 V3](evidence/006/v3-new-and-repeat.md), [007](evidence/007/README.md) V2 | — |
+| 2 | Misma versión reenviada | superada | [006 V3](evidence/006/v3-new-and-repeat.md), [004](evidence/004/acceptance.md), [005 V5](evidence/005/v5-repeat.md) | — |
+| 3 | Versión posterior | superada | [006 V4](evidence/006/v4-revision-and-stale.md), [006 V11](evidence/006/v11-statistics.md) | — |
+| 4 | Versión antigua tardía | superada | [006 V4](evidence/006/v4-revision-and-stale.md), [002](evidence/002/db-tests.txt) | — |
+| 5 | Magnitud nula | superada | [004](evidence/004/acceptance.md), [006 V5](evidence/006/v5-null-magnitude.md), [007](evidence/007/README.md) V3 | visualización ND probada con simulador |
+| 6 | Coordenadas inválidas | superada | [004](evidence/004/acceptance.md), [006 V6](evidence/006/v6-geometry.md), [007](evidence/007/README.md) V5 | igual que la 5 |
+| 7 | Evento marítimo | superada | [004](evidence/004/acceptance.md), [006 V7](evidence/006/v7-no-country.md), [007](evidence/007/README.md) V4; C1 de este apartado | — |
+| 8 | Reiniciar el consumidor | superada | [004 V3](evidence/004/restart.md), [005 V7](evidence/005/v7-consumer-restart.md) | Linux (G3) |
+| 9 | Cerrar el túnel | superada | [007](evidence/007/README.md) T2 y V11 | otro dispositivo (G4) |
+| 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 | otro dispositivo (G4) |
+| 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
+
+Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pendientes de la usuaria** (procedimientos en
+[user-gaps.md](evidence/008/user-gaps.md)): G1 puertos cerrados desde otro dispositivo (002 V2), G2 arranque por una persona ajena
+(002 T057), G3 pruebas en Linux de las specs 002, 003 (T050), 005 y 006, y G4 panel desde otro dispositivo físico. Mientras no se
+ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo.
+
+### Entregables de §12
+
+| Entregable | Dónde |
+|---|---|
+| Repositorio, Dockerfile(s), `compose.yaml`, dependencias, `.env.example`, instrucciones | `producer/`, `consumer/`, `api/`, `tests/`, `frontend/`, `compose.yaml`, `.env.example`, [README.md](../README.md) |
+| URL del panel y procedimiento de backend y túnel | [README.md](../README.md) (túnel y defensa), sección «Panel Angular (spec 007)» |
+| Diccionario de datos, registro de consultas y procedencia | «Diccionario de datos» y «Registro de procedencia» |
+| Apartado de calidad | «Calidad de los datos» y [calidad.md](calidad.md) |
+| Modelo conceptual, lógico, físico, SQL e índices | «Modelo conceptual», «Modelo lógico», «Modelo físico», «Índices» y `db/sql/` |
+| Análisis con tres conclusiones y capturas | «Análisis y conclusiones (spec 008)» y [capturas](evidence/008/C1-2025-m4.png) |
+| Informe de complejidad, mediciones, costes y mejoras | «Complejidad y rendimiento (spec 008)», «Costes, escalado y mejoras (spec 008)» y [evaluacion-financiera.md](evaluacion-financiera.md) |
+| Evidencias de aceptación y reproducción | `docs/evidence/002` a `008` |
+| Explicación individual | [guion-explicacion.md](guion-explicacion.md): solo apoyo; la explicación y la decisión técnica propia las redacta y defiende la usuaria |
+| Sin `node_modules`, credenciales ni datos grandes en Git | [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md) |
+
+### Criterios de §13
+
+| Criterio | Secciones de la memoria |
+|---|---|
+| Extracción | «Fuentes y extracción» |
+| Calidad | «Calidad de los datos» |
+| Modelado | «Modelo conceptual», «Modelo lógico», «Modelo físico», «Diccionario de datos», «Índices» |
+| Análisis | «Análisis y conclusiones (spec 008)», «API de consulta» y «Panel Angular (spec 007)» |
+| Reflexión | «Complejidad y rendimiento (spec 008)», «Costes, escalado y mejoras (spec 008)» y los límites de cada apartado |
+
+### Higiene del repositorio
+
+Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB
+(`db/seeds/historical_2026.jsonl`) existe en el historial de la rama **local** `backup/main-before-fix`, que no está en el remoto; no
+debe empujarse. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
 
 ## Modelo conceptual
 
@@ -971,5 +1313,5 @@ y la profundidad de un B-tree solo crece en uno o dos niveles. A esa escala har�
 - **Más memoria para PostgreSQL** (`shared_buffers`, `work_mem`) que los valores por defecto
   usados aquí.
 
-Nada de esto hace falta para el volumen del proyecto (unos 16.000 eventos del histórico obligatorio
+Nada de esto hace falta para el volumen del proyecto (18.302 eventos del histórico obligatorio
 más el feed), donde las cuatro consultas tardan menos de un milisegundo con índice.
