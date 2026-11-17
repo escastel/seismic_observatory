@@ -6,7 +6,7 @@ ninguna se marca superada sin haberse ejecutado.
 
 | Id | Qué comprueba | Esperado | Observado | Estado | Evidencia |
 |---|---|---|---|---|---|
-| V1 | Conclusiones regenerables | cada cifra coincide con la memoria | 4 conclusiones; SQL y API coinciden en 18.302, 14.350, 16.173/1.984/129/15/1, 15 (día 2026-11-16) | SUPERADA | [analysis-queries.md](analysis-queries.md) |
+| V1 | Conclusiones regenerables | cada cifra coincide con la memoria | 5 conclusiones (C5 solo de análisis); SQL y API coinciden en 18.302, 14.350, 16.173/1.984/129/15/1, 15 (día 2026-11-16) | SUPERADA | [analysis-queries.md](analysis-queries.md) |
 | V2 | Comparación equivalente | mismo filtro en ambos periodos; razón distinta de 3,87 | `min_mag=4`: 0,28 (24 h) y 0,30 (día completo); sin filtro 3,37 marcada como no equivalente; USGS confirma 14, 15 y 15 para tres días bajos | SUPERADA | [analysis-queries.md](analysis-queries.md) |
 | V3 | Capturas con los filtros | periodo, filtros y unidad visibles | 3 capturas: 2025 con `min_mag=4`, 24 h con `min_mag=4` y 24 h sin filtro | SUPERADA | [C1](C1-2025-m4.png), [C2a](C2a-24h-m4.png), [C2b](C2b-24h-nofilter.png), [captures.json](captures.json) |
 | V4 | Sintéticos y reproducción fuera | cifras reales sin ellos | día 2026-11-16, M ≥ 4: 516 con sintéticos, 15 sin ellos; la API en modo real da 15; `replay` no participa | SUPERADA | [analysis-queries.md](analysis-queries.md) (T008) |

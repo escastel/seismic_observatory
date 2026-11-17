@@ -655,7 +655,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ## Análisis y conclusiones (spec 008)
 
-Cuatro conclusiones sobre datos **reales** (esquema `core`; reproducción y datos sintéticos excluidos: 1.013
+Cinco conclusiones sobre datos **reales** (esquema `core`; reproducción y datos sintéticos excluidos: 1.013
 eventos `synthetic-%` de pruebas de escala, que de no excluirlos darían 516 eventos M ≥ 4 el 16-nov en lugar de 15).
 Cada cifra se regenera con [tests/analysis/queries.sql](../tests/analysis/queries.sql) (salida literal en
 [evidence/008/analysis-queries.out](evidence/008/analysis-queries.out)) o con la llamada a la API indicada, y se
@@ -743,6 +743,21 @@ magnitud y el 1 sin profundidad son casos sintéticos, excluidos); cada conclusi
 - **Regenerar**: `queries.sql` Q4 y Q8.
 - **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (el gráfico «Eventos por hora UTC» solo dibuja las últimas
   168 ventanas; la tabla de datos contiene las 8.760).
+
+### C5 · Dos tercios de los eventos sin país caen en el Pacífico y sus mares marginales (agrupación solo de análisis)
+
+- **Qué es**: una agrupación **descriptiva** de los 14.350 eventos sin país de C1 por el polígono marino de Natural Earth (110 m, dominio público) que los contiene. No se guarda en la base de datos, no cambia el modelo, la API ni el
+  panel, y **no asigna ningún país** (constitución IV): es una etiqueta de análisis. Gana el polígono más específico (mar, golfo o bahía antes que océano; el de menor área). Los polígonos no se versionan: se descargan a `data/`
+  (instrucciones en la cabecera de `tests/analysis/ocean_regions.py`).
+- **Cifras** (M ≥ 4, 2025, real, sin país: 14.350): North Pacific 5.101 (35,5 %), South Pacific 2.293 (16,0 %), mar de Filipinas 1.007 (7,0 %), Indian Ocean 726 (5,1 %), South Atlantic 621 (4,3 %), mar del Coral 358 (2,5 %),
+  North Atlantic 345 (2,4 %); el resto de 19 mares y océanos suma 769 (5,4 %). **3.130 (21,8 %) no caen en ningún polígono marino** (franja costera y arcos de islas que el contorno de 110 m no cubre; no se ha comprobado caso por caso).
+  Sumando el Pacífico (norte y sur) y sus mares marginales (Filipinas, Coral, Ojotsk, Alaska, Japón, Tasmania): 9.033 eventos, el **62,9 %** del total sin país y el **80,5 %** de los 11.220 que sí caen en un polígono.
+- **Profundidad por región** (mediana, km): Sea of Japan 248,2 (20 eventos), Sea of Okhotsk 97,2, South Pacific 60,9, Philippine Sea 51,9, Coral Sea 42,3 frente a 10,0 en Indian Ocean, South Atlantic, North Atlantic, Arctic y Southern Ocean:
+  en los océanos de dorsales la mediana coincide con la profundidad fijada de 10 km de C3 (45,1 % de los eventos), mientras que en las zonas de subducción del Pacífico las profundidades se determinan y son mayores.
+- **Magnitud ≥ 6**: 47 en North Pacific, 16 en South Pacific, 16 sin polígono, 12 en el mar de Filipinas y 7 en cada uno de Indian Ocean y South Atlantic.
+- **Filtros y periodo**: igual que C1 (`min_mag=4`, 2025-01-01 a 2026-01-01 UTC, eventos reales sin país); unidad: eventos; sin valor: 0.
+- **Advertencias**: descripción del pasado, no predicción ni evaluación de riesgo; la cobertura de detección y los tipos de magnitud varían por región (Q6); los polígonos marinos de 110 m son aproximados y los límites entre océanos son convencionales.
+- **Regenerar**: `docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python -m tests.analysis.ocean_regions` (ejecutado el 2026-11-17 18:04 UTC; salida literal en [evidence/008/ocean-regions.out](evidence/008/ocean-regions.out)). Es una agrupación de análisis; ver también [coastal-distance.md](evidence/008/coastal-distance.md).
 
 ### Q6 · Tipos de magnitud: la comparación entre muestras solo es válida con el mismo filtro
 

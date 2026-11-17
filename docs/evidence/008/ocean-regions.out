@@ -1,0 +1,30 @@
+events with no country (2025, M>=4, real): 14350; marine polygons: 29
+region | events | pct | median_depth_km | median_magnitude | M>=6
+North Pacific Ocean | 5101 | 35.5 | 23.6 | 4.4 | 47
+Sin region marina (fuera de todo poligono) | 3130 | 21.8 | 10.0 | 4.4 | 16
+South Pacific Ocean | 2293 | 16.0 | 60.9 | 4.4 | 16
+Philippine Sea | 1007 | 7.0 | 51.9 | 4.4 | 12
+Indian Ocean | 726 | 5.1 | 10.0 | 4.5 | 7
+South Atlantic Ocean | 621 | 4.3 | 10.0 | 4.6 | 7
+Coral Sea | 358 | 2.5 | 42.3 | 4.5 | 3
+North Atlantic Ocean | 345 | 2.4 | 10.0 | 4.5 | 4
+Sea Of Okhotsk | 153 | 1.1 | 97.2 | 4.3 | 0
+Mediterranean Sea | 90 | 0.6 | 39.4 | 4.3 | 1
+Caribbean Sea | 84 | 0.6 | 10.0 | 4.4 | 1
+Southern Ocean | 78 | 0.5 | 10.0 | 4.7 | 1
+South China Sea | 76 | 0.5 | 27.5 | 4.6 | 0
+Gulf Of Alaska | 72 | 0.5 | 34.2 | 4.4 | 2
+Arabian Sea | 54 | 0.4 | 10.0 | 4.4 | 0
+Tasman Sea | 29 | 0.2 | 13.1 | 4.3 | 3
+Arctic Ocean | 26 | 0.2 | 10.0 | 4.5 | 0
+Red Sea | 26 | 0.2 | 10.0 | 4.3 | 0
+Persian Gulf | 25 | 0.2 | 10.0 | 4.2 | 0
+Bay Of Bengal | 22 | 0.2 | 10.0 | 4.5 | 2
+Sea Of Japan | 20 | 0.1 | 248.2 | 4.3 | 0
+Caspian Sea | 7 | 0.0 | 35.0 | 4.3 | 0
+Baffin Bay | 2 | 0.0 | 9.8 | 4.7 | 0
+Black Sea | 2 | 0.0 | 9.7 | 4.3 | 0
+Beaufort Sea | 1 | 0.0 | 10.0 | 5.3 | 0
+Ross Sea | 1 | 0.0 | 10.0 | 4.6 | 0
+Labrador Sea | 1 | 0.0 | 10.0 | 4.8 | 0
+by kind: {'bay': 24, 'gulf': 97, 'none': 3130, 'ocean': 9190, 'sea': 1909}
