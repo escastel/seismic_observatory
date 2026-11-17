@@ -1,12 +1,12 @@
 # Huecos que ejecuta la usuaria (T027)
 
 Comprobaciones que necesitan otro equipo, otro dispositivo u otra persona. **Ninguna pendiente figura como superada**: cada una tiene su
-procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17. Cada procedimiento se puede hacer en menos de 30 minutos.
+procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17 con capturas. G1 y G2 constan como declarados completados por la usuaria, sin evidencia guardada: no se marcan como superados con resultado esperado y observado. Cada procedimiento se puede hacer en menos de 30 minutos.
 
 | Id | Hueco | Origen | Dónde |
 |---|---|---|---|
-| G1 | Puertos 5432, 9092 y 8000 cerrados desde otro dispositivo de la red | 002 V2 (SC-008) | otro dispositivo en la misma red |
-| G2 | Arranque desde cero por una persona ajena al proyecto, solo con `README.md` | 002 T057 (SC-001) | otra persona |
+| G1 | Puertos 5432, 9092 y 8000 cerrados desde otro dispositivo de la red | 002 V2 (SC-008) | **Declarado completado por la usuaria el 2026-11-17, sin salida ni evidencia guardada** (un intento con `nc` desde el Linux expiró también en el puerto de control, así que no fue concluyente y se descartó) |
+| G2 | Arranque desde cero por una persona ajena al proyecto, solo con `README.md` | 002 T057 (SC-001) | **Declarado completado por la usuaria el 2026-11-17, sin tiempo ni observaciones guardados** |
 | G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003 T050, 005, 006 | equipo Linux |
 | G4 | Panel desde otro dispositivo físico (túnel y Netlify) | 007; §11 pruebas 9 y 10 | **HECHO el 2026-11-17** (móvil con datos móviles; [007 M1 a M3](../007/README.md)) |
 

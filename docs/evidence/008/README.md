@@ -17,7 +17,7 @@ ninguna se marca superada sin haberse ejecutado.
 | V9 | Matrices | sin enlaces rotos; 11 pruebas con estado y hueco | 11 de 11 con evidencia; 4 huecos de la usuaria | SUPERADA | [matrix-11.md](matrix-11.md), [matrix-12-13.md](matrix-12-13.md) |
 | V10 | Coherencia de `report.md` | enlaces e índice válidos; cifras iguales | 267 enlaces, 0 rotos; 4 correcciones | SUPERADA | [report-coherence.md](report-coherence.md) |
 | V11 | Higiene | 0 hallazgos o hallazgo documentado | 0 en el árbol versionado; 1 hallazgo en el historial local (rama `backup/main-before-fix`), resuelto al borrar la rama con confirmación | SUPERADA | [repository-hygiene.md](repository-hygiene.md) |
-| V12 | Huecos de la usuaria | procedimiento y ruta de evidencia | G1 a G4 con procedimiento; **G4 ejecutado el 2026-11-17** (móvil con datos móviles, [007 M1 a M3](../007/README.md)); G1, G2 y G3 sin ejecutar | **PARCIAL: G1, G2 y G3 pendientes (usuaria)** | [user-gaps.md](user-gaps.md) |
+| V12 | Huecos de la usuaria | procedimiento y ruta de evidencia | G1 a G4 con procedimiento; **G4 ejecutado el 2026-11-17** (móvil con datos móviles, [007 M1 a M3](../007/README.md)); **G1 y G2 declarados completados por la usuaria, sin evidencia guardada**; G3 (Linux) en ejecución por la usuaria | **PARCIAL: G1 y G2 sin evidencia; G3 en curso** | [user-gaps.md](user-gaps.md) |
 
 Pruebas automáticas del código de medición: `pytest tests/benchmark` → 5 pasan ([tests.txt](tests.txt)); no se tocó nada de `db/`, así que no se repitió `tests/db`.
 
