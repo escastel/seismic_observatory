@@ -862,7 +862,7 @@ medición. Fuente de todo: [evidence/008/cost-measurements.md](evidence/008/cost
 | Concepto | Medida |
 |---|---|
 | Base de datos PostgreSQL | 83 MB (34.207 eventos en `core`, 2.807 en `replay`); volumen Docker 195 MB |
-| Topics de Kafka | 108 MB de datos; el volumen Docker de Kafka ocupa 1,244 GB (no se ha investigado la diferencia) |
+| Topics de Kafka | 108 MB de disco realmente ocupado; `docker system df` muestra 1,244 GB porque cuenta el tamaño aparente de los ficheros de índice dispersos (ver abajo) |
 | Memoria en reposo del stack | ≈ 1,1 GiB: Kafka 879 MiB, consumidor 82, API 48, PostgreSQL 46, productor 37, túnel 15 |
 | Respuestas de la API | eventos 24 h: 59.238 bytes; estadísticas 24 h: 2.675; salud: 111; 1.000 eventos de 2025: 307.772 |
 | Uso del túnel ngrok en noviembre | 191 MB de 1.000 MB incluidos (17 días); 5.282 peticiones |
@@ -913,8 +913,7 @@ Ordenadas por lo que las mediciones muestran, de menor a mayor esfuerzo; ninguna
    `/api/salud`, de 111 bytes) en lugar de descargar 59 kB cada minuto.
 3. **Medir la potencia real** del equipo con un vatímetro para sustituir el supuesto de 35 W, y las horas reales de desarrollo
    para sustituir las 100 h.
-4. **Investigar el volumen de Kafka** (1,244 GB frente a 108 MB de topics) y reducir la retención de `earthquakes.catalog` y
-   `earthquakes.replay`, que son reproducibles desde `data/`.
+4. **Reducir la retención de Kafka** de `earthquakes.catalog` y `earthquakes.replay` (53 y 37 MB), que son reproducibles desde `data/`. La diferencia de 1,244 GB frente a 108 MB está explicada: Kafka crea para cada partición (56 en total) dos ficheros de índice dispersos de 10 MB que ocupan 1,19 GB de tamaño aparente (`du --apparent-size`) y 110 MB en disco; no hay nada que limpiar.
 5. **A 100 millones de registros**: particionar `event_current` y `event_version` por año, BRIN para las particiones antiguas,
    agregados diarios por país recalculados desde el estado actual y más memoria para PostgreSQL
    (ver «Razonamiento para 100 millones de registros» en «Índices»).

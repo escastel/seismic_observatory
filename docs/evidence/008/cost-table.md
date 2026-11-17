@@ -24,7 +24,7 @@ y [free-tier-limits.md](free-tier-limits.md).
 |---|---|---:|---|
 | Hardware | S1 / S2 | 225 €/año | supuesto |
 | Electricidad | S3 × S5 × S4 = 0,035 kW × 8.760 h × 0,20 €/kWh | 61,32 €/año (5,04 €/mes) | supuesto |
-| Almacenamiento | volúmenes medidos 1,44 GB (195 MB + 1,244 GB) × S6 | 0,29 € (una vez; crece con el histórico) | medida × supuesto |
+| Almacenamiento | volúmenes medidos 1,44 GB (195 MB + 1,244 GB aparentes de Kafka; en disco ≈ 0,3 GB, así que es una cota superior) × S6 | 0,29 € (una vez; crece con el histórico) | medida × supuesto |
 | Transferencia | 191 MB este mes de 1 GB incluido en ngrok; la SPA en Netlify cuesta créditos de una cuota de 300 | 0 € dentro de cuota | medida de uso + cuota publicada |
 | Mantenimiento | S7 = 2 × 12 × 20 | 480 €/año | supuesto |
 | Desarrollo | S8 = 100 × 20 | 2.000 € (una vez) | supuesto |
