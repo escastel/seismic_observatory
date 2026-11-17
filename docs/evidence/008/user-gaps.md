@@ -1,7 +1,8 @@
 # Huecos que ejecuta la usuaria (T027)
 
-Comprobaciones que necesitan otro equipo, otro dispositivo u otra persona. **Ninguna pendiente figura como superada**: cada una tiene su
-procedimiento y su ruta de evidencia. G3 y G4 se ejecutaron el 2026-11-17 (G3 con alcance reducido). G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron de este seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en `docs/evidence/002/README.md`. Cada procedimiento se puede hacer en menos de 30 minutos.
+Comprobaciones que necesitan otro equipo, otro dispositivo u otra persona. Ya no queda ninguna pendiente. G3 y G4 se ejecutaron el 2026-11-17 (G3 con alcance reducido). G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron del
+seguimiento a petición de la usuaria; T057 de la spec 002 se dio por superada según lo informado (2,5 min, sin dudas) y la prueba V2 de la 002 desde otro dispositivo, igual que 003 T050 y los escenarios
+reales de 005 y 006 en Linux, se descartaron por no ser requisito del enunciado (constan así en sus README).
 
 | Id | Hueco | Origen | Dónde |
 |---|---|---|---|
