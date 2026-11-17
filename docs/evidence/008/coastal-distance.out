@@ -1,0 +1,12 @@
+/usr/local/lib/python3.11/site-packages/shapely/linear.py:203: RuntimeWarning: invalid value encountered in shortest_line
+  return lib.shortest_line(a, b, **kwargs)
+polygons: 177; exterior vertices: 10642 (mean 60 per entity)
+events with no country (2025, M>=4, real): 14350
+band_km | events | pct | cumulative_pct
+0-10 | 412 | 2.9 | 2.9
+10-50 | 1853 | 12.9 | 15.8
+50-100 | 2526 | 17.6 | 33.4
+100-200 | 3758 | 26.2 | 59.6
+200-500 | 2441 | 17.0 | 76.6
+>=500 | 3360 | 23.4 | 100.0
+median_km 144.4; p25 78.1; p75 455.9; p95 1863.5; max 4303.0

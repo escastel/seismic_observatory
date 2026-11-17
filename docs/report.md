@@ -681,6 +681,7 @@ magnitud y el 1 sin profundidad son casos sintéticos, excluidos); cada conclusi
 - **Lectura**: el país se obtiene por punto dentro de polígono sobre Natural Earth (constitución IV); un epicentro en
   mar abierto o fuera de la costa de las entidades no tiene país y permanece en el análisis, sin asignarlo al más
   cercano. La cifra describe dónde caen los epicentros respecto a los polígonos de tierra, no el peligro de ningún país.
+- **Cuánto es mar abierto**: se midió la distancia de esos 14.350 eventos al polígono de país más cercano (sin asignar ningún país): 15,8 % a menos de 50 km, 59,6 % a menos de 200 km, mediana 144 km y 23,4 % a más de 500 km. «Sin país asignado» es sobre todo mar y no un artefacto del contorno simplificado (60 vértices por entidad de media). Detalle: [evidence/008/coastal-distance.md](evidence/008/coastal-distance.md).
 - **Regenerar**: `queries.sql` Q2 y Q2b; `GET /api/estadisticas?min_mag=4&start=2025-01-01T00:00:00Z&end=2026-01-01T00:00:00Z`
   (`by_country`, 14.350).
 - **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (filtros: 01/01/2025 a 01/01/2026, magnitud mínima 4, todos
