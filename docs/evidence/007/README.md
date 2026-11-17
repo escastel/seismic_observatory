@@ -30,9 +30,21 @@ Para ejecutar los escenarios se cambió temporalmente `apiUrl` de `frontend/publ
 | V14 | Teclado y lector | real | todo operable con teclado; sin violaciones de accesibilidad automáticas | `lang="es"`; orden de tabulación: enlace «Saltar a la tabla», modo, fechas, magnitud, país, aplicar, restablecer, mapa; foco visible en todos; cambio de modo con la barra espaciadora; regiones `aria-live` en estado y tabla; axe-core (WCAG 2.0/2.1 A y AA): 0 violaciones tras corregir 3 de estructura (lista de definición, lista con roles y región desplazable sin foco) ([a11y.json](a11y.json)) | SUPERADA (ver nota) |
 | V15 | Build y secretos | local | build limpio sin secretos | `npm run build` sin errores (aviso conocido: Leaflet no es ESM); el paquete `dist/observatorio/browser` no contiene `authtoken`, `password` ni `secret`; `config.json` solo con URL, intervalos y banderas | SUPERADA |
 
+## Prueba con el túnel ngrok real (2026-11-17)
+
+Hecha desde esta sesión con el servicio `tunnel` de Compose y el dominio reservado de la cuenta (`modular-guidance-daybreak.ngrok-free.dev`, comprobado con el conector de ngrok: cuenta `Ester`, un dominio, sin agentes antes de levantarlo). El túnel se paró al terminar; antes de la prueba no estaba levantado.
+
+| Id | Qué comprueba | Esperado | Observado | Estado |
+|---|---|---|---|---|
+| T1 | El túnel sirve la API | `/api/salud` y el preflight desde `http://localhost:4200` a través del dominio público | `{"status":"ok",...}` y preflight 200 con `Access-Control-Allow-Origin: http://localhost:4200` y la cabecera `ngrok-skip-browser-warning` permitida | SUPERADA |
+| T2 | **Cerrar y reabrir el túnel** (V11 real, refresco de 60 s sin forzar) | aviso de inaccesible con la última lectura rotulada; recuperación sin recargar | con el panel abierto se paró el túnel: el aviso apareció a los 55 s (siguiente refresco) con los 165 eventos conservados y «los datos mostrados son la última lectura correcta, del 14:01:26 UTC»; al reabrirlo, el panel volvió a «Datos al día» a los 61 s sin recargar (1 navegación en toda la prueba) ([túnel abierto](T1-tunnel-open.png), [cerrado](T2-tunnel-closed.png), [reabierto](T3-tunnel-reopened.png), [datos](tunnel-real.json)) | SUPERADA |
+| T3 | Build de producción contra el túnel | el paquete `dist/observatorio/browser`, servido como sitio estático con la misma regla SPA que `_redirects`, lee del túnel | 165 eventos dibujados y 165 en tabla, sin NG0900, peticiones `GET` 200 a `https://modular-guidance-daybreak.ngrok-free.dev/api/...` ([captura](T4-prod-build-tunnel.png), [datos](prod-build-real-tunnel.json)) | SUPERADA |
+
+**Sigue pendiente: Netlify.** No hay CLI ni conector de Netlify en esta sesión y publicar exige iniciar sesión en la cuenta de la usuaria, así que **no se ha publicado ni probado desde un dominio `netlify.app`**. Para cerrarlo: publicar con el procedimiento del README (sección 10), añadir el origen exacto del sitio a `CORS_ORIGINS`, recrear la API (`docker compose up -d api`) y abrir el sitio desde otro dispositivo. La comprobación de T3 demuestra que el paquete funciona contra el túnel; lo que falta es solo el origen de Netlify en CORS.
+
 ## Notas y límites (lo que NO se ha demostrado)
 
-- **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. No se ha cerrado un túnel ngrok real ni se ha probado desde Netlify; lo hace la usuaria con el procedimiento del README. El umbral de 15 s se ha comprobado con una respuesta retrasada.
+- **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. El túnel ngrok real sí se cerró y reabrió después (sección «Prueba con el túnel ngrok real»); el despliegue en Netlify sigue sin probarse. El umbral de 15 s se ha comprobado con una respuesta retrasada.
 - **Refresco de 60 s**: V2 mostró la actualización automática real (≈3 min hasta que llegó un evento). Los escenarios de fallo forzaron el refresco con «Aplicar filtros» para no esperar 60 s por caso; el ciclo temporizado es el mismo código (`refresh()` rearma el temporizador al terminar).
 - **Teselas de OpenStreetMap**: el navegador sin interfaz recibe 400 en varias teselas (política de uso de OpenStreetMap ante clientes automatizados); no se ha comprobado el fondo en un navegador con interfaz, solo que fronteras y eventos se dibujan.
 - **Prueba en Linux**: pendiente (ver memoria); no se espera diferencia porque todo es TypeScript y Node.

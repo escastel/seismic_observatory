@@ -616,7 +616,7 @@ stack local; «simulador» indica un servidor fuera del repositorio que habla el
 | V8 | Filtros inválidos | real | Superada |
 | V9 | Reproducción etiquetada | real | Superada |
 | V10 | Aislamiento de la reproducción | real | Superada |
-| V11 | Cerrar y reabrir el túnel | simulador y bloqueo de red del navegador | Superada solo con el simulador; el túnel ngrok real está pendiente |
+| V11 | Cerrar y reabrir el túnel | simulador y bloqueo de red del navegador | Superada con el simulador y con el túnel ngrok real (aviso a los 55 s, recuperación a los 61 s sin recargar; `docs/evidence/007/`) |
 | V12 | Mensajes distintos para 503, degradado, 422 y desactualizado | simulador | Superada |
 | V13 | Sin solapes y umbral de 15 s | simulador | Superada |
 | V14 | Teclado, lector de pantalla y axe-core | real | Superada; el contraste no se ha medido a mano |
@@ -626,7 +626,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente de la usuaria**: el túnel ngrok real (cerrarlo y reabrirlo) y la publicación en Netlify.
+- **Pendiente de la usuaria**: la publicación en Netlify y la prueba desde su dominio (hace falta su origen exacto en `CORS_ORIGINS`); el túnel ngrok real ya se probó.
 - **Pendiente**: la prueba en Linux.
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
