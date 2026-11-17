@@ -626,7 +626,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente de la usuaria**: la publicación en Netlify y la prueba desde su dominio (hace falta su origen exacto en `CORS_ORIGINS`); el túnel ngrok real ya se probó.
+- **Pendiente**: la prueba desde otro dispositivo físico y en Linux. El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
 - **Pendiente**: la prueba en Linux.
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
