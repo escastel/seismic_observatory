@@ -79,13 +79,13 @@ y si faltan valores se muestran como ND. Las transiciones son suaves y se desact
 
 El panel tiene nombre, logotipo, paleta y tipografía propios del proyecto, coherentes en los dos temas y en móvil.
 
-**Why this priority**: personaliza el panel, pero depende de que la usuaria apruebe o aporte nombre y logotipo; el resto funciona sin él.
+**Why this priority**: personaliza el panel, pero depende de que la usuaria apruebe el diseño del logotipo; el resto funciona sin él.
 
 **Independent Test**: revisar el panel en ambos temas, en escritorio y móvil, y comprobar que nombre, logotipo y paleta son los aprobados y que el contraste es suficiente.
 
 **Acceptance Scenarios**:
 
-1. **Given** el nombre y el logotipo aprobados por la usuaria, **When** se abre el panel, **Then** aparecen en la cabecera y en el título de la pestaña, en ambos temas.
+1. **Given** el nombre «seismicobservatory» y el logotipo aprobado, **When** se abre el panel, **Then** aparecen en la cabecera y en el título de la pestaña, en ambos temas.
 2. **Given** los colores de profundidad y los de la paleta, **When** se muestran en tema claro y oscuro, **Then** cumplen el contraste mínimo de accesibilidad y la información no depende solo del color (forma, tamaño y tabla).
 
 ---
@@ -118,7 +118,7 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 - Pantalla muy estrecha: gráficos, tarjetas y ficha se reorganizan sin desbordar.
 - Texto del lugar con marcas o caracteres especiales: siempre se muestra como texto.
 - El modo «REPRODUCCIÓN» activo: la etiqueta aparece en todas las zonas nuevas.
-- La referencia visual del relieve o el logotipo aún no están: el panel usa el relieve genérico y un identificador provisional.
+- El logotipo definitivo aún no está aprobado: el panel usa el logotipo provisional con la «S».
 
 ## Requirements *(mandatory)*
 
@@ -154,8 +154,8 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 
 **Identidad**
 
-- **FR-017**: El panel MUST mostrar el nombre y el logotipo aprobados por la usuaria en la cabecera y en el título de la pestaña, con una paleta y una tipografía propias coherentes en ambos temas.
-- **FR-018**: Mientras el nombre o el logotipo no estén aprobados, el panel MUST usar un identificador provisional que no suplante a ninguna organización ni marca real.
+- **FR-017**: El panel MUST llamarse «seismicobservatory» y mostrar su logotipo (una «S» con una decoración sencilla) en la cabecera y en el título de la pestaña, con una paleta y una tipografía propias coherentes en ambos temas.
+- **FR-018**: Mientras el diseño del logotipo no esté aprobado, el panel MUST usar un logotipo provisional con la «S» que no suplante a ninguna organización ni marca real.
 
 **Lo que no se pierde**
 
@@ -198,12 +198,14 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 
 ## Assumptions
 
-- La usuaria aportará la referencia visual del relieve con placas tectónicas y aprobará o aportará el nombre y el logotipo; hasta entonces se usa un relieve genérico con límites de placas y un identificador provisional.
+- **Referencia visual del mapa (recibida el 2026-11-17)**: [references/map-reference.png](references/map-reference.png), aportada por la usuaria como referencia de estilo (no forma parte del panel ni se redistribuye; su procedencia no consta). Muestra un mapa oscuro de relieve con los **límites de placas tectónicas como líneas discontinuas rojas**, círculos de eventos con brillo (color por profundidad: amarillo < 70 km, naranja 70–300 km, morado ≥ 300 km; tamaño por magnitud), una **leyenda** abajo a la izquierda, un **selector de capas** arriba a la derecha («Relieve + Placas», «Mapa de calor», «Satelital», «Oscuro neutro»), un chip de **«Filtros aplicados»** y botones de zoom. Se toma como guía de estilo: la spec mantiene el mapa de calor como **capa opcional sobre cualquier fondo** y no como un fondo más, y rotula el trazo como límites de placas (no «fallas»).
+- **Cambios frente a la referencia**: el interruptor **2D/3D** de la imagen queda fuera de alcance (mapa 3D o globo excluido); la usuaria puede revisarlo más adelante.
+- **Identidad (decidida el 2026-11-17)**: el nombre es **seismicobservatory** y el logotipo es una **«S» con una decoración sencilla que represente el panel** (por ejemplo una onda sísmica). El diseño concreto del logotipo lo propone el plan y lo aprueba la usuaria; hasta entonces, un logotipo provisional con la «S».
 - Las fuentes concretas de teselas, satélite y límites de placas se eligen en el plan, comprobando licencia, atribución y política de uso; las de uso gratuito sin clave se prefieren, y ninguna clave va al frontend ni a Git.
 - El tema sigue siempre el del dispositivo; no se añade un conmutador manual (puede considerarse más adelante).
 - Una cifra de «magnitud máxima» no forma parte de las tarjetas porque la API de estadísticas no la entrega y recalcularla sobre la muestra del mapa está prohibido; si se quisiera, requeriría un cambio justificado del contrato.
 - El mapa sigue mostrando como mucho 1.000 eventos por petición; la agrupación y el mapa de calor trabajan sobre esa muestra y así se rotulan.
 - Las pruebas de la 007 (Vitest, comprobaciones en navegador, accesibilidad automática) se reutilizan y se amplían; no se rehace la lógica de datos.
 - Fuera de alcance: cambios en la API, el modelo o el contrato; nuevos datos o métricas; mapa 3D o globo; regiones oceánicas en la API o el panel (queda para una spec posterior, la 008 hizo la versión solo de análisis en C5); cuentas o autenticación; servicios cloud nuevos.
-- Dependencias externas de la usuaria: la referencia del relieve y la aprobación del nombre y logotipo.
+- Dependencias externas de la usuaria: aprobar el diseño del logotipo (una «S» con decoración sencilla) que se proponga en el plan.
 - Orquestación según `CLAUDE.md`: la sesión principal hace integración, navegador real, evidencias y memoria; agentes Sonnet para componentes y pruebas; Haiku para documentación; nunca dos ejecuciones de `tests/db` a la vez.
