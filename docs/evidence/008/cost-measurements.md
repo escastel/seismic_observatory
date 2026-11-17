@@ -44,4 +44,4 @@ si estuviera abierta de forma continua. La carga inicial del panel descarga adem
 
 El volumen `postgres_data` pasó de 195 MB a 1,18 GB después de cargar dos veces 1.000.000 de filas sintéticas en `bench`: `pg_wal` ocupa 1,1 GB
 (`max_wal_size` = 1 GB) y `base/` 104 MB; la base sigue en 82 MB. Son segmentos de WAL reciclados, no datos: el tamaño queda acotado por `max_wal_size`.
-Las partidas de coste no se han modificado.
+Las partidas de coste se actualizaron después con los valores de la usuaria (ver [cost-table.md](cost-table.md)); esta nota no cambia ningún importe.

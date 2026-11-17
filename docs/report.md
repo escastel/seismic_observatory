@@ -870,19 +870,23 @@ medición. Fuente de todo: [evidence/008/cost-measurements.md](evidence/008/cost
 
 ### Partidas de coste (supuestos)
 
-| Partida | Supuesto | Importe |
-|---|---|---:|
-| Hardware | portátil de 900 € (valor de trabajo, no el pagado) amortizado en 4 años, imputado al 100 % | 225 €/año |
-| Electricidad | 35 W de media (no medidos) × 8.760 h × 0,20 €/kWh | 61,32 €/año (5,04 €/mes) |
-| Almacenamiento | 1,44 GB de volúmenes medidos × 0,20 €/GB de SSD | 0,29 € (una vez) |
-| Transferencia | dentro de las cuotas gratuitas (ver abajo) | 0 € mientras no se superen |
-| Mantenimiento | 2 h/mes × 20 €/h | 480 €/año |
-| Desarrollo | 100 h × 20 €/h (la usuaria debe poner sus horas reales) | 2.000 € (una vez) |
-| **Total primer año** | | **2.766,61 €** |
-| **Recurrente** | | **766,32 €/año** |
+Valores de la usuaria: portátil de 675 € comprado hace 4 años y amortizado en 6 de vida total, 200 h de desarrollo, 15 €/h,
+2 h/mes de mantenimiento y 0,23 €/kWh. Siguen siendo supuestos del autor la potencia (35 W, no medida), el funcionamiento 24/7, el
+coste del almacenamiento y la tasa de descuento (10 %). Detalle en [evidence/008/cost-table.md](evidence/008/cost-table.md).
 
-Valor actual de los costes a cinco años con una tasa de descuento supuesta del 10 %: **4.905,2 €** (5.831,9 € sin descontar). Lo
-dominante es el trabajo humano (desarrollo y mantenimiento: 2.480 € del primer año de 2.766,61 €), no la infraestructura (≈ 287 €).
+| Partida | Cálculo | Importe |
+|---|---|---:|
+| Hardware | 675 € / 6 años | 112,50 €/año |
+| Electricidad | 35 W × 8.760 h × 0,23 €/kWh (306,6 kWh) | 70,52 €/año (≈ 5,8 €/mes) |
+| Almacenamiento | 1,44 GB medidos (cota superior) × 0,20 €/GB | 0,29 € (una vez) |
+| Transferencia | dentro de las cuotas gratuitas (ver abajo) | 0 € mientras no se superen |
+| Mantenimiento | 2 h/mes × 15 €/h | 360 €/año |
+| Desarrollo | 200 h × 15 €/h | 3.000 € (una vez) |
+| **Total primer año** | | **3.543,31 €** |
+| **Recurrente** | | **543,02 €/año** |
+
+Valor actual de los costes a cinco años con una tasa de descuento supuesta del 10 %: **5.058,8 €** (5.715,4 € sin descontar). Lo
+dominante es el trabajo humano (desarrollo y mantenimiento: 3.360 € del primer año de 3.543,31 €), no la infraestructura (≈ 183 €).
 Con el stack encendido solo durante demostraciones, la electricidad baja en proporción a las horas.
 
 ### Las cuotas gratuitas no son coste cero
@@ -897,11 +901,21 @@ GB de ngrok en unos 11 días. En una defensa de unas horas no se alcanza, pero u
 
 ### ROI
 
-**No se estima.** El observatorio no define un beneficio económico medible y justificable, y el principio IX prohíbe inventarlo. La
-evaluación anterior (VAN 10.730,74 €, TIR 38,5 %) se retiró porque sus flujos no tenían supuesto trazable
-([evaluacion-financiera.md](evaluacion-financiera.md)). Lo que sí se afirma: para que el VAN fuera 0 haría falta un beneficio de
-1.294,0 €/año; un beneficio válido debería definirse con una unidad medible (por ejemplo, horas manuales evitadas por mes) y una
-fuente.
+El observatorio no genera ingresos. El único beneficio definido es **el tiempo manual evitado**: sin el panel habría que descargar y filtrar a
+mano el catálogo de USGS para obtener una vista equivalente. Definición de la usuaria: 2 horas por consulta, una por día laborable (260 al año),
+a 15 €/h → **7.800 €/año**. Es un coste de oportunidad del tiempo propio, no un ahorro de caja, y se apoya en dos estimaciones **no medidas** (las
+2 horas y la frecuencia diaria).
+
+| Resultado a 5 años (tasa del 10 %) | Valor |
+|---|---:|
+| Valor actual del beneficio (7.800 × 3,7908) | 29.568,1 € |
+| **VAN** (frente a 5.058,8 € de costes) | **24.509,4 €** |
+| **ROI descontado** (VAN / costes) | **484,5 %** (582,4 % sin descontar) |
+| Beneficio anual mínimo para VAN = 0 | 1.334,5 €/año (≈ 0,86 consultas de 2 h por semana) |
+
+**Sensibilidad**: con una consulta semanal el VAN es 854,9 € y con una mensual −3.694,1 €; el resultado positivo solo se sostiene si se usa el equivalente
+de la consulta manual al menos una vez por semana. La evaluación anterior (VAN 10.730,74 €, TIR 38,5 %) se retiró porque sus flujos no tenían supuesto
+trazable ([evaluacion-financiera.md](evaluacion-financiera.md)).
 
 ### Propuesta de escalado y mejoras
 
@@ -911,8 +925,8 @@ Ordenadas por lo que las mediciones muestran, de menor a mayor esfuerzo; ninguna
    transferencia por el túnel, que es el único límite próximo (1 GB). Exige un cambio en la API (fuera del alcance de la 008).
 2. **Refresco condicional**: pedir al panel que solo pida eventos si la última ingesta cambió (campo `last_ingestion` de
    `/api/salud`, de 111 bytes) en lugar de descargar 59 kB cada minuto.
-3. **Medir la potencia real** del equipo con un vatímetro para sustituir el supuesto de 35 W, y las horas reales de desarrollo
-   para sustituir las 100 h.
+3. **Medir lo que hoy es estimación**: la potencia real del equipo con un vatímetro (hoy 35 W supuestos), y cronometrar una vez la consulta
+   manual de 2 h y anotar el uso real del panel, que son las dos estimaciones sobre las que descansa el ROI.
 4. **Reducir la retención de Kafka** de `earthquakes.catalog` y `earthquakes.replay` (53 y 37 MB), que son reproducibles desde `data/`. La diferencia de 1,244 GB frente a 108 MB está explicada: Kafka crea para cada partición (56 en total) dos ficheros de índice dispersos de 10 MB que ocupan 1,19 GB de tamaño aparente (`du --apparent-size`) y 110 MB en disco; no hay nada que limpiar.
 5. **A 100 millones de registros**: particionar `event_current` y `event_version` por año, BRIN para las particiones antiguas,
    agregados diarios por país recalculados desde el estado actual y más memoria para PostgreSQL
