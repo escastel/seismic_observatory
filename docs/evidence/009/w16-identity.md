@@ -3,7 +3,7 @@
 Fecha: 2026-11-17.
 
 - **Nombre y título**: la cabecera muestra «seismicobservatory» con el logotipo «S» con onda sísmica; `<title>` es «seismicobservatory»; favicon `brand/favicon.svg`; `meta theme-color` oscuro (`#0b1520`) y claro (`#eef3f6`) ([oscuro](panel-dark.png), [claro](panel-light.png)). Tipografía del sistema, sin fuentes externas.
-- **Logotipo provisional**: sigue pendiente de aprobación de la usuaria (FR-018).
+- **Logotipo aprobado** por la usuaria el 2026-11-17 (FR-018 cumplido).
 
 ## Contraste
 

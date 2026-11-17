@@ -673,7 +673,7 @@ Evidencia en [docs/evidence/009/](evidence/009/README.md); cifras del 2026-11-17
 - **Ficha del evento**: diálogo accesible (foco inicial en «Cerrar», Escape, retorno del foco) que se abre desde un círculo, un grupo o
   el botón «Ver ficha» de la tabla; todo el texto es texto, nunca HTML.
 - **Movimiento**: sin animaciones ni transiciones con `prefers-reduced-motion: reduce`.
-- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, **provisional** hasta que la usuaria lo apruebe.
+- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, aprobado por la usuaria el 2026-11-17.
 
 ### Fuentes y licencias
 

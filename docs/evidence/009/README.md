@@ -23,21 +23,19 @@ Donde el sistema real no produce el caso, las respuestas se alteraron en el nave
 | W12 | Accesibilidad | axe-core WCAG 2.0/2.1 A y AA sin violaciones; ficha operable con teclado | 0 violaciones en oscuro y en claro ([w12-a11y.json](w12-a11y.json)); `card_closes_with_escape: true`; foco inicial en «Cerrar» | SUPERADA |
 | W13 | No regresión de V1 a V15 de la 007 | Las pruebas V1 a V15 de la 007 pasan con el panel rediseñado | `npm test`: 13 ficheros, 142 pruebas en verde. V1, V3, V4, V5, V6, V7, V9, V10, V11, V12, V13, V14 y V15 SUPERADA. V2 PARCIAL. V8 NO REPETIDA ([captura reproducción](w13-replay.png), [sin conexión](w13-unreachable.png), [desactualizado](w13-stale.png)) ([w13-regression.md](w13-regression.md)) | PARCIAL |
 | W14 | Móvil y peso | Sin desplazamiento horizontal a 390 px; utilizable en menos de 5 s con conexión normal (SC-007) | Ancho de página 390 = viewport tras corregir dos desbordes ([captura](mobile.png)). Primera tarjeta con datos 0,46 s (red normal) y 3,6 s (red lenta emulada); cuatro gráficos 1,6 s y 4,6 s. `main` 354 kB; Chart.js 202 kB diferido ([w14](w14-mobile-weight.md)) | SUPERADA |
-| W15 | Túnel real y Netlify | Ninguna petición de teselas ni placas al túnel; cerrar y reabrir el túnel con recuperación sin recargar; despliegue en Netlify | Túnel real: carga con 212 eventos; con el túnel parado, aviso de backend inaccesible y 212 eventos conservados ([captura](w15-tunnel-closed.png)); reabierto, «Al día» sin recargar ([captura](w15-tunnel-reopened.png)); 0 peticiones de teselas o placas al túnel ([captura](w15-tunnel-open.png)). **Netlify no desplegado**: el sitio público no se probó ([w15](w15-netlify-tunnel.md)) | PARCIAL |
-| W16 | Identidad y contraste | Logotipo aprobado por la usuaria; contraste medido de los colores de profundidad | Nombre, `<title>`, favicon y `theme-color` en oscuro y claro ([oscuro](panel-dark.png), [claro](panel-light.png)). Contraste de profundidad: 5,24:1 en oscuro y 3,67:1 en claro. **Logotipo provisional**, pendiente de aprobación (FR-018) ([w16](w16-identity.md)) | PARCIAL |
+| W15 | Túnel real y Netlify | Ninguna petición de teselas ni placas al túnel; cerrar y reabrir el túnel con recuperación sin recargar; despliegue en Netlify | Túnel real: carga con 212 eventos; con el túnel parado, aviso de backend inaccesible y 212 eventos conservados ([captura](w15-tunnel-closed.png)); reabierto, «Al día» sin recargar ([captura](w15-tunnel-reopened.png)); 0 peticiones de teselas o placas al túnel ([captura](w15-tunnel-open.png)). **Netlify se despliega al hacer merge a main; aún sin probar en el sitio público**: el sitio público no se probó ([w15](w15-netlify-tunnel.md)) | PARCIAL |
+| W16 | Identidad y contraste | Logotipo aprobado por la usuaria; contraste medido de los colores de profundidad | Nombre, `<title>`, favicon y `theme-color` en oscuro y claro ([oscuro](panel-dark.png), [claro](panel-light.png)). Contraste de profundidad: 5,24:1 en oscuro y 3,67:1 en claro. **Logotipo aprobado** por la usuaria el 2026-11-17 ([w16](w16-identity.md)) | SUPERADA |
 
 ## Notas
 
 - **W10, retorno del foco**: en la comprobación inicial de W1 a W7 quedó PARCIAL («el retorno del foco no se pudo comprobar»). En la de W10 y W11 se comprobó y figura SUPERADA; la tabla usa esta última.
 - **W9**: solo se comparan totales y «sin valor» con la API, no la distribución de magnitud ni de profundidad fila a fila.
 - **W15**: el apartado de Netlify de [w15-netlify-tunnel.md](w15-netlify-tunnel.md) indica que el despliegue no se hizo en esta sesión.
-- **W16**: el fichero de identidad no da un estado global; el PARCIAL de la tabla se debe a que el logotipo sigue pendiente de aprobación.
 
 ## Pendiente
 
-- **Netlify (W15, T029)**: publicar la compilación (`npm run build` en `frontend/`, carpeta `dist/observatorio/browser`) y repetir la comprobación contra la URL pública. El tamaño comprimido en Netlify no se ha medido ([W14](w14-mobile-weight.md)).
+- **Netlify (W15, T029)**: Netlify publica al hacer merge a `main`; tras el merge, repetir la comprobación contra la URL pública. El tamaño comprimido en Netlify no se ha medido ([W14](w14-mobile-weight.md)).
 - **Mapa, «Muestra: N de TOTAL» (W4/W5)**: comprobarlo en el navegador con un periodo truncado; hoy solo lo cubre `map-layers.test.ts`.
 - **V2 (W13)**: comprobar un evento nuevo real sin recargar; en la prueba no se esperó a un evento nuevo de USGS.
 - **V8 (W13)**: repetir los filtros inválidos (inicio igual o posterior al fin; más de 10.000 horas).
-- **Logotipo (W16)**: aprobación por la usuaria (FR-018).
 - **Linux**: no consta en esta carpeta ninguna prueba en Linux; `CLAUDE.md` exige que los cambios funcionen en ambos equipos.
