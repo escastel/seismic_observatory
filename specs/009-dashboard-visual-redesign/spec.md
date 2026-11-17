@@ -32,7 +32,7 @@ casos los eventos siguen siendo legibles, los filtros se aplican igual y los dat
 
 **Acceptance Scenarios**:
 
-1. **Given** un dispositivo en modo oscuro, **When** se abre el panel, **Then** el panel, el mapa simple, los gráficos y las tarjetas usan el tema oscuro; al cambiar el dispositivo a claro, el panel pasa al tema claro sin recargar.
+1. **Given** un dispositivo en modo oscuro (o sin preferencia), **When** se abre el panel, **Then** el panel, el mapa simple, los gráficos y las tarjetas usan el tema oscuro; al cambiar el dispositivo a claro, el panel pasa al tema claro sin recargar.
 2. **Given** el panel abierto, **When** se elige el mapa de relieve con placas tectónicas o el satélite, **Then** el fondo cambia, los eventos siguen visibles con su color y tamaño, y la atribución de la fuente del fondo se muestra.
 3. **Given** un periodo con más eventos de los que el mapa dibuja, **When** se activa el mapa de calor o la agrupación, **Then** la capa indica que se calcula sobre una muestra («N de TOTAL») y no la presenta como la densidad del conjunto completo.
 4. **Given** una capa o un fondo que no se puede cargar, **When** falla la carga de sus teselas o datos, **Then** el panel sigue funcionando con el mapa simple y lo avisa, sin perder los eventos.
@@ -126,13 +126,13 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 
 **Tema**
 
-- **FR-001**: El panel MUST adoptar el tema claro u oscuro del dispositivo al abrirse y MUST cambiar de tema sin recargar cuando el dispositivo cambia.
+- **FR-001**: El panel MUST adoptar el tema claro u oscuro del dispositivo al abrirse y MUST cambiar de tema sin recargar cuando el dispositivo cambia; si el dispositivo no expresa preferencia, el tema por defecto MUST ser el **oscuro**.
 - **FR-002**: Mapa simple, gráficos, tarjetas, fichas y tabla MUST estar diseñados y comprobados en ambos temas, con contraste suficiente.
 
 **Mapa**
 
-- **FR-003**: El panel MUST ofrecer un selector de mapa base con: simple (con variante clara y oscura según el tema), relieve con placas tectónicas y satélite.
-- **FR-004**: El panel MUST permitir activar sobre cualquier mapa base un mapa de calor de densidad y la agrupación de eventos, además de los círculos actuales por magnitud y profundidad.
+- **FR-003**: El panel MUST ofrecer un selector de mapa base con: simple, relieve con placas tectónicas y satélite. El mapa simple y el de relieve con placas MUST tener variante clara y variante oscura y cambiar entre ellas con el tema de la página; el satélite es el mismo en ambos temas y sus controles y leyenda se adaptan.
+- **FR-004**: El mapa de calor de densidad y la agrupación de eventos MUST ser **capas opcionales** que se pueden activar y desactivar sobre cualquier mapa base (no son un fondo más del selector), además de los círculos actuales por magnitud y profundidad.
 - **FR-005**: El mapa de calor y la agrupación MUST etiquetarse como calculados sobre la muestra («N de TOTAL») cuando el periodo tenga más eventos de los dibujados, y MUST NOT presentarse como densidad del conjunto completo.
 - **FR-006**: Cada fondo y capa de terceros MUST mostrar su atribución y cumplir su licencia y política de uso, y MUST NOT pasar por el túnel público de la API.
 - **FR-007**: Si un fondo o capa no carga, el panel MUST avisar y conservar el mapa simple con los eventos.
@@ -198,11 +198,11 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 
 ## Assumptions
 
-- **Referencia visual del mapa (recibida el 2026-11-17)**: [references/map-reference.png](references/map-reference.png), aportada por la usuaria como referencia de estilo (no forma parte del panel ni se redistribuye; su procedencia no consta). Muestra un mapa oscuro de relieve con los **límites de placas tectónicas como líneas discontinuas rojas**, círculos de eventos con brillo (color por profundidad: amarillo < 70 km, naranja 70–300 km, morado ≥ 300 km; tamaño por magnitud), una **leyenda** abajo a la izquierda, un **selector de capas** arriba a la derecha («Relieve + Placas», «Mapa de calor», «Satelital», «Oscuro neutro»), un chip de **«Filtros aplicados»** y botones de zoom. Se toma como guía de estilo: la spec mantiene el mapa de calor como **capa opcional sobre cualquier fondo** y no como un fondo más, y rotula el trazo como límites de placas (no «fallas»).
+- **Referencia visual del mapa (recibida el 2026-11-17)**: [references/map-reference.png](references/map-reference.png), aportada por la usuaria como referencia de estilo (no forma parte del panel ni se redistribuye; su procedencia no consta). Muestra un mapa oscuro de relieve con los **límites de placas tectónicas como líneas discontinuas rojas**, círculos de eventos con brillo (color por profundidad: amarillo < 70 km, naranja 70–300 km, morado ≥ 300 km; tamaño por magnitud), una **leyenda** abajo a la izquierda, un **selector de capas** arriba a la derecha («Relieve + Placas», «Mapa de calor», «Satelital», «Oscuro neutro»), un chip de **«Filtros aplicados»** y botones de zoom. Se toma como guía de estilo del **tema oscuro**, con una variante clara equivalente para el tema claro: la spec mantiene el mapa de calor como **capa opcional sobre cualquier fondo** y no como un fondo más, y rotula el trazo como límites de placas (no «fallas»).
 - **Cambios frente a la referencia**: el interruptor **2D/3D** de la imagen queda fuera de alcance (mapa 3D o globo excluido); la usuaria puede revisarlo más adelante.
 - **Identidad (decidida el 2026-11-17)**: el nombre es **seismicobservatory** y el logotipo es una **«S» con una decoración sencilla que represente el panel** (por ejemplo una onda sísmica). El diseño concreto del logotipo lo propone el plan y lo aprueba la usuaria; hasta entonces, un logotipo provisional con la «S».
 - Las fuentes concretas de teselas, satélite y límites de placas se eligen en el plan, comprobando licencia, atribución y política de uso; las de uso gratuito sin clave se prefieren, y ninguna clave va al frontend ni a Git.
-- El tema sigue siempre el del dispositivo; no se añade un conmutador manual (puede considerarse más adelante).
+- El tema sigue el del dispositivo y, si este no expresa preferencia, es el oscuro; no se añade un conmutador manual (puede considerarse más adelante). La referencia visual es oscura; el diseño claro del relieve con placas se deriva con la misma jerarquía visual.
 - Una cifra de «magnitud máxima» no forma parte de las tarjetas porque la API de estadísticas no la entrega y recalcularla sobre la muestra del mapa está prohibido; si se quisiera, requeriría un cambio justificado del contrato.
 - El mapa sigue mostrando como mucho 1.000 eventos por petición; la agrupación y el mapa de calor trabajan sobre esa muestra y así se rotulan.
 - Las pruebas de la 007 (Vitest, comprobaciones en navegador, accesibilidad automática) se reutilizan y se amplían; no se rehace la lógica de datos.
