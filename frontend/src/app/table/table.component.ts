@@ -20,6 +20,8 @@ export class TableComponent {
   readonly truncated = input<boolean>(false);
 
   readonly loadMore = output<void>();
+  /** Opens the event card; the clicked button is passed so focus can return to it. */
+  readonly showCard = output<MapEvent>();
 
   readonly isReplay = computed(() => this.mode() === 'replay');
   readonly shown = computed(() => this.events().length);
@@ -35,6 +37,10 @@ export class TableComponent {
   syntheticText(value: boolean | null): string {
     if (value === null) return 'Sin dato';
     return value ? 'Sí' : 'No';
+  }
+
+  onShowCard(_domEvent: Event, event: MapEvent): void {
+    this.showCard.emit(event);
   }
 
   onLoadMore(): void {

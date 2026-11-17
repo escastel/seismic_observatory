@@ -1,0 +1,22 @@
+<ul class="cards" role="list" aria-label="Resumen de la consulta">
+  @for (card of cards(); track card.id) {
+    <li class="card" role="listitem" [attr.data-card]="card.id" [attr.data-tone]="card.tone">
+      <div class="head">
+        <h3 class="label">{{ card.label }}</h3>
+        @if (card.badge) {
+          <span class="badge">{{ card.badge }}</span>
+        }
+      </div>
+      <p class="figure">
+        @if (card.id === 'status') {
+          <span class="icon" aria-hidden="true">{{ icon(card.tone) }}</span>
+        }
+        <span class="value">{{ card.value }}</span>
+        @if (card.unit) {
+          <span class="unit">{{ card.unit }}</span>
+        }
+      </p>
+      <p class="detail">{{ card.detail }}</p>
+    </li>
+  }
+</ul>

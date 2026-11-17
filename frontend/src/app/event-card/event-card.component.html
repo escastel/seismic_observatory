@@ -1,0 +1,23 @@
+@if (card(); as c) {
+  <aside
+    class="event-card"
+    [class.animated]="!reducedMotion()"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="event-card-title"
+    (keydown)="onKeydown($event)"
+  >
+    <header class="event-card-header">
+      <h2 id="event-card-title">{{ c.title }}</h2>
+      <button #closeButton type="button" class="event-card-close" (click)="close()">Cerrar</button>
+    </header>
+    <dl class="event-card-fields">
+      @for (field of c.fields; track field.key) {
+        <div class="event-card-field">
+          <dt>{{ field.label }}</dt>
+          <dd>{{ field.value }}</dd>
+        </div>
+      }
+    </dl>
+  </aside>
+}

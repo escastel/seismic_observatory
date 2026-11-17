@@ -3,83 +3,106 @@
 }
 
 .summary {
-  margin: 0 0 0.5rem;
-  color: #1a1a1a;
+  margin: 0 0 var(--space-2);
+  color: var(--text);
   font-weight: 600;
 }
 
 .notice {
-  margin: 0 0 0.75rem;
-  padding: 0.5rem 0.75rem;
-  border-left: 4px solid #8a4b00;
-  background: #fff4e0;
-  color: #4a2800;
+  margin: 0 0 var(--space-3);
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--warning);
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning);
 }
 
 .scroll {
+  position: relative; /* contains the absolutely positioned visually-hidden labels */
   max-height: 32rem;
   overflow: auto;
-  border: 1px solid #595959;
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
 }
 
 .scroll:focus-visible,
 .more:focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
 table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.9rem;
-  color: #1a1a1a;
-  background: #ffffff;
+  font-size: var(--text-sm);
+  color: var(--text);
+  background: var(--surface);
 }
 
 caption {
-  padding: 0.5rem;
+  padding: var(--space-2);
   text-align: left;
   font-weight: 600;
+  color: var(--text);
 }
 
 .label {
-  margin-left: 0.5rem;
-  padding: 0.1rem 0.5rem;
-  border-radius: 0.25rem;
-  background: #4a2800;
-  color: #ffffff;
+  margin-left: var(--space-2);
+  padding: 2px var(--space-2);
+  border: 1px solid var(--warning);
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning);
   text-transform: uppercase;
 }
 
 th,
 td {
-  padding: 0.4rem 0.6rem;
-  border-bottom: 1px solid #c4c4c4;
+  padding: var(--space-2) var(--space-3);
+  border-bottom: 1px solid var(--border);
   text-align: left;
   vertical-align: top;
+}
+
+tbody tr:hover {
+  background: var(--surface-2);
 }
 
 th {
   position: sticky;
   top: 0;
-  background: #e8e8e8;
+  background: var(--surface-2);
+  color: var(--text);
   white-space: nowrap;
 }
 
 .more {
-  margin-top: 0.75rem;
-  padding: 0.5rem 1rem;
-  border: 1px solid #0b3d91;
-  border-radius: 0.25rem;
-  background: #0b3d91;
-  color: #ffffff;
+  margin-top: var(--space-3);
+  min-height: 44px;
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius);
+  background: var(--accent);
+  color: var(--accent-contrast);
   font: inherit;
+  font-weight: 600;
   cursor: pointer;
 }
 
 .more:disabled {
-  border-color: #595959;
-  background: #e8e8e8;
-  color: #3d3d3d;
+  border-color: var(--border);
+  background: var(--surface-2);
+  color: var(--text-muted);
   cursor: not-allowed;
+}
+
+@media (max-width: 480px) {
+  th,
+  td {
+    padding: var(--space-2);
+  }
+
+  .more {
+    width: 100%;
+  }
 }

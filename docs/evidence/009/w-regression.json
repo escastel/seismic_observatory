@@ -1,0 +1,261 @@
+{
+  "w8": [
+    {
+      "scheme": "dark",
+      "set": "sin filtros",
+      "apiTotal": 210,
+      "uiTotal": "210",
+      "cardsOk": true,
+      "hourlyTable": 210,
+      "apiHourly": 210,
+      "countryTable": 210,
+      "apiCountry": 210,
+      "mapCount": "210",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. Sin filtros",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    },
+    {
+      "scheme": "dark",
+      "set": "magnitud mínima 2",
+      "apiTotal": 76,
+      "uiTotal": "76",
+      "cardsOk": true,
+      "hourlyTable": 76,
+      "apiHourly": 76,
+      "countryTable": 76,
+      "apiCountry": 76,
+      "mapCount": "76",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. magnitud mínima 2",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    },
+    {
+      "scheme": "dark",
+      "set": "país USA + magnitud mínima 1",
+      "apiTotal": 128,
+      "uiTotal": "128",
+      "cardsOk": true,
+      "hourlyTable": 128,
+      "apiHourly": 128,
+      "countryTable": 128,
+      "apiCountry": 128,
+      "mapCount": "128",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. magnitud mínima 1, país USA",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    },
+    {
+      "scheme": "light",
+      "set": "sin filtros",
+      "apiTotal": 210,
+      "uiTotal": "210",
+      "cardsOk": true,
+      "hourlyTable": 210,
+      "apiHourly": 210,
+      "countryTable": 210,
+      "apiCountry": 210,
+      "mapCount": "210",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. Sin filtros",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    },
+    {
+      "scheme": "light",
+      "set": "magnitud mínima 2",
+      "apiTotal": 76,
+      "uiTotal": "76",
+      "cardsOk": true,
+      "hourlyTable": 76,
+      "apiHourly": 76,
+      "countryTable": 76,
+      "apiCountry": 76,
+      "mapCount": "76",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. magnitud mínima 2",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    },
+    {
+      "scheme": "light",
+      "set": "país USA + magnitud mínima 1",
+      "apiTotal": 128,
+      "uiTotal": "128",
+      "cardsOk": true,
+      "hourlyTable": 128,
+      "apiHourly": 128,
+      "countryTable": 128,
+      "apiCountry": 128,
+      "mapCount": "128",
+      "unvaluedCard": "SIN VALOR  0 magnitud · 0 profundidad eventos  Sin magnitud: 0. Sin profundidad: 0. magnitud mínima 1, país USA",
+      "apiMagUnvalued": 0,
+      "apiDepthUnvalued": 0
+    }
+  ],
+  "w10": {
+    "rows": [
+      [
+        "nc75467642",
+        "2026-11-17 18:43:52 UTC",
+        "ND",
+        "Sin dato",
+        "3,2 km",
+        "4 km NW of The Geysers, CA",
+        "Estados Unidos",
+        "North America",
+        "Northern America"
+      ],
+      [
+        "nc75467632",
+        "2026-11-17 18:35:37 UTC",
+        "1,2",
+        "md",
+        "ND",
+        "7 km NW of The Geysers, CA",
+        "Estados Unidos",
+        "North America",
+        "Northern America"
+      ],
+      [
+        "nc75467622",
+        "2026-11-17 18:32:48 UTC",
+        "1,1",
+        "md",
+        "1,1 km",
+        "<img src=x onerror=\"window.__xss=1\"> <b>negrita</b>",
+        "Estados Unidos",
+        "North America",
+        "Northern America"
+      ],
+      [
+        "nc75467612",
+        "2026-11-17 18:28:05 UTC",
+        "1,8",
+        "md",
+        "5,0 km",
+        "9 km WNW of Cobb, CA",
+        "Estados Unidos",
+        "North America",
+        "Northern America"
+      ],
+      [
+        "nc75467607",
+        "2026-11-17 18:04:04 UTC",
+        "0,3",
+        "md",
+        "4,1 km",
+        "3 km NNW of The Geysers, CA",
+        "Sin país asignado",
+        "North America",
+        "Northern America"
+      ],
+      [
+        "us7000tytu",
+        "2026-11-17 18:02:32 UTC",
+        "-0,5",
+        "mb",
+        "-1,2 km",
+        "1 km NW of Macaracas, Panama",
+        "Panamá",
+        "North America",
+        "Central America"
+      ],
+      [
+        "nn00927075",
+        "2026-11-17 17:59:38 UTC",
+        "0,0",
+        "ml",
+        "7,6 km",
+        "14 km ESE of Silver Springs, Nevada",
+        "Estados Unidos",
+        "North America",
+        "Northern America"
+      ]
+    ],
+    "cardNullMag": {
+      "text": "Evento nc75467642\nCerrar\nID\nnc75467642\nMagnitud\nND\nProfundidad\n3,2 km\nLugar\n4 km NW of The Geysers, CA\nHora UTC\n2026-11-17 18:43:52 UTC\nPaís\nEstados Unidos\nContinente\nNorth America\nSubregión\nNorthern America",
+      "focus": "Cerrar",
+      "img": 0
+    },
+    "escapeClosed": true,
+    "focusReturned": "detail | nc75467642",
+    "cardNullDepth": "Evento nc75467632\nCerrar\nID\nnc75467632\nMagnitud\n1,2 md\nProfundidad\nND\nLugar\n7 km NW of The Geysers, CA\nHora UTC\n2026-11-17 18:35:37 UTC\nPaís\nEstados Unidos\nContinente\nNorth America\nSubregión\nNorthern America",
+    "cardMarkup": {
+      "text": "Evento nc75467622\nCerrar\nID\nnc75467622\nMagnitud\n1,1 md\nProfundidad\n1,1 km\nLugar\n<img src=x onerror=\"window.__xss=1\"> <b>negrita</b>\nHora UTC\n2026-11-17 18:32:48 UTC\nPaís\nEstados Unidos\nContinente\nNorth America\nSubregión\nNorthern America",
+      "focus": "Cerrar",
+      "img": 0
+    },
+    "cardNoCountry": "Evento nc75467607\nCerrar\nID\nnc75467607\nMagnitud\n0,3 md\nProfundidad\n4,1 km\nLugar\n3 km NNW of The Geysers, CA\nHora UTC\n2026-11-17 18:04:04 UTC\nPaís\nSin país asignado\nContinente\nNorth America\nSubregión\nNorthern America",
+    "cardNegative": "Evento us7000tytu\nCerrar\nID\nus7000tytu\nMagnitud\n-0,5 mb\nProfundidad\n-1,2 km\nLugar\n1 km NW of Macaracas, Panama\nHora UTC\n2026-11-17 18:02:32 UTC\nPaís\nPanamá\nContinente\nNorth America\nSubregión\nCentral America",
+    "cardZero": "Evento nn00927075\nCerrar\nID\nnn00927075\nMagnitud\n0,0 ml\nProfundidad\n7,6 km\nLugar\n14 km ESE of Silver Springs, Nevada\nHora UTC\n2026-11-17 17:59:38 UTC\nPaís\nEstados Unidos\nContinente\nNorth America\nSubregión\nNorthern America",
+    "closedByButton": true,
+    "xss": "undefined",
+    "mapCounts": "209 eventos dibujados · 1 omitidos por coordenadas no válidas",
+    "errors": [],
+    "reducedMotionCardAnimation": {
+      "animationName": "none",
+      "transition": "0s",
+      "animatedClass": "event-card"
+    }
+  },
+  "w13": {
+    "v6": {
+      "first": "Mostrando 1000 de 2500 eventos",
+      "notice": "Respuesta truncada: el mapa y la tabla muestran 1000 de 2500 eventos. Las estadísticas corresponden al conjunto completo. Usa «Cargar más» en la tabla para trae",
+      "last": "Mostrando 2500 de 2500 eventos",
+      "moreDisabled": true,
+      "uniqueRows": 2500
+    },
+    "baseline": {
+      "count": "Mostrando 209 de 209 eventos",
+      "cards": "Al día"
+    },
+    "v11_unreachable": {
+      "status": "Estado del panel Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 18:48:41 UTC. Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco. Última lectura correcta del panel 2026-11-17 18:48:41 UTC Generación de la respuesta (API) 2026-11-17 18:48:41 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:48:38 UTC Modo Tiem",
+      "table": "Mostrando 209 de 209 eventos",
+      "cardStatus": "Backend inaccesible"
+    },
+    "v11_recovered": {
+      "status": "Estado del panel Información: Datos al día. Última lectura correcta del panel 2026-11-17 18:48:56 UTC Generación de la respuesta (API) 2026-11-17 18:48:56 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:48:38 UTC Modo Tiempo real Periodo consultado 2026-11-16 18:48:56 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto) Eventos en cuarentena 2 (geometría no válida: 0) Eventos sin magnitud 0 (in",
+      "cardStatus": "Al día"
+    },
+    "v11_html": {
+      "status": "Estado del panel Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 18:48:56 UTC. Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco. Última lectura correcta del panel 2026-11-17 18:48:56 UTC Generación de la respuesta (API) 2026-11-17 18:48:56 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:48:38 UTC Modo Tiem"
+    },
+    "v12_503": {
+      "status": "Estado del panel Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 18:49:06 UTC. Aviso: La base de datos no está disponible (503). Esto no significa que no haya eventos. Última lectura correcta del panel 2026-11-17 18:49:06 UTC Generación de la respuesta (API) 2026-11-17 18:49:06 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:48:38 UTC Modo Tiempo real Periodo consultado 2026-11-1",
+      "cardStatus": "Base de datos no disponible"
+    },
+    "v12_422": {
+      "status": "Estado del panel Información: Datos al día. Aviso: las estadísticas no se han podido cargar (Filtro no válido). Última lectura correcta del panel 2026-11-17 18:49:21 UTC Generación de la respuesta (API) 2026-11-17 18:49:21 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:48:38 UTC Modo Tiempo real Periodo consultado 2026-11-16 18:49:21 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto) Eventos"
+    },
+    "v12_stale": {
+      "status": "Estado del panel Aviso: Datos desactualizados: la última consulta correcta a USGS fue hace 40 min. Última lectura correcta del panel 2026-11-17 18:49:37 UTC Generación de la respuesta (API) 2026-11-17 18:49:37 UTC Última ingesta (consulta correcta a USGS) 2026-11-17 18:09:37 UTC Modo Tiempo real Periodo consultado 2026-11-16 18:49:37 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto) Eventos en cuarenten",
+      "cardStatus": "Desactualizado",
+      "cardIngestion": "2026-11-17 18:09:37 UTC"
+    },
+    "errors": [],
+    "v13": {
+      "maxInFlight": 1,
+      "status": "Estado del panel Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 18:49:37 UTC. Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintent",
+      "table": "Mostrando 209 de 209 eventos"
+    },
+    "v9": {
+      "summaryBadge": "REPRODUCCIÓN",
+      "status": "⚠ Modo: REPRODUCCIÓN",
+      "map": "REPRODUCCIÓN",
+      "table": "REPRODUCCIÓN",
+      "charts": true,
+      "card": null,
+      "cardReplay": "Evento us6000pxh0 | Cerrar | ID | us6000pxh0 | Magnitud | 4,6 mb | Profundidad | 10,0 km | Lugar | 83 km NE of Hihifo, Tonga | Hora UTC | 2025-02-28 23:27:01 UTC | País | Sin país asignado | Continente | ND | Subregión | ND | Hora de reproducción | 2026-11-16 18:55:09 UTC | Sintético | No sintético",
+      "replayTotal": "2807"
+    },
+    "v10": {
+      "realBefore": "210",
+      "realAfter": "210"
+    }
+  },
+  "v15": {
+    "filesChecked": 12,
+    "hits": []
+  }
+}

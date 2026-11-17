@@ -6,22 +6,37 @@ import { MapComponent } from './map/map.component';
 import { StatusComponent } from './status/status.component';
 import { TableComponent } from './table/table.component';
 import { ChartsComponent } from './charts/charts.component';
-import type { Mode, QueryFilters } from './lib/api-types';
+import { SummaryComponent } from './summary/summary.component';
+import { EventCardComponent } from './event-card/event-card.component';
+import { LogoComponent } from './brand/logo.component';
+import { ThemeService } from './theme/theme.service';
+import type { MapEvent, Mode, QueryFilters } from './lib/api-types';
 import { buildCountryCatalog } from './lib/countries';
 
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [FiltersComponent, MapComponent, StatusComponent, TableComponent, ChartsComponent],
+  imports: [
+    FiltersComponent,
+    MapComponent,
+    StatusComponent,
+    TableComponent,
+    ChartsComponent,
+    SummaryComponent,
+    EventCardComponent,
+    LogoComponent,
+  ],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css',
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class AppComponent implements OnInit {
   protected readonly service = inject(ObservatoryService);
+  protected readonly themeService = inject(ThemeService);
   protected readonly borders = signal<FeatureCollection | null>(null);
   protected readonly bordersError = signal(false);
   protected readonly countries = computed(() => buildCountryCatalog(this.borders()));
+  protected readonly selectedEvent = signal<MapEvent | null>(null);
 
   protected readonly events = computed(() => this.service.reading()?.events ?? []);
   protected readonly metadata = computed(() => this.service.reading()?.metadata ?? null);
@@ -48,5 +63,13 @@ export class AppComponent implements OnInit {
 
   protected changeMode(mode: Mode): void {
     void this.service.setMode(mode);
+  }
+
+  protected openCard(event: MapEvent): void {
+    this.selectedEvent.set(event);
+  }
+
+  protected closeCard(): void {
+    this.selectedEvent.set(null);
   }
 }

@@ -1,0 +1,118 @@
+:host {
+  display: block;
+}
+
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 13rem), 1fr));
+  gap: 0.75rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  min-width: 0;
+  padding: 0.85rem 1rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+}
+
+.head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+
+.label {
+  margin: 0;
+  font-size: var(--text-xs);
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+}
+
+.badge {
+  padding: 0.1rem 0.45rem;
+  font-size: var(--text-xs);
+  font-weight: 700;
+  color: var(--accent-contrast);
+  background: var(--accent);
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.figure {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.35rem;
+  margin: 0;
+}
+
+.value {
+  font-family: var(--font-mono);
+  font-size: var(--text-xl);
+  font-weight: 700;
+  line-height: 1.2;
+  overflow-wrap: anywhere;
+}
+
+.unit {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.icon {
+  font-size: var(--text-lg);
+}
+
+.detail {
+  margin: 0;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+
+.card[data-card='period'] .value,
+.card[data-card='unvalued'] .value,
+.card[data-card='lastIngestion'] .value {
+  font-size: var(--text-lg);
+}
+
+.card[data-tone='ok'] {
+  border-color: var(--success);
+}
+.card[data-tone='ok'] .icon,
+.card[data-tone='ok'] .value {
+  color: var(--success);
+}
+
+.card[data-tone='warning'] {
+  border-color: var(--warning);
+}
+.card[data-tone='warning'] .icon,
+.card[data-tone='warning'] .value {
+  color: var(--warning);
+}
+
+.card[data-tone='error'] {
+  border-color: var(--error);
+}
+.card[data-tone='error'] .icon,
+.card[data-tone='error'] .value {
+  color: var(--error);
+}
+
+.value,
+.detail {
+  overflow-wrap: anywhere;
+}

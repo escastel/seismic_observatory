@@ -1,0 +1,33 @@
+{
+  "normal": {
+    "msToCards": 457,
+    "msToFirstTile": 533,
+    "msToCharts": 1560,
+    "kB": {
+      "app": 606,
+      "f:chunk-FDERIQAA.js": 1,
+      "f:main-JBQKUJFN.js": 354,
+      "other": 1,
+      "geojson": 819,
+      "f:paises.geojson": 819,
+      "api": 73,
+      "tiles": 27,
+      "f:chunk-MWNQD2IY.js": 202
+    }
+  },
+  "red lenta (1,6 Mbit/s, 150 ms)": {
+    "msToCards": 3570,
+    "msToFirstTile": 3578,
+    "msToCharts": 4593,
+    "kB": {
+      "app": 404,
+      "f:chunk-FDERIQAA.js": 1,
+      "f:main-JBQKUJFN.js": 354,
+      "other": 0,
+      "geojson": 209,
+      "f:paises.geojson": 209,
+      "tiles": 27,
+      "api": 73
+    }
+  }
+}

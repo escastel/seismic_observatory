@@ -1,0 +1,10 @@
+{
+  "standard": "axe-core, WCAG 2.0/2.1 A y AA",
+  "date": "2026-11-17",
+  "dark": [],
+  "light": [],
+  "keyboard": {
+    "card_closes_with_escape": true,
+    "initial_focus": "Cerrar"
+  }
+}

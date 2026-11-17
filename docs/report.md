@@ -1,7 +1,7 @@
 # Memoria del Observatorio Sísmico
 
 Este documento reúne las decisiones de diseño del observatorio, su justificación y las evidencias de cada
-funcionalidad (specs 002 a 008). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
+funcionalidad (specs 002 a 009). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
 indica el instante en que se obtuvieron, porque la base crece con el feed en vivo (por ejemplo, `core` tenía 34.045 eventos el
 2026-11-16, 34.207 el 2026-11-17 y 32.978 terremotos reales en la medición de calidad del 2026-11-16: no son contradicciones, son
 instantes distintos). Los datos sintéticos y de reproducción quedan fuera de todo análisis de datos reales.
@@ -14,13 +14,14 @@ instantes distintos). Los datos sintéticos y de reproducción quedan fuera de t
 4. [Reproducción histórica](#reproducción-histórica)
 5. [API de consulta](#api-de-consulta)
 6. [Panel Angular (spec 007)](#panel-angular-spec-007)
-7. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
-8. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
-9. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
-10. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
-11. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
-12. [Diccionario de datos](#diccionario-de-datos)
-13. [Índices](#índices)
+7. [Panel rediseñado (spec 009)](#panel-rediseñado-spec-009)
+8. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
+9. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
+10. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
+11. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
+12. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
+13. [Diccionario de datos](#diccionario-de-datos)
+14. [Índices](#índices)
 
 ## Alcance y decisiones
 
@@ -584,7 +585,7 @@ la entrega inicial, que leía un formato anterior de la API. La evidencia está 
 
 ### Qué muestra el panel
 
-- **Mapa** con los eventos del periodo y las fronteras de `paises.geojson`. **Tabla** recorrible con «Cargar más» y el texto «Mostrando N de TOTAL».
+- **Mapa** con los eventos del periodo y las fronteras de `paises.geojson`. (La spec 009 rediseña su presentación: ver [Panel rediseñado](#panel-rediseñado-spec-009).) **Tabla** recorrible con «Cargar más» y el texto «Mostrando N de TOTAL».
 - **Análisis**: gráficos de ventanas horarias, países, distribuciones de magnitud y profundidad y
   comparación histórica, cada uno con su tabla de valores. Las cifras son las de `/api/estadisticas`; el
   panel no las recalcula.
@@ -652,6 +653,64 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
   con «Aplicar filtros».
 - En el navegador sin interfaz, OpenStreetMap rechazó varias teselas (400): el fondo del mapa no se ha
   comprobado en un navegador con interfaz; sí que se dibujan fronteras y eventos.
+
+## Panel rediseñado (spec 009)
+
+La spec 009 cambia solo la **presentación** del panel de la 007: no toca la API, la base de datos ni la lógica de datos
+(`observatory.service.ts`, `adapt.ts`, `api-types.ts`, `filters.ts`, `status.ts` y `config.ts` no tienen diferencias con la rama 008).
+Evidencia en [docs/evidence/009/](evidence/009/README.md); cifras del 2026-11-17.
+
+### Qué cambia
+
+- **Tema**: oscuro por defecto y claro cuando el dispositivo lo pide (`prefers-color-scheme`), con cambio en vivo y sin
+  perder la lectura. Los tokens de diseño están en `frontend/src/styles.css`.
+- **Mapa**: fondo **Simple**, **Relieve** o **Satélite**; el simple y el relieve tienen variante clara y oscura (filtro CSS sobre las
+  teselas). Capas opcionales: **mapa de calor**, **agrupación** y **límites de placas** (activadas por defecto solo con Relieve).
+  El calor y la agrupación se rotulan «Muestra: N de TOTAL» (o «Todos los eventos del periodo») porque la API entrega como mucho 1.000 eventos.
+- **Tarjetas de resumen**: eventos, última ingesta, estado, periodo y registros sin valor, siempre desde `Statistics` y el estado del
+  sistema, nunca desde la muestra del mapa. No hay tarjeta de «magnitud máxima».
+- **Gráficos**: cuatro gráficos con Chart.js, cada uno con descripción accesible y su tabla completa en «Ver tabla de datos».
+- **Ficha del evento**: diálogo accesible (foco inicial en «Cerrar», Escape, retorno del foco) que se abre desde un círculo, un grupo o
+  el botón «Ver ficha» de la tabla; todo el texto es texto, nunca HTML.
+- **Movimiento**: sin animaciones ni transiciones con `prefers-reduced-motion: reduce`.
+- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, **provisional** hasta que la usuaria lo apruebe.
+
+### Fuentes y licencias
+
+| Elemento | Origen | Licencia y atribución |
+|---|---|---|
+| Fondo Simple | OpenStreetMap (`tile.openstreetmap.org`) | ODbL; «© OpenStreetMap contributors» |
+| Relieve | Esri World Shaded Relief | «Tiles © Esri — Source: Esri»; servicio en «mature support» |
+| Satélite | EOX Sentinel-2 cloudless 2021 | CC BY-NC-SA 4.0, uso no comercial (proyecto académico); atribución de EOX y Copernicus |
+| Límites de placas | PB2002 (P. Bird, 2003), versión GeoJSON de `fraxen/tectonicplates` (H. Ahlenius, Nordpil) | ODC-By 1.0 |
+
+Todos los fondos son **sin clave** (se descartaron CARTO, Stadia y MapTiler porque exigen una clave en el cliente) y las teselas
+se piden desde el navegador a cada proveedor, nunca por el túnel de ngrok ni por Netlify; los proveedores ven la IP y el `Referer`, y el pie
+de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1 (MIT), `leaflet.markercluster` 1.5.3 (MIT) y `leaflet.heat` 0.2.0 (BSD-2-Clause).
+
+### Decisiones y hallazgos
+
+- Los plugins de Leaflet se enganchan al `L` global, no al módulo importado: la agrupación y el calor fallaban hasta usar `window.L`.
+- **Contraste**: los colores de profundidad del mapa (`geo.ts`) quedaban por debajo de 3:1 (profundo en oscuro 2,56:1; superficial en claro 2,17:1).
+  Se añadió `depthColor(clave, tema)` en `lib/map-layers.ts` con los tokens `--depth-*` (entre 3,67:1 y 9,32:1) y lo usan círculos, leyenda y gráfico.
+  `geo.ts` no se modificó.
+- Dos desbordes en móvil (rejilla de tarjetas y etiquetas ocultas de la tabla) dejaban la página en 948 px; corregidos (ancho 390 = viewport).
+
+### Resultados
+
+- 142 pruebas de `npm test` en verde (106 anteriores y 36 nuevas); axe-core WCAG A y AA sin violaciones en ambos temas.
+- Cifras de tarjetas, tablas y gráficos iguales a `/api/estadisticas` en tres conjuntos de filtros y los dos temas ([W8/W9](evidence/009/w8-w9-cards-charts.md)).
+- Casos límite con respuestas alteradas en el navegador (nulos, sin país, marcas, coordenadas inválidas, 503, 422, desactualizado, inaccesible, truncado de 2.500): [W13](evidence/009/w13-regression.md).
+- Móvil con red lenta emulada: primera tarjeta en 3,6 s y gráficos en 4,6 s ([W14](evidence/009/w14-mobile-weight.md)).
+- Túnel real: solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
+
+### Límites
+
+- **No se desplegó en Netlify** en esta sesión (no hay sesión de Netlify en el equipo): falta repetir W15 en el sitio público.
+- «Muestra: N de TOTAL» solo está cubierto por pruebas unitarias; los datos reales no estaban truncados.
+- Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
+- El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
+- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; no se probó en Linux.
 
 ## Análisis y conclusiones (spec 008)
 
