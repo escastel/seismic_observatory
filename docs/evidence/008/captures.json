@@ -1,0 +1,26 @@
+[
+  {
+    "name": "C1-2025-m4",
+    "start": "2025-01-01T00:00",
+    "end": "2026-01-01T00:00",
+    "mag": "4",
+    "captured_at_utc": "2026-11-17T14:37:29.078Z",
+    "text": "Saltar a la tabla de eventos\n\nBIG DATA · PROYECTO DE AULA\n\nObservatorio de actividad sísmica\n\nEventos, análisis y estado del sistema a partir de la API de consulta. Este panel nunca consulta USGS.\n\nEstado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-17 14:37:20 UTC\nGeneración de la respuesta (API)\n2026-11-17 14:37:20 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-17 14:36:21 UTC\nModo\nTiempo real\nPeriodo consultado\n2025-01-01 00:00:00 UTC a 2026-01-01 00:00:00 UTC\nEventos en cuarentena\n2 (geometría no válida: 0)\nEventos sin magnitud\n0 (excluidos por el filtro)\nModo de datos\nReal\nReproducción\nDesde (UTC)\nHasta (UTC)\n\nHoras en UTC: inicio inclusivo, fin exclusivo.\n\nMagnitud mínima\nPaís\nTodos los países\nAfganistán\nAlbania\nAlemania\nAngola\nAntártida\nArabia Saudita\nArgelia\nArgentina\nArmenia\nAustralia\nAustria\nAzerbaiyán\nBahamas\nBangladés\nBélgica\nBelice\nBenín\nBielorrusia\nBirmania\nBolivia\nBosnia y Herzegovina\nBotsuana\nBrasil\nBrunéi\nBulgaria\nBurkina Faso\nBurundi\nBután\nCamboya\nCamerún\nCanadá\nCatar\nChad\nChile\nChina\nChipre\nColombia\nCorea del Norte\nCorea del Sur\nCosta de Marfil\nCosta Rica\nCroacia\nCuba\nDinamarca\nEcuador\nEgipto\nEl Salvador\nEmiratos Árabes Unidos\nEritrea\nEslovaquia\nEslovenia\nEspaña\nEstados Unidos\nEstonia\nEtiopía\nFilipinas\nFinlandia\nFiyi\nFrancia\nGabón\nGambia\nGeorgia\nGhana\nGrecia\nGroenlandia\nGuatemala\nGuinea\nGuinea Ecuatorial\nGuinea-Bisáu\nGuyana\nHaití\nHonduras\nHungría\nIndia\nIndonesia\nIrak\nIrán\nIrlanda\nIslandia\nIslas Malvinas\nIslas Salomón"
+  },
+  {
+    "name": "C2a-24h-m4",
+    "start": "",
+    "end": "",
+    "mag": "4",
+    "captured_at_utc": "2026-11-17T14:37:45.586Z",
+    "text": "Saltar a la tabla de eventos\n\nBIG DATA · PROYECTO DE AULA\n\nObservatorio de actividad sísmica\n\nEventos, análisis y estado del sistema a partir de la API de consulta. Este panel nunca consulta USGS.\n\nEstado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-17 14:37:36 UTC\nGeneración de la respuesta (API)\n2026-11-17 14:37:36 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-17 14:37:21 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-16 14:37:36 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n2 (geometría no válida: 0)\nEventos sin magnitud\n0 (excluidos por el filtro)\nModo de datos\nReal\nReproducción\nDesde (UTC)\nHasta (UTC)\n\nHoras en UTC: inicio inclusivo, fin exclusivo.\n\nMagnitud mínima\nPaís\nTodos los países\nAfganistán\nAlbania\nAlemania\nAngola\nAntártida\nArabia Saudita\nArgelia\nArgentina\nArmenia\nAustralia\nAustria\nAzerbaiyán\nBahamas\nBangladés\nBélgica\nBelice\nBenín\nBielorrusia\nBirmania\nBolivia\nBosnia y Herzegovina\nBotsuana\nBrasil\nBrunéi\nBulgaria\nBurkina Faso\nBurundi\nBután\nCamboya\nCamerún\nCanadá\nCatar\nChad\nChile\nChina\nChipre\nColombia\nCorea del Norte\nCorea del Sur\nCosta de Marfil\nCosta Rica\nCroacia\nCuba\nDinamarca\nEcuador\nEgipto\nEl Salvador\nEmiratos Árabes Unidos\nEritrea\nEslovaquia\nEslovenia\nEspaña\nEstados Unidos\nEstonia\nEtiopía\nFilipinas\nFinlandia\nFiyi\nFrancia\nGabón\nGambia\nGeorgia\nGhana\nGrecia\nGroenlandia\nGuatemala\nGuinea\nGuinea Ecuatorial\nGuinea-Bisáu\nGuyana\nHaití\nHonduras\nHungría\nIndia\nIndonesia\nIrak\nIrán\nIrlanda\nIsl"
+  },
+  {
+    "name": "C2b-24h-nofilter",
+    "start": "",
+    "end": "",
+    "mag": "",
+    "captured_at_utc": "2026-11-17T14:38:01.094Z",
+    "text": "Saltar a la tabla de eventos\n\nBIG DATA · PROYECTO DE AULA\n\nObservatorio de actividad sísmica\n\nEventos, análisis y estado del sistema a partir de la API de consulta. Este panel nunca consulta USGS.\n\nEstado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-17 14:37:52 UTC\nGeneración de la respuesta (API)\n2026-11-17 14:37:52 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-17 14:37:21 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-16 14:37:52 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n2 (geometría no válida: 0)\nEventos sin magnitud\n0 (incluidos)\nModo de datos\nReal\nReproducción\nDesde (UTC)\nHasta (UTC)\n\nHoras en UTC: inicio inclusivo, fin exclusivo.\n\nMagnitud mínima\nPaís\nTodos los países\nAfganistán\nAlbania\nAlemania\nAngola\nAntártida\nArabia Saudita\nArgelia\nArgentina\nArmenia\nAustralia\nAustria\nAzerbaiyán\nBahamas\nBangladés\nBélgica\nBelice\nBenín\nBielorrusia\nBirmania\nBolivia\nBosnia y Herzegovina\nBotsuana\nBrasil\nBrunéi\nBulgaria\nBurkina Faso\nBurundi\nBután\nCamboya\nCamerún\nCanadá\nCatar\nChad\nChile\nChina\nChipre\nColombia\nCorea del Norte\nCorea del Sur\nCosta de Marfil\nCosta Rica\nCroacia\nCuba\nDinamarca\nEcuador\nEgipto\nEl Salvador\nEmiratos Árabes Unidos\nEritrea\nEslovaquia\nEslovenia\nEspaña\nEstados Unidos\nEstonia\nEtiopía\nFilipinas\nFinlandia\nFiyi\nFrancia\nGabón\nGambia\nGeorgia\nGhana\nGrecia\nGroenlandia\nGuatemala\nGuinea\nGuinea Ecuatorial\nGuinea-Bisáu\nGuyana\nHaití\nHonduras\nHungría\nIndia\nIndonesia\nIrak\nIrán\nIrlanda\nIslandia\nIslas Ma"
+  }
+]

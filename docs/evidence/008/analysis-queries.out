@@ -1,0 +1,142 @@
+== Q0 population by year, magnitude >= 4, real ==
+ year | events | null_magnitude | null_depth 
+------+--------+----------------+------------
+ 2025 |  18302 |              0 |          0
+ 2026 |  14893 |              0 |          0
+(2 rows)
+
+== Q1 magnitude coverage: all events vs magnitude >= 4, 2025 (catalog only has >= 4) ==
+ events_2025 | events_2025_m4 | min_magnitude 
+-------------+----------------+---------------
+       18302 |          18302 |             4
+(1 row)
+
+== Q2 split by country, 2025, magnitude >= 4 (NULL = Sin pais asignado) ==
+      country       | events | pct  
+--------------------+--------+------
+ Sin pais asignado  |  14350 | 78.4
+ China              |    354 |  1.9
+ Chile              |    348 |  1.9
+ Indonesia          |    306 |  1.7
+ Etiopía            |    265 |  1.4
+ Argentina          |    236 |  1.3
+ Papúa Nueva Guinea |    192 |  1.0
+ Afganistán         |    191 |  1.0
+ Perú               |    158 |  0.9
+ Irán               |    155 |  0.8
+ Rusia              |    150 |  0.8
+ Birmania           |    141 |  0.8
+(12 rows)
+
+== Q2b share of events with no country, by magnitude band, 2025 ==
+ mag_from | events | no_country | pct_no_country 
+----------+--------+------------+----------------
+        4 |  16173 |      12545 |           77.6
+        5 |   1984 |       1683 |           84.8
+        6 |    129 |        109 |           84.5
+        7 |     15 |         12 |           80.0
+        8 |      1 |          1 |          100.0
+(5 rows)
+
+== Q3 equivalent comparison: complete UTC day 2026-11-16 vs 2025 daily mean, magnitude >= 4 ==
+ baseline_days | days_with_zero_events | baseline_events | daily_mean_with_zero_days | daily_mean_without_zero_days 
+---------------+-----------------------+-----------------+---------------------------+------------------------------
+           365 |                     0 |           18302 |                     50.14 |                        50.14
+(1 row)
+
+== Q3b recent periods, magnitude >= 4, real ==
+                  period                   | events 
+-------------------------------------------+--------
+ day 2026-11-16 (complete UTC day)         |     15
+ catalog 2026-01-01..2026-11-15 (319 days) |  14225
+(2 rows)
+
+== Q3c NON-equivalent comparison (the trap): all magnitudes, last day vs 2025 M>=4 mean ==
+ events_all_magnitudes_2026_11_16 | events_m4_2026_11_16 
+----------------------------------+----------------------
+                              200 |                   15
+(1 row)
+
+== Q4 hour of day UTC, 2025, magnitude >= 4 ==
+ hour_utc | events 
+----------+--------
+        0 |    747
+        1 |    788
+        2 |    778
+        3 |    832
+        4 |    814
+        5 |    764
+        6 |    726
+        7 |    759
+        8 |    775
+        9 |    810
+       10 |    747
+       11 |    776
+       12 |    783
+       13 |    751
+       14 |    757
+       15 |    681
+       16 |    738
+       17 |    724
+       18 |    717
+       19 |    742
+       20 |    741
+       21 |    732
+       22 |    789
+       23 |    831
+(24 rows)
+
+== Q5 depth by subregion, 2025, magnitude >= 4 (km; events without depth counted apart) ==
+     subregion      | events | no_depth | median_depth_km | pct_deep_300 
+--------------------+--------+----------+-----------------+--------------
+ Sin pais asignado  |  14350 |        0 |            22.0 |          7.5
+ South America      |    973 |        0 |           117.1 |          1.2
+ South-Eastern Asia |    580 |        0 |            19.0 |          0.7
+ Eastern Asia       |    548 |        0 |            10.0 |          0.9
+ Southern Asia      |    443 |        0 |            10.0 |          0.0
+ Eastern Africa     |    290 |        0 |            10.0 |          0.0
+ Melanesia          |    216 |        0 |            86.1 |          0.0
+ Eastern Europe     |    168 |        0 |            52.3 |          1.8
+ Northern America   |    154 |        0 |             7.0 |          0.0
+ Central America    |    143 |        0 |            57.9 |          0.0
+ Western Asia       |    142 |        0 |            10.0 |          0.0
+ Central Asia       |    120 |        0 |            10.0 |          0.0
+(12 rows)
+
+== Q6 magnitude types, 2025 magnitude >= 4 vs live 2026-11-10..2026-11-17 all magnitudes ==
+          sample           | mag_type | events 
+---------------------------+----------+--------
+ catalog 2025 M>=4         | mb       |  16332
+ catalog 2025 M>=4         | mww      |   1476
+ catalog 2025 M>=4         | mwr      |    354
+ catalog 2025 M>=4         | ml       |     76
+ catalog 2025 M>=4         | mw       |     29
+ catalog 2025 M>=4         | md       |     29
+ catalog 2025 M>=4         | mwb      |      6
+ live 2026-11-10..17 all M | ml       |    384
+ live 2026-11-10..17 all M | md       |    145
+ live 2026-11-10..17 all M | mb       |    131
+ live 2026-11-10..17 all M | mww      |     25
+ live 2026-11-10..17 all M | mwr      |      2
+ live 2026-11-10..17 all M | mb_lg    |      2
+(13 rows)
+
+== Q3d daily counts of magnitude >= 4, real: distribution in 2025 and in the 2026 catalog, and where 2026-11-16 falls ==
+         period         | days | mean  | stddev | min | p05 | median | p95 | max | days_le_15 
+------------------------+------+-------+--------+-----+-----+--------+-----+-----+------------
+ 2025                   |  365 | 50.14 |  41.13 |  20 |  27 |     43 |  89 | 645 |          0
+ 2026-01-01..2026-11-14 |  318 | 44.73 |  17.50 |  14 |  26 |     41 |  70 | 175 |          2
+(2 rows)
+
+== Q7 depth fixed at 10 km (USGS placeholder for poorly constrained depth), 2025, magnitude >= 4 ==
+ events | depth_exactly_10 | pct_depth_10 | negative_depth 
+--------+------------------+--------------+----------------
+  18302 |             8258 |         45.1 |              0
+(1 row)
+
+== Q8 hour of day UTC, chi-square against a uniform distribution, 2025, magnitude >= 4 ==
+ events | expected_per_hour | min_hour | max_hour | max_over_min | chi2_23_df 
+--------+-------------------+----------+----------+--------------+------------
+  18302 |             762.6 |      681 |      832 |         1.22 |       41.1
+(1 row)
+

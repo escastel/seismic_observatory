@@ -1,0 +1,30 @@
+ Container seismic_observatory-postgres-1  Recreate
+ Container seismic_observatory-postgres-1  Recreated
+ Container seismic_observatory-postgres-1  Starting
+ Container seismic_observatory-postgres-1  Started
+[   10,000] search  list_scan              17.987 ms (5 runs)
+[   10,000] search  dict                    0.008 ms (5 runs)
+[   10,000] search  sql_no_key             67.480 ms (5 runs)
+[   10,000] search  sql_primary_key        11.126 ms (5 runs)
+[   10,000] geo     naive_polygons       5091.117 ms (5 runs)
+[   10,000] geo     strtree                19.189 ms (5 runs)
+[   10,000] hourly  python_dict            14.654 ms (5 runs)
+[   10,000] hourly  sql_date_bin            7.410 ms (5 runs)
+[  100,000] search  list_scan             362.378 ms (3 runs)
+[  100,000] search  dict                    0.008 ms (5 runs)
+[  100,000] search  sql_no_key            492.612 ms (3 runs)
+[  100,000] search  sql_primary_key        12.543 ms (5 runs)
+[  100,000] geo     naive_polygons      50319.413 ms (3 runs)
+[  100,000] geo     strtree               194.710 ms (5 runs)
+[  100,000] hourly  python_dict           118.673 ms (5 runs)
+[  100,000] hourly  sql_date_bin           34.947 ms (5 runs)
+[1,000,000] search  list_scan            2767.741 ms (3 runs)
+[1,000,000] search  dict                    0.008 ms (5 runs)
+[1,000,000] search  sql_no_key           2334.576 ms (3 runs)
+[1,000,000] search  sql_primary_key        11.718 ms (5 runs)
+[1,000,000] geo     naive_polygons     504088.197 ms (1 runs)
+[1,000,000] geo     strtree              1836.879 ms (5 runs)
+[1,000,000] hourly  python_dict          1092.756 ms (5 runs)
+[1,000,000] hourly  sql_date_bin          330.688 ms (5 runs)
+schema bench dropped
+written /repo/docs/evidence/008/structure-benchmark.md and structure-benchmark.json

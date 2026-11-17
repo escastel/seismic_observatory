@@ -1,0 +1,13 @@
+bench loaded with 1,000,000 synthetic events in 90.0 s
+secondary indexes created on bench.event_current
+schema bench dropped
+SYNTHETIC, in process (no network), replay mode reading bench with secondary indexes; 1,000,000 events
+Runs: 30 after 5 warm-up
+
+name                                total    median       p95       max  (ms)
+-----------------------------------------------------------------------------
+events limit=10                   1000000     166.8     182.9     192.0
+events limit=1000                 1000000     182.0     194.4     207.0
+events limit=1000 (2025)          1000000     190.6     208.6     213.5
+statistics (2025, no filter)      1000000    1276.4    1333.7    1412.6
+statistics (2025, min_mag=4)         1016     449.1     487.0     517.8
