@@ -5,7 +5,7 @@ procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17 con capturas.
 
 | Id | Hueco | Origen | Dónde |
 |---|---|---|---|
-| G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003 T050, 005, 006 | equipo Linux |
+| G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003 T050, 005, 006 | **PARCIAL el 2026-11-17**: suite completa 886 pruebas en verde ([linux-g3.md](linux-g3.md)); falta la salida de T050 (`ls -ln`) y la de `up --wait`; la latencia salió con 0 eventos (no concluyente) |
 | G4 | Panel desde otro dispositivo físico (túnel y Netlify) | 007; §11 pruebas 9 y 10 | **HECHO el 2026-11-17** (móvil con datos móviles; [007 M1 a M3](../007/README.md)) |
 
 ## G3 · Linux (specs 002, 003, 005, 006)

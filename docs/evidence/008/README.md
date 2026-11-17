@@ -17,7 +17,7 @@ ninguna se marca superada sin haberse ejecutado.
 | V9 | Matrices | sin enlaces rotos; 11 pruebas con estado y hueco | 11 de 11 con evidencia; huecos de la usuaria en user-gaps.md | SUPERADA | [matrix-11.md](matrix-11.md), [matrix-12-13.md](matrix-12-13.md) |
 | V10 | Coherencia de `report.md` | enlaces e índice válidos; cifras iguales | 267 enlaces, 0 rotos; 4 correcciones | SUPERADA | [report-coherence.md](report-coherence.md) |
 | V11 | Higiene | 0 hallazgos o hallazgo documentado | 0 en el árbol versionado; 1 hallazgo en el historial local (rama `backup/main-before-fix`), resuelto al borrar la rama con confirmación | SUPERADA | [repository-hygiene.md](repository-hygiene.md) |
-| V12 | Huecos de la usuaria | procedimiento y ruta de evidencia | G3 y G4 con procedimiento; **G4 ejecutado el 2026-11-17** (móvil con datos móviles, [007 M1 a M3](../007/README.md)); G3 (Linux) en ejecución por la usuaria; G1 y G2 retirados del seguimiento a petición de la usuaria | **PARCIAL: G3 en curso** | [user-gaps.md](user-gaps.md) |
+| V12 | Huecos de la usuaria | procedimiento y ruta de evidencia | G3 y G4 con procedimiento; **G4 ejecutado el 2026-11-17** (móvil con datos móviles, [007 M1 a M3](../007/README.md)); **G3 (Linux) parcial**: suite completa 886 pruebas en verde ([linux-g3.md](linux-g3.md)), sin la salida de T050 y con la latencia no concluyente (0 eventos); G1 y G2 retirados del seguimiento a petición de la usuaria | **PARCIAL: faltan T050 y V2 de la 002** | [user-gaps.md](user-gaps.md) |
 
 Pruebas automáticas del código de medición: `pytest tests/benchmark` → 5 pasan ([tests.txt](tests.txt)); no se tocó nada de `db/`, así que no se repitió `tests/db`.
 

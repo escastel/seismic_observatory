@@ -26,9 +26,7 @@ Pruebas automáticas: 161 superadas (`tests/db`, `tests/unit`, `tests/contract`)
 
 ## SC-001: arranque por una persona ajena al proyecto (T057)
 
-**NO EJECUTADA.** Requiere que una persona que no conozca el proyecto levante el sistema solo
-con el `README.md`. Cuando se haga, anotar aquí el tiempo empleado, las dudas y las correcciones
-aplicadas al README.
+**SUPERADA (según lo informado por la usuaria, 2026-11-17).** Una persona ajena al proyecto levantó el sistema siguiendo solo el `README.md`: **tardó 2,5 min** (esperado: menos de 3 minutos con las imágenes ya descargadas), **sin dudas** y sin correcciones al README. No se guardó captura ni salida: el dato es el que comunicó la usuaria.
 
 ## Revisión constitucional (v2.1.0, T058)
 

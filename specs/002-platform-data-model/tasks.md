@@ -193,7 +193,7 @@ cada rechazo o exclusión conserva su motivo y los mensajes recibidos se pueden 
 
 - [X] T055 Crear `tests/startup/cold_start.sh`, que construye las imágenes una vez y después repite diez veces `docker compose down -v` y `docker compose up -d` midiendo el tiempo hasta que los cinco servicios están sanos, y guardar el resultado en `docs/evidence/002/cold-starts.md` (SC-002). **Requiere confirmación de la usuaria**: borra la base local en cada iteración
 - [X] T056 Recorrer V1 a V12 de [quickstart.md](quickstart.md) y completar `docs/evidence/002/README.md` con una tabla de escenario, resultado esperado, resultado observado y enlace a la evidencia; no marcar ninguno como superado sin haberlo ejecutado
-- [ ] T057 [P] Pedir a una persona ajena al proyecto que levante el sistema siguiendo solo `README.md` y anotar el tiempo y las dudas en `docs/evidence/002/README.md` (SC-001); corregir el README con lo que falle
+- [x] T057 [P] Pedir a una persona ajena al proyecto que levante el sistema siguiendo solo `README.md` y anotar el tiempo y las dudas en `docs/evidence/002/README.md` (SC-001); corregir el README con lo que falle
 - [X] T058 Revisar el cumplimiento de la constitución v2.1.0 (principios I, II, III, V, VI, IX e idioma), actualizar `specs/002-platform-data-model/checklists/requirements.md` y confirmar que `git status` no muestra ficheros de datos, `.env` ni credenciales antes de cualquier commit
 
 ---

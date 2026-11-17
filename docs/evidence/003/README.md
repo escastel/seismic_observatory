@@ -34,7 +34,8 @@ ejecutado; cada fichero enlazado incluye la orden, la cabecera de equipo y commi
   ```
 
   No se ha podido hacer en esta sesión (solo había acceso al equipo Windows). Hasta entonces la
-  tarea queda sin marcar.
+  tarea queda sin marcar. El 2026-11-17 se ejecutó en Linux la suite completa (886 pruebas en verde,
+  [linux-g3.md](../008/linux-g3.md)), pero **no se aportó la salida de `ls -ln data/usgs/catalog`**, así que T050 sigue pendiente.
 
 ## Revisión constitucional (v2.1.0, T052)
 
