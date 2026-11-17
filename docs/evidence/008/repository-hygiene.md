@@ -24,8 +24,9 @@ ejecutó `docker compose config`. Las órdenes están al final.
   lista).
 - **Riesgo**: empujar esa rama (o `git push --all`) publicaría 98 MB de datos descargados, lo que el enunciado §12 y la
   constitución V prohíben.
-- **Acción propuesta, no ejecutada** (pide confirmación explícita según CLAUDE.md): conservar la rama solo en local, no
-  empujarla, y borrarla cuando se confirme que ya no hace falta. No se ha reescrito el historial.
+- **Resuelto el 2026-11-17**: con confirmación explícita de la usuaria se borró la rama local `backup/main-before-fix`
+  (`git branch -D`, estaba en `4c0a8c5`). El blob queda en el almacén de objetos hasta el siguiente `git gc`, pero ya no es
+  alcanzable desde ninguna rama. No se reescribió el historial publicado.
 
 ## Órdenes
 

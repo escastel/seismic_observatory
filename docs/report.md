@@ -1,7 +1,7 @@
 # Memoria del Observatorio Sísmico
 
 Este documento reúne las decisiones de diseño del observatorio, su justificación y las evidencias de cada
-funcionalidad (specs 002 a 008). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
+funcionalidad (specs 002 a 009). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
 indica el instante en que se obtuvieron, porque la base crece con el feed en vivo (por ejemplo, `core` tenía 34.045 eventos el
 2026-11-16, 34.207 el 2026-11-17 y 32.978 terremotos reales en la medición de calidad del 2026-11-16: no son contradicciones, son
 instantes distintos). Los datos sintéticos y de reproducción quedan fuera de todo análisis de datos reales.
@@ -14,13 +14,14 @@ instantes distintos). Los datos sintéticos y de reproducción quedan fuera de t
 4. [Reproducción histórica](#reproducción-histórica)
 5. [API de consulta](#api-de-consulta)
 6. [Panel Angular (spec 007)](#panel-angular-spec-007)
-7. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
-8. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
-9. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
-10. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
-11. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
-12. [Diccionario de datos](#diccionario-de-datos)
-13. [Índices](#índices)
+7. [Panel rediseñado (spec 009)](#panel-rediseñado-spec-009)
+8. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
+9. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
+10. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
+11. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
+12. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
+13. [Diccionario de datos](#diccionario-de-datos)
+14. [Índices](#índices)
 
 ## Alcance y decisiones
 
@@ -584,7 +585,7 @@ la entrega inicial, que leía un formato anterior de la API. La evidencia está 
 
 ### Qué muestra el panel
 
-- **Mapa** con los eventos del periodo y las fronteras de `paises.geojson`. **Tabla** recorrible con «Cargar más» y el texto «Mostrando N de TOTAL».
+- **Mapa** con los eventos del periodo y las fronteras de `paises.geojson`. (La spec 009 rediseña su presentación: ver [Panel rediseñado](#panel-rediseñado-spec-009).) **Tabla** recorrible con «Cargar más» y el texto «Mostrando N de TOTAL».
 - **Análisis**: gráficos de ventanas horarias, países, distribuciones de magnitud y profundidad y
   comparación histórica, cada uno con su tabla de valores. Las cifras son las de `/api/estadisticas`; el
   panel no las recalcula.
@@ -643,7 +644,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente**: la prueba desde otro dispositivo físico y en Linux. El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
+- **Pendiente**: la prueba en Linux. La prueba desde un móvil con datos móviles (cerrar y reabrir el túnel con el sitio de Netlify) se hizo el 2026-11-17 (`docs/evidence/007/`, M1 a M3). El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
 - **Pendiente**: la prueba en Linux.
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
@@ -653,9 +654,67 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 - En el navegador sin interfaz, OpenStreetMap rechazó varias teselas (400): el fondo del mapa no se ha
   comprobado en un navegador con interfaz; sí que se dibujan fronteras y eventos.
 
+## Panel rediseñado (spec 009)
+
+La spec 009 cambia solo la **presentación** del panel de la 007: no toca la API, la base de datos ni la lógica de datos
+(`observatory.service.ts`, `adapt.ts`, `api-types.ts`, `filters.ts`, `status.ts` y `config.ts` no tienen diferencias con la rama 008).
+Evidencia en [docs/evidence/009/](evidence/009/README.md); cifras del 2026-11-17.
+
+### Qué cambia
+
+- **Tema**: oscuro por defecto y claro cuando el dispositivo lo pide (`prefers-color-scheme`), con cambio en vivo y sin
+  perder la lectura. Los tokens de diseño están en `frontend/src/styles.css`.
+- **Mapa**: fondo **Simple**, **Relieve** o **Satélite**; el simple y el relieve tienen variante clara y oscura (filtro CSS sobre las
+  teselas). Capas opcionales: **mapa de calor**, **agrupación** y **límites de placas** (activadas por defecto solo con Relieve).
+  El calor y la agrupación se rotulan «Muestra: N de TOTAL» (o «Todos los eventos del periodo») porque la API entrega como mucho 1.000 eventos.
+- **Tarjetas de resumen**: eventos, última ingesta, estado, periodo y registros sin valor, siempre desde `Statistics` y el estado del
+  sistema, nunca desde la muestra del mapa. No hay tarjeta de «magnitud máxima».
+- **Gráficos**: cuatro gráficos con Chart.js, cada uno con descripción accesible y su tabla completa en «Ver tabla de datos».
+- **Ficha del evento**: diálogo accesible (foco inicial en «Cerrar», Escape, retorno del foco) que se abre desde un círculo, un grupo o
+  el botón «Ver ficha» de la tabla; todo el texto es texto, nunca HTML.
+- **Movimiento**: sin animaciones ni transiciones con `prefers-reduced-motion: reduce`.
+- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, aprobado por la usuaria el 2026-11-17.
+
+### Fuentes y licencias
+
+| Elemento | Origen | Licencia y atribución |
+|---|---|---|
+| Fondo Simple | OpenStreetMap (`tile.openstreetmap.org`) | ODbL; «© OpenStreetMap contributors» |
+| Relieve | Esri World Shaded Relief | «Tiles © Esri — Source: Esri»; servicio en «mature support» |
+| Satélite | EOX Sentinel-2 cloudless 2021 | CC BY-NC-SA 4.0, uso no comercial (proyecto académico); atribución de EOX y Copernicus |
+| Límites de placas | PB2002 (P. Bird, 2003), versión GeoJSON de `fraxen/tectonicplates` (H. Ahlenius, Nordpil) | ODC-By 1.0 |
+
+Todos los fondos son **sin clave** (se descartaron CARTO, Stadia y MapTiler porque exigen una clave en el cliente) y las teselas
+se piden desde el navegador a cada proveedor, nunca por el túnel de ngrok ni por Netlify; los proveedores ven la IP y el `Referer`, y el pie
+de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1 (MIT), `leaflet.markercluster` 1.5.3 (MIT) y `leaflet.heat` 0.2.0 (BSD-2-Clause).
+
+### Decisiones y hallazgos
+
+- Los plugins de Leaflet se enganchan al `L` global, no al módulo importado: la agrupación y el calor fallaban hasta usar `window.L`.
+- **Contraste**: los colores de profundidad del mapa (`geo.ts`) quedaban por debajo de 3:1 (profundo en oscuro 2,56:1; superficial en claro 2,17:1).
+  Se añadió `depthColor(clave, tema)` en `lib/map-layers.ts` con los tokens `--depth-*` (entre 3,67:1 y 9,32:1) y lo usan círculos, leyenda y gráfico.
+  `geo.ts` no se modificó.
+- Dos desbordes en móvil (rejilla de tarjetas y etiquetas ocultas de la tabla) dejaban la página en 948 px; corregidos (ancho 390 = viewport).
+
+### Resultados
+
+- 142 pruebas de `npm test` en verde (106 anteriores y 36 nuevas); axe-core WCAG A y AA sin violaciones en ambos temas.
+- Cifras de tarjetas, tablas y gráficos iguales a `/api/estadisticas` en tres conjuntos de filtros y los dos temas ([W8/W9](evidence/009/w8-w9-cards-charts.md)).
+- Casos límite con respuestas alteradas en el navegador (nulos, sin país, marcas, coordenadas inválidas, 503, 422, desactualizado, inaccesible, truncado de 2.500): [W13](evidence/009/w13-regression.md).
+- Móvil con red lenta emulada: primera tarjeta en 3,6 s y gráficos en 4,6 s ([W14](evidence/009/w14-mobile-weight.md)).
+- Túnel real: solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
+
+### Límites
+
+- **No se desplegó en Netlify** en esta sesión (no hay sesión de Netlify en el equipo): falta repetir W15 en el sitio público.
+- Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
+- Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
+- El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
+- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; no se probó en Linux.
+
 ## Análisis y conclusiones (spec 008)
 
-Cuatro conclusiones sobre datos **reales** (esquema `core`; reproducción y datos sintéticos excluidos: 1.013
+Cinco conclusiones sobre datos **reales** (esquema `core`; reproducción y datos sintéticos excluidos: 1.013
 eventos `synthetic-%` de pruebas de escala, que de no excluirlos darían 516 eventos M ≥ 4 el 16-nov en lugar de 15).
 Cada cifra se regenera con [tests/analysis/queries.sql](../tests/analysis/queries.sql) (salida literal en
 [evidence/008/analysis-queries.out](evidence/008/analysis-queries.out)) o con la llamada a la API indicada, y se
@@ -681,6 +740,7 @@ magnitud y el 1 sin profundidad son casos sintéticos, excluidos); cada conclusi
 - **Lectura**: el país se obtiene por punto dentro de polígono sobre Natural Earth (constitución IV); un epicentro en
   mar abierto o fuera de la costa de las entidades no tiene país y permanece en el análisis, sin asignarlo al más
   cercano. La cifra describe dónde caen los epicentros respecto a los polígonos de tierra, no el peligro de ningún país.
+- **Cuánto es mar abierto**: se midió la distancia de esos 14.350 eventos al polígono de país más cercano (sin asignar ningún país): 15,8 % a menos de 50 km, 59,6 % a menos de 200 km, mediana 144 km y 23,4 % a más de 500 km. «Sin país asignado» es sobre todo mar y no un artefacto del contorno simplificado (60 vértices por entidad de media). Detalle: [evidence/008/coastal-distance.md](evidence/008/coastal-distance.md).
 - **Regenerar**: `queries.sql` Q2 y Q2b; `GET /api/estadisticas?min_mag=4&start=2025-01-01T00:00:00Z&end=2026-01-01T00:00:00Z`
   (`by_country`, 14.350).
 - **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (filtros: 01/01/2025 a 01/01/2026, magnitud mínima 4, todos
@@ -742,6 +802,21 @@ magnitud y el 1 sin profundidad son casos sintéticos, excluidos); cada conclusi
 - **Regenerar**: `queries.sql` Q4 y Q8.
 - **Captura**: [C1-2025-m4.png](evidence/008/C1-2025-m4.png) (el gráfico «Eventos por hora UTC» solo dibuja las últimas
   168 ventanas; la tabla de datos contiene las 8.760).
+
+### C5 · Dos tercios de los eventos sin país caen en el Pacífico y sus mares marginales (agrupación solo de análisis)
+
+- **Qué es**: una agrupación **descriptiva** de los 14.350 eventos sin país de C1 por el polígono marino de Natural Earth (110 m, dominio público) que los contiene. No se guarda en la base de datos, no cambia el modelo, la API ni el
+  panel, y **no asigna ningún país** (constitución IV): es una etiqueta de análisis. Gana el polígono más específico (mar, golfo o bahía antes que océano; el de menor área). Los polígonos no se versionan: se descargan a `data/`
+  (instrucciones en la cabecera de `tests/analysis/ocean_regions.py`).
+- **Cifras** (M ≥ 4, 2025, real, sin país: 14.350): North Pacific 5.101 (35,5 %), South Pacific 2.293 (16,0 %), mar de Filipinas 1.007 (7,0 %), Indian Ocean 726 (5,1 %), South Atlantic 621 (4,3 %), mar del Coral 358 (2,5 %),
+  North Atlantic 345 (2,4 %); el resto de 19 mares y océanos suma 769 (5,4 %). **3.130 (21,8 %) no caen en ningún polígono marino** (franja costera y arcos de islas que el contorno de 110 m no cubre; no se ha comprobado caso por caso).
+  Sumando el Pacífico (norte y sur) y sus mares marginales (Filipinas, Coral, Ojotsk, Alaska, Japón, Tasmania): 9.033 eventos, el **62,9 %** del total sin país y el **80,5 %** de los 11.220 que sí caen en un polígono.
+- **Profundidad por región** (mediana, km): Sea of Japan 248,2 (20 eventos), Sea of Okhotsk 97,2, South Pacific 60,9, Philippine Sea 51,9, Coral Sea 42,3 frente a 10,0 en Indian Ocean, South Atlantic, North Atlantic, Arctic y Southern Ocean:
+  en los océanos de dorsales la mediana coincide con la profundidad fijada de 10 km de C3 (45,1 % de los eventos), mientras que en las zonas de subducción del Pacífico las profundidades se determinan y son mayores.
+- **Magnitud ≥ 6**: 47 en North Pacific, 16 en South Pacific, 16 sin polígono, 12 en el mar de Filipinas y 7 en cada uno de Indian Ocean y South Atlantic.
+- **Filtros y periodo**: igual que C1 (`min_mag=4`, 2025-01-01 a 2026-01-01 UTC, eventos reales sin país); unidad: eventos; sin valor: 0.
+- **Advertencias**: descripción del pasado, no predicción ni evaluación de riesgo; la cobertura de detección y los tipos de magnitud varían por región (Q6); los polígonos marinos de 110 m son aproximados y los límites entre océanos son convencionales.
+- **Regenerar**: `docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python -m tests.analysis.ocean_regions` (ejecutado el 2026-11-17 18:04 UTC; salida literal en [evidence/008/ocean-regions.out](evidence/008/ocean-regions.out)). Es una agrupación de análisis; ver también [coastal-distance.md](evidence/008/coastal-distance.md).
 
 ### Q6 · Tipos de magnitud: la comparación entre muestras solo es válida con el mismo filtro
 
@@ -870,19 +945,23 @@ medición. Fuente de todo: [evidence/008/cost-measurements.md](evidence/008/cost
 
 ### Partidas de coste (supuestos)
 
-| Partida | Supuesto | Importe |
-|---|---|---:|
-| Hardware | portátil de 900 € (valor de trabajo, no el pagado) amortizado en 4 años, imputado al 100 % | 225 €/año |
-| Electricidad | 35 W de media (no medidos) × 8.760 h × 0,20 €/kWh | 61,32 €/año (5,04 €/mes) |
-| Almacenamiento | 1,44 GB de volúmenes medidos × 0,20 €/GB de SSD | 0,29 € (una vez) |
-| Transferencia | dentro de las cuotas gratuitas (ver abajo) | 0 € mientras no se superen |
-| Mantenimiento | 2 h/mes × 20 €/h | 480 €/año |
-| Desarrollo | 100 h × 20 €/h (la usuaria debe poner sus horas reales) | 2.000 € (una vez) |
-| **Total primer año** | | **2.766,61 €** |
-| **Recurrente** | | **766,32 €/año** |
+Valores de la usuaria: portátil de 675 € comprado hace 4 años y amortizado en 6 de vida total, 200 h de desarrollo, 15 €/h,
+2 h/mes de mantenimiento y 0,23 €/kWh. Siguen siendo supuestos del autor la potencia (35 W, no medida), el funcionamiento 24/7, el
+coste del almacenamiento y la tasa de descuento (10 %). Detalle en [evidence/008/cost-table.md](evidence/008/cost-table.md).
 
-Valor actual de los costes a cinco años con una tasa de descuento supuesta del 10 %: **4.905,2 €** (5.831,9 € sin descontar). Lo
-dominante es el trabajo humano (desarrollo y mantenimiento: 2.480 € del primer año de 2.766,61 €), no la infraestructura (≈ 287 €).
+| Partida | Cálculo | Importe |
+|---|---|---:|
+| Hardware | 675 € / 6 años | 112,50 €/año |
+| Electricidad | 35 W × 8.760 h × 0,23 €/kWh (306,6 kWh) | 70,52 €/año (≈ 5,8 €/mes) |
+| Almacenamiento | 1,44 GB medidos (cota superior) × 0,20 €/GB | 0,29 € (una vez) |
+| Transferencia | dentro de las cuotas gratuitas (ver abajo) | 0 € mientras no se superen |
+| Mantenimiento | 2 h/mes × 15 €/h | 360 €/año |
+| Desarrollo | 200 h × 15 €/h | 3.000 € (una vez) |
+| **Total primer año** | | **3.543,31 €** |
+| **Recurrente** | | **543,02 €/año** |
+
+Valor actual de los costes a cinco años con una tasa de descuento supuesta del 10 %: **5.058,8 €** (5.715,4 € sin descontar). Lo
+dominante es el trabajo humano (desarrollo y mantenimiento: 3.360 € del primer año de 3.543,31 €), no la infraestructura (≈ 183 €).
 Con el stack encendido solo durante demostraciones, la electricidad baja en proporción a las horas.
 
 ### Las cuotas gratuitas no son coste cero
@@ -897,11 +976,21 @@ GB de ngrok en unos 11 días. En una defensa de unas horas no se alcanza, pero u
 
 ### ROI
 
-**No se estima.** El observatorio no define un beneficio económico medible y justificable, y el principio IX prohíbe inventarlo. La
-evaluación anterior (VAN 10.730,74 €, TIR 38,5 %) se retiró porque sus flujos no tenían supuesto trazable
-([evaluacion-financiera.md](evaluacion-financiera.md)). Lo que sí se afirma: para que el VAN fuera 0 haría falta un beneficio de
-1.294,0 €/año; un beneficio válido debería definirse con una unidad medible (por ejemplo, horas manuales evitadas por mes) y una
-fuente.
+El observatorio no genera ingresos. El único beneficio definido es **el tiempo manual evitado**: sin el panel habría que descargar y filtrar a
+mano el catálogo de USGS para obtener una vista equivalente. Definición de la usuaria: 2 horas por consulta, una por día laborable (260 al año),
+a 15 €/h → **7.800 €/año**. Es un coste de oportunidad del tiempo propio, no un ahorro de caja, y se apoya en dos estimaciones **no medidas** (las
+2 horas y la frecuencia diaria).
+
+| Resultado a 5 años (tasa del 10 %) | Valor |
+|---|---:|
+| Valor actual del beneficio (7.800 × 3,7908) | 29.568,1 € |
+| **VAN** (frente a 5.058,8 € de costes) | **24.509,4 €** |
+| **ROI descontado** (VAN / costes) | **484,5 %** (582,4 % sin descontar) |
+| Beneficio anual mínimo para VAN = 0 | 1.334,5 €/año (≈ 0,86 consultas de 2 h por semana) |
+
+**Sensibilidad**: con una consulta semanal el VAN es 854,9 € y con una mensual −3.694,1 €; el resultado positivo solo se sostiene si se usa el equivalente
+de la consulta manual al menos una vez por semana. La evaluación anterior (VAN 10.730,74 €, TIR 38,5 %) se retiró porque sus flujos no tenían supuesto
+trazable ([evaluacion-financiera.md](evaluacion-financiera.md)).
 
 ### Propuesta de escalado y mejoras
 
@@ -911,8 +1000,8 @@ Ordenadas por lo que las mediciones muestran, de menor a mayor esfuerzo; ninguna
    transferencia por el túnel, que es el único límite próximo (1 GB). Exige un cambio en la API (fuera del alcance de la 008).
 2. **Refresco condicional**: pedir al panel que solo pida eventos si la última ingesta cambió (campo `last_ingestion` de
    `/api/salud`, de 111 bytes) en lugar de descargar 59 kB cada minuto.
-3. **Medir la potencia real** del equipo con un vatímetro para sustituir el supuesto de 35 W, y las horas reales de desarrollo
-   para sustituir las 100 h.
+3. **Medir lo que hoy es estimación**: la potencia real del equipo con un vatímetro (hoy 35 W supuestos), y cronometrar una vez la consulta
+   manual de 2 h y anotar el uso real del panel, que son las dos estimaciones sobre las que descansa el ROI.
 4. **Reducir la retención de Kafka** de `earthquakes.catalog` y `earthquakes.replay` (53 y 37 MB), que son reproducibles desde `data/`. La diferencia de 1,244 GB frente a 108 MB está explicada: Kafka crea para cada partición (56 en total) dos ficheros de índice dispersos de 10 MB que ocupan 1,19 GB de tamaño aparente (`du --apparent-size`) y 110 MB en disco; no hay nada que limpiar.
 5. **A 100 millones de registros**: particionar `event_current` y `event_version` por año, BRIN para las particiones antiguas,
    agregados diarios por país recalculados desde el estado actual y más memoria para PostgreSQL
@@ -938,14 +1027,14 @@ figura como superada si su evidencia tiene resultado esperado y observado ejecut
 | 6 | Coordenadas inválidas | superada | [004](evidence/004/acceptance.md), [006 V6](evidence/006/v6-geometry.md), [007](evidence/007/README.md) V5 | igual que la 5 |
 | 7 | Evento marítimo | superada | [004](evidence/004/acceptance.md), [006 V7](evidence/006/v7-no-country.md), [007](evidence/007/README.md) V4; C1 de este apartado | — |
 | 8 | Reiniciar el consumidor | superada | [004 V3](evidence/004/restart.md), [005 V7](evidence/005/v7-consumer-restart.md) | Linux (G3) |
-| 9 | Cerrar el túnel | superada | [007](evidence/007/README.md) T2 y V11 | otro dispositivo (G4) |
-| 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 | otro dispositivo (G4) |
+| 9 | Cerrar el túnel | superada | [007](evidence/007/README.md) T2, V11 y M2 (móvil) | — |
+| 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 y M3 (móvil) | — |
 | 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
 
-Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pendientes de la usuaria** (procedimientos en
-[user-gaps.md](evidence/008/user-gaps.md)): G1 puertos cerrados desde otro dispositivo (002 V2), G2 arranque por una persona ajena
-(002 T057), G3 pruebas en Linux de las specs 002, 003 (T050), 005 y 006, y G4 panel desde otro dispositivo físico. Mientras no se
-ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo.
+Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pruebas de la usuaria** ([user-gaps.md](evidence/008/user-gaps.md)): el 2026-11-17 se probó el panel desde un móvil con datos móviles (G4, cerrar y reabrir el túnel con el sitio
+de Netlify, [capturas](evidence/007/README.md)) y en un equipo Linux se levantó el stack (cinco servicios `healthy`) y pasó la suite completa (886 pruebas, [linux-g3.md](evidence/008/linux-g3.md)); la latencia
+en Linux no fue concluyente (0 eventos). La tarea T057 de la 002 (arranque por una persona ajena) se dio por superada según lo informado: 2,5 min y sin dudas. Por no ser requisito del enunciado, y a petición de la usuaria, no se hicieron
+los puertos cerrados desde otro dispositivo, la comprobación de propiedad de ficheros de 003 T050 ni los escenarios con el sistema real de las specs 005 y 006 en Linux.
 
 ### Entregables de §12
 
@@ -974,9 +1063,7 @@ ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo
 
 ### Higiene del repositorio
 
-Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB
-(`db/seeds/historical_2026.jsonl`) existe en el historial de la rama **local** `backup/main-before-fix`, que no está en el remoto; no
-debe empujarse. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
+Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB (`db/seeds/historical_2026.jsonl`) estaba en una rama local de respaldo que no estaba en el remoto; la rama se borró el 2026-11-17 con confirmación de la usuaria. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
 
 ## Modelo conceptual
 

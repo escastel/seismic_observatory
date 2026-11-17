@@ -1,35 +1,47 @@
 # Evaluación financiera
 
 **Revisada en la spec 008 frente al principio IX de la constitución** («los costes distinguen valores medidos de supuestos y no
-inventan beneficios económicos; un ROI solo se estima si se define un beneficio medible y justificable»).
+inventan beneficios económicos; un ROI solo se estima si se define un beneficio medible y justificable»). Cálculo completo y
+supuestos en [evidence/008/cost-table.md](evidence/008/cost-table.md).
 
-## Qué se ha retirado y por qué
+## Qué se retiró y por qué
 
-La versión anterior calculaba un VAN de 10.730,74 € y una TIR del 38,5 % a cinco años con una inversión de 12.000 € y flujos
-netos de 5.000 a 7.000 € al año. Esos importes **no tenían supuesto trazable**: no había ingreso, ahorro ni coste del que
-salieran, y la inversión de 12.000 € no corresponde a ninguna partida del proyecto. Un observatorio académico que corre en un
-portátil no genera ingresos. Se retiran los flujos, el VAN, la TIR y el veredicto «viable».
+La versión anterior daba un VAN de 10.730,74 € y una TIR del 38,5 % con una inversión de 12.000 € y flujos de 5.000 a 7.000 € al
+año que **no tenían supuesto trazable** (ni ingreso, ni ahorro, ni partida de la que salieran). Se retiraron esos flujos y ese
+veredicto. Lo que sigue los sustituye por costes y un beneficio con origen declarado.
 
-## Qué se mantiene: los costes, con supuestos explícitos
+## Costes (cinco años, tasa de descuento supuesta del 10 %)
 
-Los costes (hardware, electricidad, almacenamiento, transferencia, mantenimiento y desarrollo) están en la sección «Costes» de
-[report.md](report.md) y en [evidence/008/cost-table.md](evidence/008/cost-table.md), con cada valor marcado como medida o
-supuesto. Resumen a cinco años con una tasa de descuento supuesta del 10 %:
+| Concepto | Cálculo | Importe | Tipo |
+|---|---|---:|---|
+| Desarrollo | 200 h × 15 €/h (horas y tarifa de la usuaria) | 3.000 € (una vez) | supuesto |
+| Hardware | portátil de 675 € a 6 años de vida | 112,50 €/año | supuesto |
+| Electricidad | 35 W × 8.760 h × 0,23 €/kWh | 70,52 €/año | supuesto (la potencia no está medida) |
+| Mantenimiento | 2 h/mes × 15 €/h | 360 €/año | supuesto |
+| Almacenamiento, transferencia | 0,29 € una vez; dentro de las cuotas gratuitas | ≈ 0 € | medida × supuesto |
+| **Recurrente** | | **543,02 €/año** | |
+| **Valor actual de los costes a 5 años** | 3.000,29 + 543,02 × 3,7908 | **5.058,8 €** | |
 
-| Concepto | Importe | Tipo |
-|---|---:|---|
-| Coste recurrente anual (hardware amortizado, electricidad 24/7, mantenimiento) | 766,32 €/año | supuesto |
-| Desarrollo y almacenamiento inicial | 2.000,29 € | supuesto (las horas debe confirmarlas la usuaria) |
-| Valor actual de los costes a 5 años | 4.905,2 € | supuesto |
+## Beneficio y ROI
 
-## ROI: no se estima
+El observatorio no genera ingresos. El único beneficio que se define es **el tiempo de trabajo manual evitado**: sin el panel habría
+que descargar y filtrar a mano el catálogo de USGS para obtener una vista equivalente (recuento por país, distribuciones y comparación
+con 2025).
 
-El observatorio no tiene un beneficio económico medible y justificable definido, así que **no se calcula ROI, VAN ni TIR**. Lo que
-sí se puede afirmar sin inventar nada es el umbral: para que el valor actual neto fuera 0 haría falta un beneficio de
-**1.294,0 €/año** durante cinco años. Un beneficio válido tendría que:
+- **Definición (de la usuaria)**: 2 horas por consulta, una consulta por día laborable (260 al año), valoradas a 15 €/h
+  → **7.800 €/año**.
+- **Justificación y límite**: es un coste de oportunidad del tiempo propio, no un ahorro de caja, y descansa en dos estimaciones
+  **no medidas** (las 2 horas y la frecuencia diaria). Para respaldarlo mejor, cronometrar una vez la consulta manual y anotar
+  cuántas veces se usa el panel de verdad.
 
-1. definirse con una unidad medible (por ejemplo, horas de trabajo manual evitadas por mes), y
-2. justificarse con una medición o una fuente (cuánto tarda hoy el procedimiento alternativo, quién lo hace y cuánto cuesta esa hora).
+| Resultado (5 años, 10 %) | Valor |
+|---|---:|
+| Valor actual del beneficio (7.800 × 3,7908) | 29.568,1 € |
+| **VAN** (beneficio − costes) | **24.509,4 €** |
+| **ROI descontado** (VAN / valor actual de los costes) | **484,5 %** |
+| ROI sin descontar | 582,4 % |
+| Beneficio anual mínimo para VAN = 0 | 1.334,5 €/año (≈ 0,86 consultas de 2 h por semana) |
 
-Si la usuaria define ese beneficio, se recalcula con la fórmula `VAN = −costes_iniciales + Σ (beneficio_t − costes_t) / (1 + r)^t`
-y el veredicto no se hereda de esta versión.
+**Sensibilidad**: con una consulta semanal (1.560 €/año) el VAN es 854,9 €, apenas positivo; con una mensual (360 €/año) es
+−3.694,1 €. La conclusión «el observatorio compensa» **solo se sostiene si se usa al menos una vez por semana** el equivalente de
+la consulta manual. Si cambian los supuestos, el resultado debe recalcularse y no heredarse.

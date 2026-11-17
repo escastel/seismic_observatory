@@ -1,0 +1,38 @@
+{
+  "t0": "2026-11-17T19:04:01.009Z",
+  "loaded": {
+    "cards": "212",
+    "status": "Al día",
+    "table": "Mostrando 212 de 212 eventos",
+    "msg": "Información: Datos al día."
+  },
+  "hostsAndCounts": {
+    "localhost:4200": 11,
+    "": 2,
+    "tile.openstreetmap.org": 18,
+    "modular-guidance-daybreak.ngrok-free.dev": 9,
+    "server.arcgisonline.com": 18
+  },
+  "tunnelPaths": [
+    "/api/eventos",
+    "/api/estadisticas",
+    "/api/salud"
+  ],
+  "tunnelTileOrPlates": 0,
+  "stopped": "2026-11-17T19:04:05.675Z",
+  "closed": {
+    "cards": "212",
+    "status": "Backend inaccesible",
+    "table": "Mostrando 212 de 212 eventos",
+    "msg": "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+  },
+  "started": "2026-11-17T19:04:16.429Z",
+  "reopened": {
+    "cards": "212",
+    "status": "Al día",
+    "table": "Mostrando 212 de 212 eventos",
+    "msg": "Información: Datos al día."
+  },
+  "navigations": 1,
+  "errors": []
+}

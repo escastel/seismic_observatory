@@ -25,3 +25,8 @@ y el estado de esta tabla se actualiza.
 | V14 | Superficie: solo las rutas del contrato, 405 en escritura, respuesta siempre `FeatureCollection` | `v14-surface.md` | superada |
 | V15 | Planes e índices: `EXPLAIN (ANALYZE, BUFFERS)` usa los índices de la spec 002 | `v15-plans.md` | superada |
 | V16 | Latencia por tamaños, mediana, p95 y máximo (SC-008), con equipo y procedimiento | `v16-latency.md` | superada |
+
+## Linux
+**Linux (2026-11-17)**: la suite completa (`pytest tests`) pasó en un equipo Linux: **886 pruebas en verde** ([linux-g3.md](../008/linux-g3.md)).
+
+La latencia en Linux (`api_latency.py`) dio PASS pero con 0 eventos de 2025 en esa base, por lo que **no es concluyente**; la medida con datos es la de Windows ([v16-latency.md](v16-latency.md)).

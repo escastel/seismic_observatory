@@ -21,20 +21,11 @@ ejecutado; cada fichero enlazado incluye la orden, la cabecera de equipo y commi
 | V11 · Mensaje publicado | Clave = id; `source`, `ingested_at`, `mode`, `extraction_id`, original | Mensaje real del offset 291: todos los campos; el consumidor lo registró | SUPERADA | [feed.md](feed.md) |
 | V12 · Nada fuera de alcance | Pruebas de la 002 en verde; sin cambios en `db/sql`, consumidor, API ni panel | 303 pruebas superadas; `git diff 002-platform-data-model` vacío en esas rutas | SUPERADA | [tests.txt](tests.txt) |
 
-## Pendiente
+## Linux
 
-- **T050, permisos en Linux.** Comprobar en el equipo Linux que la carga escribe en `./data` con
-  el usuario propio:
-
-  ```bash
-  LOADER_UID=$(id -u) LOADER_GID=$(id -g) docker compose run --rm catalog-loader --dry-run
-  LOADER_UID=$(id -u) LOADER_GID=$(id -g) docker compose run --rm catalog-loader \
-    --start 2025-01-01 --end 2025-01-02
-  ls -ln data/usgs/catalog | tail -3      # propietario: el uid propio, no 0
-  ```
-
-  No se ha podido hacer en esta sesión (solo había acceso al equipo Windows). Hasta entonces la
-  tarea queda sin marcar.
+La tarea T050 (permisos de `./data` con el usuario propio en Linux) se **descartó el 2026-11-17 a petición de la usuaria** por no ser un requisito del enunciado; no se ejecutó
+la comprobación de propiedad de ficheros y no se da por observada. Ese día sí se levantó el stack en Linux (todos los servicios `healthy`) y pasó la suite completa
+(886 pruebas, [linux-g3.md](../008/linux-g3.md)).
 
 ## Revisión constitucional (v2.1.0, T052)
 

@@ -1,36 +1,61 @@
-# Tabla de partidas de coste (T019)
+# Tabla de partidas de coste y ROI (T019, actualizada el 2026-11-17 con los datos de la usuaria)
 
-**Fecha**: 2026-11-17. Las columnas separan lo **medido** (enlace a evidencia) de lo **supuesto** (valor y razón). Los supuestos
-son valores de trabajo editables por la usuaria; **ninguno procede de una medición**. Medidas: [cost-measurements.md](cost-measurements.md)
-y [free-tier-limits.md](free-tier-limits.md).
+Las columnas separan lo **medido** (enlace a evidencia) de lo **supuesto** (valor y razón). Medidas: [cost-measurements.md](cost-measurements.md)
+y [free-tier-limits.md](free-tier-limits.md). Los valores S1, S2, S4, S7 y S8 **los dio la usuaria** (se indica); S3, S5, S6 y S9 siguen siendo
+supuestos del autor; S10 a S12 definen el beneficio del ROI y también son de la usuaria. Ninguno procede de una medición.
 
 ## Supuestos
 
-| Id | Supuesto | Valor | Razón |
+| Id | Supuesto | Valor | Origen y razón |
 |---|---|---|---|
-| S1 | Precio de compra del equipo | 900 € | orden de magnitud de un portátil de gama media como el usado (i5-11400H, 16 GB); **no es el precio real pagado** |
-| S2 | Vida útil para amortizar | 4 años (lineal) | convención habitual; el equipo se imputa al 100 % al proyecto (cota superior: es de uso general) |
-| S3 | Potencia media adicional del stack | 35 W | **no medida**: se supone para una carga ligera continua (Kafka, PostgreSQL, tres procesos Python); medirla requiere un vatímetro |
-| S4 | Tarifa eléctrica | 0,20 €/kWh | orden de magnitud doméstico; no consultada a una comercializadora |
-| S5 | Horas de funcionamiento | 8.760 h/año (24/7) | escenario más caro; la defensa solo exige horas de demostración |
-| S6 | Coste del almacenamiento local | 0,20 €/GB | SSD de ≈ 100 € por 512 GB |
-| S7 | Mantenimiento | 2 h/mes a 20 €/h | revisar el stack, rotar el túnel y actualizar imágenes |
-| S8 | Desarrollo | 100 h a 20 €/h | **la usuaria debe sustituir por sus horas reales** |
-| S9 | Tasa de descuento | 10 % | la que usaba la evaluación anterior; sin fuente, se mantiene solo como parámetro |
+| S1 | Precio de compra del portátil | 675 € | la usuaria: comprado hace 4 años |
+| S2 | Vida útil total para amortizar | 6 años (lineal, 112,50 €/año) | la usuaria: «todavía puedo sacarle rentabilidad»; se imputa al 100 % al proyecto (cota superior: es de uso general) |
+| S3 | Potencia media adicional del stack | 35 W | autor; **no medida** (haría falta un vatímetro) |
+| S4 | Tarifa eléctrica | 0,23 €/kWh | la usuaria |
+| S5 | Horas de funcionamiento | 8.760 h/año (24/7) | autor; escenario más caro: la defensa solo exige unas horas |
+| S6 | Coste del almacenamiento local | 0,20 €/GB | autor; SSD de ≈ 100 € por 512 GB |
+| S7 | Mantenimiento | 2 h/mes a 15 €/h | la usuaria |
+| S8 | Desarrollo | 200 h a 15 €/h | la usuaria: «unas 200 h» (estimación, no cronometradas) |
+| S9 | Tasa de descuento | 10 % | la de la evaluación anterior; sin fuente, solo como parámetro |
+| S10 | Beneficio: tiempo manual evitado por consulta | 2 h | la usuaria: hacer a mano una vista equivalente a la del panel descargando y filtrando el catálogo de USGS (estimación, **no cronometrada**) |
+| S11 | Frecuencia de esa consulta sin observatorio | 1 por día laborable = 260/año | la usuaria |
+| S12 | Valor de la hora evitada | 15 €/h | la misma tarifa que S7 y S8 |
 
-## Partidas
+## Partidas de coste
 
 | Partida | Cálculo | Importe | Tipo |
 |---|---|---:|---|
-| Hardware | S1 / S2 | 225 €/año | supuesto |
-| Electricidad | S3 × S5 × S4 = 0,035 kW × 8.760 h × 0,20 €/kWh | 61,32 €/año (5,04 €/mes) | supuesto |
-| Almacenamiento | volúmenes medidos 1,44 GB (195 MB + 1,244 GB aparentes de Kafka; en disco ≈ 0,3 GB, así que es una cota superior) × S6 | 0,29 € (una vez; crece con el histórico) | medida × supuesto |
+| Hardware | S1 / S2 = 675 / 6 | 112,50 €/año | supuesto |
+| Electricidad | S3 × S5 × S4 = 0,035 kW × 8.760 h × 0,23 €/kWh (306,6 kWh) | 70,52 €/año (≈ 5,8 €/mes) | supuesto |
+| Almacenamiento | volúmenes medidos 1,44 GB (cota superior, ver [cost-measurements.md](cost-measurements.md)) × S6 | 0,29 € (una vez) | medida × supuesto |
 | Transferencia | 191 MB este mes de 1 GB incluido en ngrok; la SPA en Netlify cuesta créditos de una cuota de 300 | 0 € dentro de cuota | medida de uso + cuota publicada |
-| Mantenimiento | S7 = 2 × 12 × 20 | 480 €/año | supuesto |
-| Desarrollo | S8 = 100 × 20 | 2.000 € (una vez) | supuesto |
-| **Recurrente** | 225 + 61,32 + 480 | **766,32 €/año** | |
-| **Total del primer año** | recurrente + 2.000 + 0,29 | **2.766,61 €** | |
+| Mantenimiento | S7 = 2 × 12 × 15 | 360 €/año | supuesto |
+| Desarrollo | S8 = 200 × 15 | 3.000 € (una vez) | supuesto |
+| **Recurrente** | 112,50 + 70,52 + 360 | **543,02 €/año** | |
+| **Total del primer año** | recurrente + 3.000 + 0,29 | **3.543,31 €** | |
 
-**Valor actual de los costes a 5 años** (S9): 2.000 + 0,29 + 766,32 × 3,7908 = **4.905,2 €** (sin descontar: 5.831,9 €).
-**Beneficio anual mínimo para que el valor actual neto sea 0**: 4.905,2 / 3,7908 = **1.294,0 €/año**. Es el umbral que habría
-que demostrar con un beneficio medible; el observatorio no define ninguno, por lo que el ROI no se estima.
+**Valor actual de los costes a 5 años** (S9, factor de anualidad 3,7908): 3.000 + 0,29 + 543,02 × 3,7908 = **5.058,8 €**
+(sin descontar: 5.715,4 €). Lo dominante es el trabajo humano (3.360 € del primer año de 3.543,31 €).
+
+## ROI (con el beneficio definido en S10 a S12)
+
+| Concepto | Cálculo | Importe |
+|---|---|---:|
+| Beneficio anual | S10 × S11 × S12 = 2 h × 260 × 15 €/h | 7.800 €/año |
+| Valor actual del beneficio a 5 años | 7.800 × 3,7908 | 29.568,1 € |
+| Valor actual neto (VAN) | 29.568,1 − 5.058,8 | **24.509,4 €** |
+| ROI descontado | VAN / valor actual de los costes = 24.509,4 / 5.058,8 | **484,5 %** |
+| ROI sin descontar | (7.800 × 5 − 5.715,4) / 5.715,4 | 582,4 % |
+| **Beneficio anual mínimo para VAN = 0** | 5.058,8 / 3,7908 | **1.334,5 €/año** (89 h/año ≈ 44,5 consultas de 2 h ≈ 0,86 por semana) |
+
+**Sensibilidad a la frecuencia (S11)**, con S10 = 2 h y S12 = 15 €/h:
+
+| Frecuencia | Beneficio anual | VAN a 5 años |
+|---|---:|---:|
+| Diaria (260/año) | 7.800 € | 24.509,4 € |
+| Semanal (52/año) | 1.560 € | 854,9 € |
+| Mensual (12/año) | 360 € | −3.694,1 € |
+
+**Cautelas**: el beneficio descansa en dos estimaciones no medidas (2 h por consulta y una consulta diaria) y valora el tiempo propio a 15 €/h; no es un ingreso
+ni un ahorro de caja. Para justificarlo mejor, cronometrar una vez la consulta manual con el catálogo y anotar con qué frecuencia se usa realmente el panel. Con una
+frecuencia semanal el VAN es apenas positivo y con una mensual es negativo.

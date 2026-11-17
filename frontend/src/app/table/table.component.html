@@ -30,6 +30,7 @@
           <th scope="col">País</th>
           <th scope="col">Continente</th>
           <th scope="col">Subregión</th>
+          <th scope="col">Ficha</th>
           @if (isReplay()) {
             <th scope="col">replayed_at</th>
             <th scope="col">Sintético</th>
@@ -48,6 +49,11 @@
             <td>{{ countryLabel(event.countryName) }}</td>
             <td>{{ textOrAbsent(event.continent) }}</td>
             <td>{{ textOrAbsent(event.subregion) }}</td>
+            <td>
+              <button type="button" class="detail" (click)="onShowCard($event, event)">
+                Ver ficha<span class="visually-hidden"> del evento {{ event.id }}</span>
+              </button>
+            </td>
             @if (isReplay()) {
               <td>{{ formatUtc(event.replayedAt) }}</td>
               <td>{{ syntheticText(event.synthetic) }}</td>

@@ -1,9 +1,15 @@
 <a class="skip" href="#tabla">Saltar a la tabla de eventos</a>
 <main>
-  <header>
-    <p class="eyebrow">BIG DATA · PROYECTO DE AULA</p>
-    <h1>Observatorio de actividad sísmica</h1>
-    <p>Eventos, análisis y estado del sistema a partir de la API de consulta. Este panel nunca consulta USGS.</p>
+  <header class="brand-header">
+    <div class="brand">
+      <app-logo class="brand-logo" />
+      <div>
+        <p class="eyebrow">BIG DATA · PROYECTO DE AULA</p>
+        <h1>seismicobservatory</h1>
+      </div>
+    </div>
+    <p class="tagline">Observatorio de actividad sísmica: eventos, análisis y estado del sistema a partir de la API de consulta. Este panel nunca consulta USGS.</p>
+    <app-summary [statistics]="service.reading()?.statistics ?? null" [status]="service.status()" />
   </header>
 
   @if (service.configError(); as error) {
@@ -36,9 +42,20 @@
     }
   }
 
-  <app-map [events]="events()" [borders]="borders()" [label]="service.label()" [mode]="mode()" />
+  <app-map
+    [events]="events()"
+    [borders]="borders()"
+    [label]="service.label()"
+    [mode]="mode()"
+    [total]="metadata()?.total ?? 0"
+    [theme]="themeService.theme()"
+    (eventSelected)="openCard($event)" />
 
-  <app-charts [statistics]="service.reading()?.statistics ?? null" [statsFailure]="service.statsFailure()" [label]="service.label()" />
+  <app-charts
+    [statistics]="service.reading()?.statistics ?? null"
+    [statsFailure]="service.statsFailure()"
+    [label]="service.label()"
+    [theme]="themeService.theme()" />
 
   <section id="tabla" tabindex="-1">
     <app-table
@@ -49,10 +66,21 @@
       [label]="service.label()"
       [mode]="mode()"
       [truncated]="metadata()?.truncated ?? false"
-      (loadMore)="service.loadMore()" />
+      (loadMore)="service.loadMore()"
+      (showCard)="openCard($event)" />
   </section>
 
   <footer>
-    <p>Fronteras: Natural Earth · Mapa base: OpenStreetMap · Datos sísmicos: USGS, procesados por el backend del proyecto.</p>
+    <p>
+      Mapa base: © OpenStreetMap contributors · Relieve: Tiles © Esri · Satélite: Sentinel-2 cloudless by EOX IT Services
+      GmbH (contiene datos modificados de Copernicus Sentinel 2021) · Límites de placas: PB2002 (P. Bird, 2003; H. Ahlenius,
+      Nordpil) · Fronteras: Natural Earth · Datos sísmicos: USGS, procesados por el backend del proyecto.
+    </p>
+    <p>
+      Los fondos de mapa se piden directamente desde tu navegador a sus proveedores (OpenStreetMap, Esri, EOX), que ven tu
+      dirección IP y el <em>Referer</em> de esta página.
+    </p>
   </footer>
 </main>
+
+<app-event-card [event]="selectedEvent()" [mode]="mode()" (closed)="closeCard()" />

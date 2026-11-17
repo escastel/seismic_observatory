@@ -1,0 +1,40 @@
+{
+  "initialRequests": [
+    "localhost:4200/",
+    "localhost:4200/chunk-FDERIQAA.js",
+    "localhost:4200/polyfills-5CFQRCPP.js",
+    "localhost:4200/main-JBQKUJFN.js",
+    "localhost:4200/styles-RRODIGAX.css",
+    "localhost:4200/datos/paises.geojson",
+    "localhost:4200/config.json",
+    "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+    "tile.openstreetmap.org/2/1",
+    "tile.openstreetmap.org/2/2",
+    "tile.openstreetmap.org/2/0",
+    "tile.openstreetmap.org/2/3",
+    "tile.openstreetmap.org/2/-1",
+    "tile.openstreetmap.org/2/4",
+    "localhost:4200/chunk-MWNQD2IY.js",
+    "localhost:4200/brand/favicon.svg"
+  ],
+  "platesRequestedBeforeRelief": false,
+  "reliefPlates": {
+    "checked": true,
+    "paths": "Tiles © Esri — Source: Esri · Límites de placas: PB2002 (P. Bird, 2003); datos de H. Ahlenius, Nordpil · Fronteras: Natural Earth · Datos sísmicos: USGS"
+  },
+  "platesRequested": true,
+  "blocked": {
+    "notice": "No se pudo cargar el fondo «Relieve»; se vuelve al mapa Simple.",
+    "base": "live",
+    "counts": "209 eventos dibujados · 0 omitidos por c"
+  },
+  "reducedMotion": "0s",
+  "mobileSlow": {
+    "msToCards": 548,
+    "kbTransferred": 1,
+    "files": [
+      "chunk-FDERIQAA.js",
+      "main-JBQKUJFN.js"
+    ]
+  }
+}

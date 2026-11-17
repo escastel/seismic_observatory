@@ -39,6 +39,10 @@ anteriores de las specs 002 a 004 (sin regresiones) y las nuevas de esta spec:
 | `tests/db/test_replay_synthetic.py` | los siete mensajes sintéticos con el resultado esperado |
 | `tests/db/test_replay_consumer_restart.py` | reinicio del consumidor con relectura solapada |
 
+## Linux
+
+**Linux (2026-11-17)**: la suite completa (`pytest tests`) pasó en un equipo Linux: **886 pruebas en verde** ([linux-g3.md](../008/linux-g3.md)).
+
 ## Revisión contra la constitución
 
 | Principio | Revisión |

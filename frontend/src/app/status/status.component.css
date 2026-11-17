@@ -3,54 +3,58 @@
 }
 
 .status {
-  padding: 0.75rem 1rem;
-  border: 1px solid #5c5c5c;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #1a1a1a;
+  padding: var(--space-3) var(--space-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface);
+  color: var(--text);
+  box-shadow: var(--shadow);
 }
 
 .status:focus-visible,
 .status :focus-visible {
-  outline: 3px solid #0b57d0;
+  outline: 3px solid var(--focus);
   outline-offset: 2px;
 }
 
 .status__title {
-  margin: 0 0 0.5rem;
-  font-size: 1.1rem;
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-lg);
 }
 
 .status__loading {
-  margin: 0 0 0.5rem;
+  margin: 0 0 var(--space-2);
   font-style: italic;
+  color: var(--text-muted);
 }
 
 .status__label {
   display: inline-block;
-  margin: 0 0 0.5rem;
-  padding: 0.25rem 0.75rem;
-  border: 2px solid #1a1a1a;
-  border-radius: 4px;
-  background: #fff3c4;
-  color: #1a1a1a;
+  margin: 0 0 var(--space-2);
+  padding: var(--space-1) var(--space-3);
+  border: 2px solid var(--warning);
+  border-radius: var(--radius);
+  background: var(--warning-bg);
+  color: var(--warning);
   font-weight: 700;
   letter-spacing: 0.04em;
 }
 
 .status__previous,
 .status__message {
-  margin: 0 0 0.5rem;
-  padding: 0.4rem 0.6rem;
-  border-left: 4px solid #5c5c5c;
-  background: #f1f1f1;
-  color: #1a1a1a;
+  margin: 0 0 var(--space-2);
+  padding: var(--space-2) var(--space-3);
+  border-left: 4px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  overflow-wrap: anywhere;
 }
 
 .status__message--urgent {
-  border-left-color: #8c1d18;
-  background: #fde8e6;
-  color: #5c0f0b;
+  border-left-color: var(--error);
+  background: var(--error-bg);
+  color: var(--error);
   font-weight: 600;
 }
 
@@ -62,14 +66,15 @@
 
 .status__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
-  gap: 0.5rem 1rem;
-  margin: 0.5rem 0 0;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 16rem), 1fr));
+  gap: var(--space-2) var(--space-4);
+  margin: var(--space-2) 0 0;
 }
 
 .status__item {
-  padding: 0.25rem 0;
-  border-top: 1px solid #c4c4c4;
+  padding: var(--space-1) 0;
+  border-top: 1px solid var(--border);
+  min-width: 0;
 }
 
 .status__item--wide {
@@ -77,12 +82,13 @@
 }
 
 .status__item dt {
-  font-size: 0.85rem;
-  color: #404040;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
 }
 
 .status__item dd {
   margin: 0;
   font-weight: 600;
   font-variant-numeric: tabular-nums;
+  overflow-wrap: anywhere;
 }
