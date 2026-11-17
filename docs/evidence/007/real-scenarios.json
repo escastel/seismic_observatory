@@ -1,0 +1,213 @@
+{
+ "v7": [
+  {
+   "name": "sin filtros (24 h)",
+   "apiEventsTotal": 194,
+   "apiStatsTotal": 194,
+   "tableShown": 195,
+   "tableTotal": 195,
+   "statsTotal": 195,
+   "mapDrawn": 195,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:21 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:21 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  {
+   "name": "min_mag 4",
+   "apiEventsTotal": 15,
+   "apiStatsTotal": 15,
+   "tableShown": 15,
+   "tableTotal": 15,
+   "statsTotal": 15,
+   "mapDrawn": 15,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:24 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:24 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  {
+   "name": "país USA",
+   "apiEventsTotal": 158,
+   "apiStatsTotal": 158,
+   "tableShown": 158,
+   "tableTotal": 158,
+   "statsTotal": 158,
+   "mapDrawn": 158,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:26 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:26 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  {
+   "name": "USA + min_mag 2",
+   "apiEventsTotal": 46,
+   "apiStatsTotal": 46,
+   "tableShown": 46,
+   "tableTotal": 46,
+   "statsTotal": 46,
+   "mapDrawn": 46,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:29 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:29 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  {
+   "name": "fecha UTC 2026-11-16T00:00..12:00",
+   "apiEventsTotal": 114,
+   "apiStatsTotal": 114,
+   "tableShown": 114,
+   "tableTotal": 114,
+   "statsTotal": 114,
+   "mapDrawn": 114,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:31 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:31 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  {
+   "name": "fecha + min_mag 3 + país USA",
+   "apiEventsTotal": 0,
+   "apiStatsTotal": 0,
+   "tableShown": 0,
+   "tableTotal": 0,
+   "statsTotal": 0,
+   "mapDrawn": 0,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Sin eventos para este periodo y estos filtros (la consulta ha funcionado). | Última lectura correcta del panel | 2026-11-16 23:04:34 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:34 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  }
+ ],
+ "v4": {
+  "tableRowsWithoutCountry": 27,
+  "chartCountWithoutCountry": 27,
+  "example": [
+   "hv75071182",
+   "2026-11-16 21:57:08 UTC",
+   "2,5",
+   "md",
+   "29,6 km",
+   "21 km ESE of Naalehu, Hawaii",
+   "Sin país asignado",
+   "Sin dato",
+   "Sin dato"
+  ]
+ },
+ "v6": {
+  "first": {
+   "tableShown": 1000,
+   "tableTotal": 18302,
+   "statsTotal": 18302,
+   "mapDrawn": 1000,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:39 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:39 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  "notice": "Respuesta truncada: el mapa y la tabla muestran 1000 de 18302 eventos. Las estadísticas corresponden al conjunto completo. Usa «Cargar más» en la tabla para traer el resto.",
+  "after": {
+   "tableShown": 3000,
+   "tableTotal": 18302,
+   "statsTotal": 18302,
+   "mapDrawn": 3000,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:39 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:39 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  "rows": 3000,
+  "unique": 3000,
+  "apiTotal": 18302
+ },
+ "v8_start_after_end": {
+  "tableShown": 3000,
+  "tableTotal": 18302,
+  "statsTotal": 18302,
+  "mapDrawn": 3000,
+  "mapOmitted": 0,
+  "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:39 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:39 UTC",
+  "errorsOnForm": [
+   "El inicio debe ser anterior al fin."
+  ],
+  "statsFail": null
+ },
+ "v8_over_10000h": {
+  "tableShown": 1000,
+  "tableTotal": 33084,
+  "statsTotal": null,
+  "mapDrawn": 1000,
+  "mapOmitted": 0,
+  "status": "Estado del panel | Información: Datos al día. |  | Aviso: las estadísticas no se han podido cargar (the period has 16440 hourly windows; narrow it to at most 10000 hours). |  | Última lectura correcta del panel",
+  "errorsOnForm": [],
+  "statsFail": "No se pudieron cargar las estadísticas. El periodo supera las 10.000 horas: acota las fechas"
+ },
+ "v9_v10": {
+  "liveBefore": {
+   "tableShown": 1000,
+   "tableTotal": 18302,
+   "statsTotal": 18302,
+   "mapDrawn": 1000,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:53 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:53 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  "replay": {
+   "tableShown": 1000,
+   "tableTotal": 2807,
+   "statsTotal": 2807,
+   "mapDrawn": 1000,
+   "mapOmitted": 0,
+   "status": "Estado del panel |  | ⚠ Modo: REPRODUCCIÓN |  | Información: Datos al día. | Última lectura correcta del panel",
+   "errorsOnForm": [],
+   "statsFail": null
+  },
+  "replayApiTotal": 2807,
+  "replayApiLabel": "REPRODUCCIÓN",
+  "replayInfo": {
+   "status": "Estado del panel\n\n⚠ Modo: REPRODUCCIÓN\n\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-16 23:04:55 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:04:55 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:04:55 UTC\nModo\nReproducción\nÚltima reproducción\n2026-11-16 18:55:09 UTC\nPeriodo consultado\n2025-01-01 00:00:00 UTC a 2026-01-01 00:00:00 UTC\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n0 (incluidos)",
+   "label": [
+    [
+     "APP-STATUS",
+     true
+    ],
+    [
+     "APP-MAP",
+     true
+    ],
+    [
+     "APP-CHARTS",
+     true
+    ],
+    [
+     "APP-TABLE",
+     true
+    ]
+   ],
+   "header": [
+    "Id",
+    "Hora (UTC)",
+    "Magnitud",
+    "Tipo de magnitud",
+    "Profundidad",
+    "Lugar",
+    "País",
+    "Continente",
+    "Subregión",
+    "replayed_at",
+    "Sintético"
+   ]
+  },
+  "liveAfter": {
+   "tableShown": 1000,
+   "tableTotal": 18302,
+   "statsTotal": 18302,
+   "mapDrawn": 1000,
+   "mapOmitted": 0,
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-16 23:04:59 UTC | Generación de la respuesta (API) | 2026-11-16 23:04:59 UTC",
+   "errorsOnForm": [],
+   "statsFail": null
+  }
+ }
+}

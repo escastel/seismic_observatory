@@ -1,0 +1,83 @@
+<section class="status" aria-labelledby="status-title" tabindex="-1">
+  <h2 id="status-title" class="status__title">Estado del panel</h2>
+
+  @if (loading()) {
+    <p class="status__loading" role="status" aria-live="polite">Actualizando datos…</p>
+  }
+
+  @if (label(); as apiLabel) {
+    <p class="status__label"><span aria-hidden="true">&#9888;</span> Modo: {{ apiLabel }}</p>
+  }
+
+  @if (status().showingPreviousReading && reading(); as prev) {
+    <p class="status__previous" role="status" aria-live="polite">
+      Aviso: los datos mostrados son la última lectura correcta, del
+      {{ formatUtc(prev.readAt) }}.
+    </p>
+  }
+
+  <div class="status__messages">
+    @for (message of messages(); track $index) {
+      @if (message.urgent) {
+        <div class="status__message status__message--urgent" role="alert" aria-live="assertive">
+          <strong>Error:</strong> {{ message.text }}
+        </div>
+      } @else {
+        <div class="status__message" role="status" aria-live="polite">
+          <strong>{{ message.prefix }}</strong> {{ message.text }}
+        </div>
+      }
+    }
+  </div>
+
+  @if (statsFailure(); as failure) {
+    <p class="status__message status__message--stats" role="status" aria-live="polite">
+      <strong>Aviso:</strong> las estadísticas no se han podido cargar ({{ failure.message }}).
+    </p>
+  }
+
+  <dl class="status__grid">
+    <div class="status__item">
+      <dt>Última lectura correcta del panel</dt>
+      <dd>{{ formatUtc(reading()?.readAt) }}</dd>
+    </div>
+    <div class="status__item">
+      <dt>Generación de la respuesta (API)</dt>
+      <dd>{{ formatUtc(reading()?.metadata?.generated) }}</dd>
+    </div>
+    <div class="status__item">
+      <dt>Última ingesta (consulta correcta a USGS)</dt>
+      <dd>{{ formatUtc(reading()?.metadata?.lastIngestion) }}</dd>
+    </div>
+    <div class="status__item">
+      <dt>Modo</dt>
+      <dd>{{ modeText() }}</dd>
+    </div>
+    @if (isReplay()) {
+      <div class="status__item">
+        <dt>Última reproducción</dt>
+        <dd>{{ formatUtc(reading()?.metadata?.lastReplayedAt) }}</dd>
+      </div>
+    }
+    <div class="status__item status__item--wide">
+      <dt>Periodo consultado</dt>
+      <dd>{{ periodText() ?? 'ND' }}</dd>
+    </div>
+    @if (reading(); as r) {
+      <div class="status__item">
+        <dt>Eventos en cuarentena</dt>
+        <dd>
+          {{ r.metadata.quarantined.total }} (geometría no válida:
+          {{ r.metadata.quarantined.invalidGeometry }})
+        </dd>
+      </div>
+      <div class="status__item">
+        <dt>Eventos sin magnitud</dt>
+        <dd>
+          {{ r.metadata.nullMagnitude.count }}
+          {{ r.metadata.nullMagnitude.excluded ? '(excluidos por el filtro)' : '(incluidos)' }}
+        </dd>
+      </div>
+    }
+  </dl>
+</section>

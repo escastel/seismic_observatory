@@ -1,0 +1,113 @@
+{
+  "nulls": {
+    "nullMag": [
+      "null-mag",
+      "2026-11-16 23:01:34 UTC",
+      "ND",
+      "ml",
+      "11,0 km",
+      "Evento sin magnitud",
+      "Estados Unidos",
+      "North America",
+      "Northern America"
+    ],
+    "nullDepth": [
+      "null-depth",
+      "2026-11-16 23:00:34 UTC",
+      "4,0",
+      "ml",
+      "ND",
+      "Evento sin profundidad",
+      "Estados Unidos",
+      "North America",
+      "Northern America"
+    ],
+    "sea": [
+      "sea",
+      "2026-11-16 22:59:34 UTC",
+      "5,0",
+      "ml",
+      "13,0 km",
+      "Mid-Atlantic Ridge",
+      "Sin país asignado",
+      "North America",
+      "Northern America"
+    ],
+    "markupRow": [
+      "markup",
+      "2026-11-16 22:58:34 UTC",
+      "6,0",
+      "ml",
+      "14,0 km",
+      "<img src=x onerror=window.__xss=1><b>negrita</b>",
+      "Estados Unidos",
+      "North America",
+      "Northern America"
+    ],
+    "xssExecuted": false,
+    "mapCounter": "5 eventos dibujados · 1 omitidos por coordenadas no válidas",
+    "status": "Estado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-16 23:02:34 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:34 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:04 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:34 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)"
+  },
+  "big": {
+    "before": "Mostrando 1000 de 2500 eventos",
+    "notice": null,
+    "counts": [
+      {
+        "clicked": true,
+        "shown": "Mostrando 2000 de 2500 eventos"
+      },
+      {
+        "clicked": true,
+        "shown": "Mostrando 2500 de 2500 eventos"
+      },
+      {
+        "clicked": false,
+        "shown": "Mostrando 2500 de 2500 eventos"
+      }
+    ],
+    "rows": 2500,
+    "unique": 2500,
+    "charts": [
+      "El mapa está truncado; estas estadísticas corresponden al conjunto completo (scope: complete)",
+      "Total de eventos: 2500"
+    ]
+  },
+  "v11_ok": {
+    "status": "Estado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-16 23:02:47 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:47 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:17 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:47 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v12_503": {
+    "status": "Estado del panel\n\nAviso: los datos mostrados son la última lectura correcta, del 2026-11-16 23:02:47 UTC.\n\nAviso: La base de datos no está disponible (503). Esto no significa que no haya eventos.\nAviso: Sistema degradado: alguna base de datos no está disponible.\nÚltima lectura correcta del panel\n2026-11-16 23:02:47 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:47 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:17 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:47 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v11_html_not_json": {
+    "status": "Estado del panel\n\nAviso: los datos mostrados son la última lectura correcta, del 2026-11-16 23:02:47 UTC.\n\nError: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco.\nÚltima lectura correcta del panel\n2026-11-16 23:02:47 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:47 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:17 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:47 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v12_422": {
+    "status": "Estado del panel\nInformación: Datos al día.\n\nAviso: las estadísticas no se han podido cargar (el periodo supera las 10000 ventanas horarias).\n\nÚltima lectura correcta del panel\n2026-11-16 23:02:54 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:54 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:24 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:54 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v12_stale": {
+    "status": "Estado del panel\nAviso: Datos desactualizados: la última consulta correcta a USGS fue hace 40 min.\nÚltima lectura correcta del panel\n2026-11-16 23:02:56 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:56 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 22:22:56 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:56 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v11_recovered": {
+    "status": "Estado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-16 23:02:57 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:57 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:27 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:57 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v11_unreachable": {
+    "status": "Estado del panel\n\nAviso: los datos mostrados son la última lectura correcta, del 2026-11-16 23:02:57 UTC.\n\nError: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco.\nÚltima lectura correcta del panel\n2026-11-16 23:02:57 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:02:57 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:27 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:02:57 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v11_recovered_after_unreachable": {
+    "status": "Estado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-16 23:03:00 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:03:00 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:30 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:03:00 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "rows": 6
+  },
+  "v13": {
+    "elapsedMs": 17015,
+    "status": "Estado del panel\n\nAviso: los datos mostrados son la última lectura correcta, del 2026-11-16 23:03:02 UTC.\n\nError: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco.\nÚltima lectura correcta del panel\n2026-11-16 23:03:02 UTC\nGeneración de la respuesta (API)\n2026-11-16 23:03:02 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-16 23:02:32 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-15 23:03:02 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n0 (geometría no válida: 0)\nEventos sin magnitud\n1 (incluidos)",
+    "maxInflightEventos": 1,
+    "requests": 1
+  }
+}

@@ -585,3 +585,99 @@ sus resultados en [docs/evidence/002/](docs/evidence/002/).
 El proyecto usa únicamente el stack aprobado: Python, Kafka, PostgreSQL, FastAPI, Docker
 Compose, Angular y Leaflet. No usa PostGIS, Spark, Flink ni Kubernetes: el cruce espacial se
 hace en Python con GeoPandas.
+
+## 10. Panel Angular y defensa (spec 007)
+
+El panel (`frontend/`) lee solo la API de la spec 006 y se publica en Netlify; el backend se queda en
+este equipo y se expone con un túnel. Su configuración está en `frontend/public/config.json`. El modo
+demo se ha retirado: el panel muestra solo datos de la API, en modo real o de reproducción, y la
+reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
+
+### Procedimiento
+
+1. **Levantar el stack.**
+
+   ```bash
+   docker compose up --build -d
+   curl -s http://127.0.0.1:8000/api/salud
+   ```
+
+2. **Levantar el túnel.** Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` en `.env`, el servicio opcional de
+   Compose sirve (ver [sección 5](#5-túnel-para-el-panel-publicado)):
+
+   ```bash
+   docker compose --profile tunnel up -d
+   ```
+
+   Alternativa: ngrok como agente en este equipo, apuntando a la API:
+
+   ```bash
+   ngrok http 8000 --domain=TU-DOMINIO.ngrok-free.app
+   ```
+
+   El authtoken **nunca** va en Git ni en el frontend: en el agente se guarda en la configuración
+   local de ngrok, fuera del repositorio. Comprobar el túnel desde fuera:
+
+   ```bash
+   curl -s "https://TU-DOMINIO.ngrok-free.app/api/salud" -H "ngrok-skip-browser-warning: 1"
+   ```
+
+3. **Fijar la URL en `frontend/public/config.json` antes de compilar.** Copiar la URL HTTPS del túnel
+   en `apiUrl`, sin `/api` al final (el panel añade las rutas). Campos:
+
+   | Campo | Valor de ejemplo | Uso |
+   |---|---|---|
+   | `mode` | `live` o `replay` | Modo inicial; se puede cambiar en el panel |
+   | `apiUrl` | `https://TU-DOMINIO.ngrok-free.app` | Base de la API, sin `/api` |
+   | `refreshMs` | `60000` | Intervalo de refresco; el mínimo admitido es 5000 ms |
+   | `requestTimeoutMs` | `15000` | Tiempo máximo de cada petición |
+   | `staleAfterMs` | `900000` | A partir de esta antigüedad la lectura se marca como desactualizada |
+   | `skipNgrokWarning` | `true` | Envía `ngrok-skip-browser-warning` para saltar la página intermedia de ngrok |
+
+4. **Autorizar el origen de Netlify en CORS.** En `.env`, `CORS_ORIGINS` debe contener el origen
+   exacto del sitio (esquema y host, sin barra final) más el de desarrollo, sin comodines:
+
+   ```
+   CORS_ORIGINS=https://TU-SITIO.netlify.app,http://localhost:4200
+   ```
+
+   Después, recrear la API para que lea el cambio: `docker compose up -d api`. `docker compose restart`
+   no vuelve a leer `.env`.
+
+5. **Instalar, probar y arrancar en local.** Node 22.12 o 24 (ver `engines` en `package.json`):
+
+   ```bash
+   cd frontend
+   npm ci
+   npm test
+   npm start
+   ```
+
+   `npm ci` instala las versiones fijadas en `package-lock.json`. El panel queda en
+   `http://localhost:4200`.
+
+6. **Compilar y publicar en Netlify.** `netlify.toml` ya define la base `frontend`, el comando
+   `npm run build` y la publicación de `dist/observatorio/browser`. Netlify compila desde el
+   repositorio, así que la URL de `config.json` debe estar en la rama que se despliega (la URL no es
+   secreta; el authtoken sí, y no debe estar nunca). El despliegue lo hace la usuaria.
+
+7. **Comprobar desde otro dispositivo.** Abrir la URL de Netlify en un móvil con datos, fuera de la
+   red del equipo. Debe cargar el mapa y la tabla, y mostrar el estado de frescura con la hora de la
+   última ingesta.
+
+8. **Si cambia la URL del túnel.** La URL queda compilada en el panel: no basta con reiniciar. Actualizar
+   `apiUrl` en `config.json`, repetir `npm run build` y publicar de nuevo en Netlify. Si cambia el
+   origen de Netlify, actualizar `CORS_ORIGINS` y recrear la API (paso 4).
+
+### Guion de la defensa
+
+| Momento | Qué hacer | Qué debe verse |
+|---|---|---|
+| Cerrar y reabrir el túnel | Parar el servicio `tunnel` (`docker compose --profile tunnel stop tunnel`) y volver a arrancarlo | Con el túnel cerrado: aviso de backend inaccesible con la última lectura y su hora, sin perder los eventos ya cargados. Al reabrirlo, vuelve a «Datos al día» en el siguiente refresco, sin recargar la página |
+| Reproducción | Cambiar a modo «Reproducción» y elegir un periodo del histórico (ver [demostración](#demostración-de-la-defensa)) | «REPRODUCCIÓN» en estado, mapa, tabla y gráficos, con la última reproducción. Al volver a «Real», los totales reales no cambian |
+| Nulos como ND | Buscar en la tabla un evento sin magnitud o sin profundidad | «ND», nunca 0 ni un hueco. El 0 real sigue mostrándose como 0 |
+| Evento marítimo | Buscar un evento en el mar (por ejemplo, un lugar «Hawaii» sin país) | «Sin país asignado» en la ficha, en la tabla y en el gráfico por país; no aparece en el selector de país |
+| Truncado | Seleccionar 2025 completo (18.302 eventos) | Aviso de respuesta truncada, «Mostrando 1000 de 18302», «Cargar más» para avanzar, y estadísticas con el total |
+
+Estado de las comprobaciones y lo que queda pendiente (túnel ngrok real, Netlify real y Linux):
+[docs/evidence/007/README.md](docs/evidence/007/README.md).

@@ -1,0 +1,63 @@
+:host {
+  display: block;
+}
+
+.map-container {
+  height: 480px;
+  width: 100%;
+  border: 1px solid #94a3b8;
+  border-radius: 4px;
+}
+
+.map-counts,
+.map-note,
+.legend-size {
+  margin: 0.5rem 0;
+}
+
+.map-note {
+  font-size: 0.875rem;
+}
+
+.label-badge {
+  display: inline-block;
+  margin-left: 0.5rem;
+  padding: 0.125rem 0.5rem;
+  border: 1px solid #334155;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.legend-title {
+  margin: 0.5rem 0 0.25rem;
+  font-weight: 600;
+}
+
+.legend-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.25rem;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.legend-list li {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.swatch {
+  display: inline-block;
+  width: 14px;
+  height: 14px;
+  border: 2px solid transparent;
+  border-radius: 50%;
+}
+
+.swatch.dashed {
+  border-style: dashed;
+  background-clip: padding-box;
+}

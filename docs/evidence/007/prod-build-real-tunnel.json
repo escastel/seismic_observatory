@@ -1,0 +1,33 @@
+{
+  "info": {
+    "markers": 1,
+    "tableRows": 212,
+    "shown": "Mostrando 165 de 165 eventos",
+    "statusText": "Estado del panel\nInformación: Datos al día.\nÚltima lectura correcta del panel\n2026-11-17 14:04:28 UTC\nGeneración de la respuesta (API)\n2026-11-17 14:04:28 UTC\nÚltima ingesta (consulta correcta a USGS)\n2026-11-17 14:04:20 UTC\nModo\nTiempo real\nPeriodo consultado\n2026-11-16 14:04:28 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto)\nEventos en cuarentena\n2 (geometría no válida: 0)\nEventos sin magnitud\n0 (incluidos)",
+    "mapCounter": "165 eventos dibujados · 0 omitidos por coordenadas no válidas +− OpenStreetMap Países (Natural Earth) Terremotos Leaflet",
+    "chartsText": "Estadísticas\n\nLas cifras describen el pasado; no son una predicción ni una evaluación de riesgo.\n\nPeriodo (UTC): 2026-11-16 14:04:28 UTC a 2026-11-17 14:04:28 UTC\nMagnitud mínima: sin filtro\nPaís: sin filtro\nExcluir sintéticos: no\nUnidad: events\nTotal de eventos: 165\nEventos por hora UTC\n\nPeriodo (UTC): 2026-11-16 14:04:28 UTC a 2026-11-17 14:04:28 UTC. Filtros: magnitud mínima sin filtro, país sin filtro, excluir sintéticos no. Unidad: events. Ventana: 1 hour UTC, end excluded.\n\n11-16 14:00\n5\n11-16 15:00\n6\n11-16 16:00\n12\n11-16 17:00\n4\n11-16 18:00\n14\n11-16 19:00\n8\n11-16 20:00\n5\n11-16 21:00\n13\n11-16 22:00\n1\n11-16 23:00\n6\n11-17 00:00\n4\n11-17 01:00\n5\n11-17 02:00\n4\n11-17 03:00\n5\n11-17 04:00\n9\n11-17 05:00\n6\n11-17 06:00\n7\n11-17 07:00\n9\n11-17 08:00\n7\n11-17 09:00\n9\n11-17 10:00\n9\n11-17 11:00\n5\n11-17 12:00\n8\n11-17 13:00\n4\n11-17 14:00\n0\nVer tabla de datos\nEventos por país\n\nPeriodo (UTC): 2026-11-16 14:04:28 UTC a 2026-11-17 14:04:28 UTC. Filtros: magnitud mínima sin filtro, país sin filtro, excluir sintéticos no. Unidad: events.\n\nEstados Unidos\n126\nSin país asignado\n33\nAfganistán\n1\nMéxico\n1\nNueva Zelanda\n1\nPerú\n1\nPapúa Nueva Guinea\n1\nPuerto Rico\n1\nVer tabla de datos\nDistribución de magnitud\n\nPeriodo (UTC): 2026-11-16 14:04:28 UTC a 2026-11-17 14:04:28 UTC. Filtros: magnitud mínima sin filtro, país sin filtro, excluir sintéticos no. Unidad: magnitude, 1 unit bins [from, to).\n\nRegistros sin valor: 0 (magnitud ND)\n\n-1–0\n2\n0–1\n40\n1–2\n63\n2–3\n34\n3–4\n12\n4–5\n11\n5–6\n2\n6–7\n1\nVer tabla de datos\nDi",
+    "ng0900": false
+  },
+  "errors": [
+    "error: Failed to load resource: the server responded with a status of 400 ()",
+    "error: Failed to load resource: the server responded with a status of 400 ()",
+    "error: Failed to load resource: the server responded with a status of 400 ()",
+    "error: Failed to load resource: the server responded with a status of 400 ()",
+    "error: Failed to load resource: the server responded with a status of 400 ()",
+    "error: Failed to load resource: the server responded with a status of 400 ()"
+  ],
+  "requests": [
+    "200 OPTIONS https://modular-guidance-daybreak.ngrok-free.dev/api/eventos?mode=live&limit=1000&offset=0",
+    "200 OPTIONS https://modular-guidance-daybreak.ngrok-free.dev/api/estadisticas?mode=live",
+    "200 OPTIONS https://modular-guidance-daybreak.ngrok-free.dev/api/salud",
+    "200 GET https://modular-guidance-daybreak.ngrok-free.dev/api/eventos?mode=live&limit=1000&offset=0",
+    "200 GET https://modular-guidance-daybreak.ngrok-free.dev/api/estadisticas?mode=live",
+    "200 GET https://modular-guidance-daybreak.ngrok-free.dev/api/salud",
+    "400 GET https://tile.openstreetmap.org/2/-1/0.png",
+    "400 GET https://tile.openstreetmap.org/2/-1/2.png",
+    "400 GET https://tile.openstreetmap.org/2/4/1.png",
+    "400 GET https://tile.openstreetmap.org/2/4/2.png",
+    "400 GET https://tile.openstreetmap.org/2/4/0.png",
+    "400 GET https://tile.openstreetmap.org/2/-1/1.png"
+  ]
+}

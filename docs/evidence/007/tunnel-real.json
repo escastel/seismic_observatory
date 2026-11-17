@@ -1,0 +1,35 @@
+{
+ "navigations": 1,
+ "log": [
+  {
+   "t": "2026-11-17T14:01:32.637Z",
+   "label": "1 túnel abierto",
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:01:26 UTC | Generación de la respuesta (API) | 2026-11-17 14:01:26 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:01:20 UTC | Modo | Tiempo real | Periodo consultado | 2026-11-16 14:01:26 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto) | Eventos en cuarentena | 2 (geometría no válida: 0) ",
+   "rows": 165,
+   "banner": []
+  },
+  {
+   "t": "2026-11-17T14:01:33.091Z",
+   "label": "2 túnel cerrado (docker stop)",
+   "note": "esperando al refresco automático de 60 s"
+  },
+  {
+   "t": "2026-11-17T14:02:28.187Z",
+   "label": "3 aviso de backend inaccesible",
+   "status": "Estado del panel | Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 14:01:26 UTC. | Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco. | Última lectura correcta del panel | 2026-11-17 14:01:26 UTC | Generación de la respuesta (API) | 2026-11-17 14:01:26 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:01:",
+   "rows": 165,
+   "banner": [
+    "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+   ],
+   "afterMs": 55488
+  },
+  {
+   "t": "2026-11-17T14:03:29.763Z",
+   "label": "4 recuperación tras reabrir",
+   "status": "Estado del panel | Información: Datos al día. | Última lectura correcta del panel | 2026-11-17 14:03:27 UTC | Generación de la respuesta (API) | 2026-11-17 14:03:26 UTC | Última ingesta (consulta correcta a USGS) | 2026-11-17 14:03:20 UTC | Modo | Tiempo real | Periodo consultado | 2026-11-16 14:03:26 UTC a sin fin (hasta ahora) (últimas 24 h, periodo por defecto) | Eventos en cuarentena | 2 (geometría no válida: 0) ",
+   "rows": 164,
+   "banner": [],
+   "afterMs": 61523
+  }
+ ]
+}

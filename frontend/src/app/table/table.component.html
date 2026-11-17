@@ -1,0 +1,69 @@
+<section class="events-table" aria-label="Tabla de eventos">
+  <p class="summary" aria-live="polite">
+    Mostrando {{ shown() }} de {{ total() }} eventos
+  </p>
+  @if (incomplete()) {
+    <p class="notice">
+      La tabla no muestra todos los eventos del periodo ({{ shown() }} de {{ total() }}).
+      @if (nextOffset() !== null) {
+        Use «Cargar más» para ver los siguientes.
+      }
+    </p>
+  }
+
+  <div class="scroll" tabindex="0" role="region" aria-label="Tabla de eventos, desplazable">
+    <table>
+      <caption>
+        Eventos sísmicos
+        @if (label(); as apiLabel) {
+          <span class="label">{{ apiLabel }}</span>
+        }
+      </caption>
+      <thead>
+        <tr>
+          <th scope="col">Id</th>
+          <th scope="col">Hora (UTC)</th>
+          <th scope="col">Magnitud</th>
+          <th scope="col">Tipo de magnitud</th>
+          <th scope="col">Profundidad</th>
+          <th scope="col">Lugar</th>
+          <th scope="col">País</th>
+          <th scope="col">Continente</th>
+          <th scope="col">Subregión</th>
+          @if (isReplay()) {
+            <th scope="col">replayed_at</th>
+            <th scope="col">Sintético</th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        @for (event of events(); track event.id) {
+          <tr>
+            <td>{{ event.id }}</td>
+            <td>{{ formatUtc(event.time) }}</td>
+            <td>{{ formatMagnitude(event.mag) }}</td>
+            <td>{{ textOrAbsent(event.magType) }}</td>
+            <td>{{ formatDepth(event.depthKm) }}</td>
+            <td>{{ textOrAbsent(event.place) }}</td>
+            <td>{{ countryLabel(event.countryName) }}</td>
+            <td>{{ textOrAbsent(event.continent) }}</td>
+            <td>{{ textOrAbsent(event.subregion) }}</td>
+            @if (isReplay()) {
+              <td>{{ formatUtc(event.replayedAt) }}</td>
+              <td>{{ syntheticText(event.synthetic) }}</td>
+            }
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <button
+    type="button"
+    class="more"
+    [disabled]="loadingMore() || nextOffset() === null"
+    (click)="onLoadMore()"
+  >
+    {{ loadingMore() ? 'Cargando…' : 'Cargar más' }}
+  </button>
+</section>

@@ -1,0 +1,196 @@
+<section class="charts" aria-labelledby="charts-title">
+  <h2 id="charts-title" class="charts__title">Estadísticas</h2>
+
+  @if (label(); as badge) {
+    <p class="charts__label">{{ badge }}</p>
+  }
+
+  <p class="charts__note">Las cifras describen el pasado; no son una predicción ni una evaluación de riesgo.</p>
+
+  @if (failureText(); as failure) {
+    <p class="charts__failure" role="alert">No se pudieron cargar las estadísticas. {{ failure }}</p>
+  }
+
+  @if (statistics(); as stats) {
+    @if (stats.mapTruncated) {
+      <p class="charts__notice">
+        El mapa está truncado; estas estadísticas corresponden al conjunto completo (scope: complete)
+      </p>
+    }
+
+    @if (meta(); as m) {
+      <ul class="charts__meta" aria-label="Alcance de las estadísticas">
+        <li>Periodo (UTC): {{ m.period }}</li>
+        <li>Magnitud mínima: {{ m.minMag }}</li>
+        <li>País: {{ m.country }}</li>
+        <li>Excluir sintéticos: {{ m.synthetic }}</li>
+        <li>Unidad: {{ m.unit }}</li>
+        <li>Total de eventos: {{ m.total }}</li>
+      </ul>
+    }
+
+    @if (hourly(); as h) {
+      <section class="chart" aria-labelledby="chart-hourly">
+        <h3 id="chart-hourly">Eventos por hora UTC</h3>
+        <p class="chart__meta">
+          Periodo (UTC): {{ meta()?.period }}. Filtros: magnitud mínima {{ meta()?.minMag }}, país
+          {{ meta()?.country }}, excluir sintéticos {{ meta()?.synthetic }}. Unidad: {{ meta()?.unit }}.
+          Ventana: {{ h.window }}.
+        </p>
+        @if (h.hidden > 0) {
+          <p class="chart__notice">
+            El gráfico muestra solo las últimas {{ maxHourlyBars }} ventanas ({{ h.hidden }} ventanas
+            anteriores no se dibujan); la tabla contiene todas.
+          </p>
+        }
+        <div class="bars bars--scroll" role="img" tabindex="0" [attr.aria-label]="h.aria">
+          @for (r of h.rows; track $index) {
+            <div class="bar">
+              <span class="bar__label">{{ r.label }}</span>
+              <span class="bar__track"><span class="bar__fill" [style.width.%]="r.width"></span></span>
+              <span class="bar__value">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+        <details>
+          <summary>Ver tabla de datos</summary>
+          <table>
+            <caption>Eventos por hora UTC (todas las ventanas)</caption>
+            <thead><tr><th scope="col">Inicio de la ventana</th><th scope="col">Eventos</th></tr></thead>
+            <tbody>
+              @for (r of h.table; track $index) {
+                <tr><td>{{ r.start }}</td><td>{{ r.count }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </details>
+      </section>
+    }
+
+    @if (countries(); as c) {
+      <section class="chart" aria-labelledby="chart-country">
+        <h3 id="chart-country">Eventos por país</h3>
+        <p class="chart__meta">
+          Periodo (UTC): {{ meta()?.period }}. Filtros: magnitud mínima {{ meta()?.minMag }}, país
+          {{ meta()?.country }}, excluir sintéticos {{ meta()?.synthetic }}. Unidad: {{ meta()?.unit }}.
+        </p>
+        <div class="bars" role="img" [attr.aria-label]="c.aria">
+          @for (r of c.rows; track $index) {
+            <div class="bar">
+              <span class="bar__label">{{ r.label }}</span>
+              <span class="bar__track"><span class="bar__fill" [style.width.%]="r.width"></span></span>
+              <span class="bar__value">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+        @if (c.others; as o) {
+          <p class="chart__notice">
+            Otros: {{ o.count }} eventos en {{ o.countries }} países más (suma de filas ya entregadas; la
+            tabla los lista todos).
+          </p>
+        }
+        <details>
+          <summary>Ver tabla de datos</summary>
+          <table>
+            <caption>Eventos por país (todas las filas)</caption>
+            <thead><tr><th scope="col">País</th><th scope="col">Eventos</th></tr></thead>
+            <tbody>
+              @for (r of c.table; track $index) {
+                <tr><td>{{ r.label }}</td><td>{{ r.count }}</td></tr>
+              }
+            </tbody>
+          </table>
+        </details>
+      </section>
+    }
+
+    @if (magnitude(); as g) {
+      <section class="chart" aria-labelledby="chart-mag">
+        <h3 id="chart-mag">Distribución de magnitud</h3>
+        <p class="chart__meta">
+          Periodo (UTC): {{ meta()?.period }}. Filtros: magnitud mínima {{ meta()?.minMag }}, país
+          {{ meta()?.country }}, excluir sintéticos {{ meta()?.synthetic }}. Unidad: {{ g.unit }}.
+        </p>
+        <p class="chart__unvalued">Registros sin valor: {{ g.unvalued }} (magnitud {{ nd }})</p>
+        <div class="bars" role="img" [attr.aria-label]="g.aria">
+          @for (r of g.rows; track $index) {
+            <div class="bar">
+              <span class="bar__label">{{ r.label }}</span>
+              <span class="bar__track"><span class="bar__fill" [style.width.%]="r.width"></span></span>
+              <span class="bar__value">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+        <details>
+          <summary>Ver tabla de datos</summary>
+          <table>
+            <caption>Distribución de magnitud</caption>
+            <thead><tr><th scope="col">Intervalo ({{ g.unit }})</th><th scope="col">Eventos</th></tr></thead>
+            <tbody>
+              @for (r of g.rows; track $index) {
+                <tr><td>{{ r.label }}</td><td>{{ r.count }}</td></tr>
+              }
+              <tr><td>Sin valor ({{ nd }})</td><td>{{ g.unvalued }}</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </section>
+    }
+
+    @if (depth(); as d) {
+      <section class="chart" aria-labelledby="chart-depth">
+        <h3 id="chart-depth">Distribución de profundidad</h3>
+        <p class="chart__meta">
+          Periodo (UTC): {{ meta()?.period }}. Filtros: magnitud mínima {{ meta()?.minMag }}, país
+          {{ meta()?.country }}, excluir sintéticos {{ meta()?.synthetic }}. Unidad: {{ d.unit }}.
+        </p>
+        <p class="chart__unvalued">Registros sin valor: {{ d.unvalued }} (profundidad {{ nd }})</p>
+        <div class="bars" role="img" [attr.aria-label]="d.aria">
+          @for (r of d.rows; track $index) {
+            <div class="bar">
+              <span class="bar__label">{{ r.label }}</span>
+              <span class="bar__track"><span class="bar__fill" [style.width.%]="r.width"></span></span>
+              <span class="bar__value">{{ r.count }}</span>
+            </div>
+          }
+        </div>
+        <details>
+          <summary>Ver tabla de datos</summary>
+          <table>
+            <caption>Distribución de profundidad</caption>
+            <thead><tr><th scope="col">Intervalo ({{ d.unit }})</th><th scope="col">Eventos</th></tr></thead>
+            <tbody>
+              @for (r of d.rows; track $index) {
+                <tr><td>{{ r.label }}</td><td>{{ r.count }}</td></tr>
+              }
+              <tr><td>Sin valor ({{ nd }})</td><td>{{ d.unvalued }}</td></tr>
+            </tbody>
+          </table>
+        </details>
+      </section>
+    }
+
+    @if (comparison(); as k) {
+      <section class="chart" aria-labelledby="chart-comparison">
+        <h3 id="chart-comparison">Comparación histórica</h3>
+        <p class="chart__meta">
+          Últimas 24 h frente a la media diaria de {{ k.baselineYear }} ({{ k.baselineDays }} días).
+          Periodo reciente (UTC): {{ k.recentPeriod }}. Unidad: {{ meta()?.unit }}.
+        </p>
+        @if (k.filtersApplied.length > 0) {
+          <p class="chart__meta">Filtros aplicados a la comparación: {{ k.filtersApplied.join(', ') }}.</p>
+        } @else {
+          <p class="chart__meta">Filtros aplicados a la comparación: sin filtro.</p>
+        }
+        <dl class="comparison">
+          <div><dt>Eventos en las últimas 24 h</dt><dd>{{ k.recentCount }}</dd></div>
+          <div><dt>Media diaria de {{ k.baselineYear }}</dt><dd>{{ k.dailyMeanText }}</dd></div>
+          <div><dt>Razón (últimas 24 h / media diaria)</dt><dd>{{ k.ratioText }}</dd></div>
+        </dl>
+        <p class="chart__warning">{{ k.warning }}</p>
+      </section>
+    }
+  } @else if (!statsFailure()) {
+    <p class="charts__empty">Sin estadísticas todavía</p>
+  }
+</section>
