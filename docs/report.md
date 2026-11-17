@@ -707,7 +707,7 @@ de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1
 ### Límites
 
 - **No se desplegó en Netlify** en esta sesión (no hay sesión de Netlify en el equipo): falta repetir W15 en el sitio público.
-- «Muestra: N de TOTAL» solo está cubierto por pruebas unitarias; los datos reales no estaban truncados.
+- Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
 - Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
 - El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
 - No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; no se probó en Linux.

@@ -13,7 +13,7 @@ Donde el sistema real no produce el caso, las respuestas se alteraron en el nave
 | W1 | Tema oscuro y claro | Oscuro con `prefers-color-scheme: dark`; claro con `light`; filtro CSS del mapa desactivado en claro | Oscuro: `body` `rgb(11, 21, 32)` ([captura](panel-dark.png)). Claro: [captura](panel-light.png); filtro del fondo Simple `none` ([w1-w7](w1-w7-theme-map.md)) | SUPERADA |
 | W2 | Fondos Simple, Relieve y Satélite | Los tres cargan teselas | 12, 18 y 18 teselas cargadas; filtro oscuro solo en Simple y Relieve ([relieve](map-relief-dark.png), [satélite](map-satellite-dark.png)) | SUPERADA |
 | W3 | Placas tectónicas con relieve | Activadas por defecto con Relieve; no se piden antes | `placas.geojson` no se pide al cargar; con Relieve la casilla está marcada y se pide ([captura](relief-plates.png)) | SUPERADA |
-| W4/W5 | Mapa de calor y agrupación | Capas opcionales con rótulo de muestra | Calor: 1 lienzo. Agrupación: 10 grupos. Rótulo «Todos los eventos del periodo» (211 de 211) ([captura](map-heat-cluster-dark.png)). El caso «Muestra: N de TOTAL» solo en pruebas unitarias (`map-layers.test.ts`); no se forzó un periodo truncado | PARCIAL |
+| W4/W5 | Mapa de calor y agrupación | Capas opcionales con rótulo de muestra | Con datos reales: calor 1 lienzo, agrupación 10 grupos y rótulo «Todos los eventos del periodo» (211 de 211) ([captura](map-heat-cluster-dark.png)). Con un periodo truncado simulado (total 2.500, 1.000 dibujados): rótulo «Muestra: 1000 de 2500» con el calor y con la agrupación; tras cargar todo con «Cargar más» (2.500 dibujados) pasa a «Todos los eventos del periodo» ([captura](w4-sample-label.png), [w4-sample.json](w4-sample.json)) | SUPERADA |
 | W6 | Fallo de un fondo | Aviso y vuelta a Simple, eventos intactos | Con `arcgisonline.com` bloqueado: «No se pudo cargar el fondo «Relieve»; se vuelve al mapa Simple.»; 211 eventos dibujados | SUPERADA |
 | W7 | Carga diferida | Chart.js, calor, agrupación y placas no se piden hasta usarlos | Al cargar solo se piden la aplicación, `paises.geojson`, teselas OSM y el trozo de gráficos; calor, agrupación y placas llegan al activarlos ([w1-w7](w1-w7-theme-map.md)) | SUPERADA |
 | W8 | Tarjetas frente a la API | Cada cifra igual a `GET /api/estadisticas` con los mismos filtros | Seis casos (sin filtros; magnitud mínima 2; país USA + magnitud mínima 1; en oscuro y claro). Total de la API 210, 76 y 128; tarjeta «Eventos» igual en los seis; «Sin valor» 0 y 0 ([captura](w8-filtered-dark.png)) ([w8-w9](w8-w9-cards-charts.md)) | SUPERADA |
@@ -35,7 +35,6 @@ Donde el sistema real no produce el caso, las respuestas se alteraron en el nave
 ## Pendiente
 
 - **Netlify (W15, T029)**: Netlify publica al hacer merge a `main`; tras el merge, repetir la comprobación contra la URL pública. El tamaño comprimido en Netlify no se ha medido ([W14](w14-mobile-weight.md)).
-- **Mapa, «Muestra: N de TOTAL» (W4/W5)**: comprobarlo en el navegador con un periodo truncado; hoy solo lo cubre `map-layers.test.ts`.
 - **V2 (W13)**: comprobar un evento nuevo real sin recargar; en la prueba no se esperó a un evento nuevo de USGS.
 - **V8 (W13)**: repetir los filtros inválidos (inicio igual o posterior al fin; más de 10.000 horas).
 - **Linux**: no consta en esta carpeta ninguna prueba en Linux; `CLAUDE.md` exige que los cambios funcionen en ambos equipos.

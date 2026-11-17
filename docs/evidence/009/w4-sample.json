@@ -1,0 +1,10 @@
+{
+  "sinCapas": null,
+  "calor": "Muestra: 1000 de 2500",
+  "agrupacion": "Muestra: 1000 de 2500",
+  "drawn": "1000",
+  "afterLoadAll": {
+    "sample": "Todos los eventos del periodo",
+    "drawn": "2500"
+  }
+}
