@@ -1,33 +1,16 @@
 # Huecos que ejecuta la usuaria (T027)
 
 Comprobaciones que necesitan otro equipo, otro dispositivo u otra persona. **Ninguna pendiente figura como superada**: cada una tiene su
-procedimiento y su ruta de evidencia. G4 se ejecutó el 2026-11-17 con capturas. G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron de este seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en `docs/evidence/002/README.md`. Cada procedimiento se puede hacer en menos de 30 minutos.
+procedimiento y su ruta de evidencia. G3 y G4 se ejecutaron el 2026-11-17 (G3 con alcance reducido). G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron de este seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en `docs/evidence/002/README.md`. Cada procedimiento se puede hacer en menos de 30 minutos.
 
 | Id | Hueco | Origen | Dónde |
 |---|---|---|---|
-| G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003 T050, 005, 006 | **PARCIAL el 2026-11-17**: suite completa 886 pruebas en verde ([linux-g3.md](linux-g3.md)); falta la salida de T050 (`ls -ln`) y la de `up --wait`; la latencia salió con 0 eventos (no concluyente) |
+| G3 | Pruebas en Linux de las specs 002, 003, 005 y 006 | 002, 003, 005, 006 | **HECHO el 2026-11-17 con alcance reducido** ([linux-g3.md](linux-g3.md)): arranque con los cinco servicios `healthy` y suite completa de 886 pruebas en verde; la latencia salió con 0 eventos (no concluyente); 003 T050 y los escenarios reales de 005 y 006 se descartaron |
 | G4 | Panel desde otro dispositivo físico (túnel y Netlify) | 007; §11 pruebas 9 y 10 | **HECHO el 2026-11-17** (móvil con datos móviles; [007 M1 a M3](../007/README.md)) |
 
-## G3 · Linux (specs 002, 003, 005, 006)
+## G3 · Linux (specs 002, 003, 005, 006) — HECHO el 2026-11-17 con alcance reducido
 
-En el equipo Linux, con el repositorio actualizado (`git fetch` y comparar con `origin/main` antes de `git pull`):
-
-```bash
-docker compose up --build -d --wait
-LOADER_UID=$(id -u) LOADER_GID=$(id -g) docker compose run --rm catalog-loader --dry-run
-LOADER_UID=$(id -u) LOADER_GID=$(id -g) docker compose run --rm catalog-loader --start 2025-01-01 --end 2025-01-02
-ls -ln data/usgs/catalog | tail -3         # propietario: el uid propio, no 0   (003 T050)
-docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python -m pytest tests -q   # una sola ejecución
-docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python3 tests/benchmark/api_latency.py --base-url http://api:8000
-```
-
-- **Esperado**: servicios `healthy`; ficheros de `data/` propiedad del usuario; suite en verde; latencia con la misma forma que en
-  [006 v16](../006/v16-latency.md) (medianas por debajo de 2.000 ms).
-- Si el volumen de PostgreSQL es anterior a la spec 004, aplicar la migración (sección «Base creada antes de la spec 004» de
-  `README.md`).
-- Los volúmenes de Docker son locales: el estado de la base de un equipo no dice nada del otro.
-- Registrar la salida en `docs/evidence/002`, `003`, `005` y `006` (una nota «Linux» en cada README) y marcar T050 de la 003.
-- Añadir los resultados de rendimiento de [008](structure-benchmark.md) en Linux (misma orden, otro equipo) si se quieren comparar.
+Ver [linux-g3.md](linux-g3.md): `docker compose up --build -d --wait` (cinco servicios `healthy`) y `pytest tests` (886 pruebas en verde). No se hizo la comprobación 003 T050 ni se repitieron los escenarios con el sistema real de las specs 005 y 006: se descartaron por no ser requisito del enunciado.
 
 ## G4 · Panel desde otro dispositivo físico (007; §11 pruebas 9 y 10) — HECHO el 2026-11-17 ([007 M1 a M3](../007/README.md))
 

@@ -23,13 +23,17 @@ docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python3 tests/
 **Resultado: NO CONCLUYENTE.** La base de Linux está vacía de datos de 2025 (el volumen de Docker es local a cada equipo), así que el PASS es trivial: mide consultas sobre cero filas, no la latencia
 real. Para que valga habría que cargar 2025 en el Linux (`catalog-loader`, ver `README.md`) y repetir. La latencia con datos se midió en Windows ([006 v16](../006/v16-latency.md)) y con 1.000.000 de filas ([api-latency-1m.md](api-latency-1m.md)).
 
-## 3. Lo que NO se ha demostrado en Linux
+## 3. Arranque del stack
 
-| Qué | Estado |
-|---|---|
-| `docker compose up --build -d --wait` con todos los servicios `healthy` (salida no aportada) | sin evidencia |
-| 003 T050: la carga escribe en `./data` con el usuario propio (`ls -ln data/usgs/catalog`, propietario = uid propio, no 0) | **sin evidencia; la tarea sigue sin marcar** |
-| Escenarios con el sistema real de las specs 005 y 006 (reproducción, API sobre datos reales) | no repetidos; solo las pruebas automáticas |
-| Latencia con datos | no concluyente (apartado 2) |
+```bash
+docker compose up --build -d --wait
+```
 
-Qué aporta esta evidencia: que el código y las pruebas automáticas de las specs 002 a 008 se comportan igual en Linux que en Windows (886 pruebas en verde).
+**Esperado**: los cinco servicios obligatorios en `healthy`. **Observado** ([captura](linux-up.png)): `postgres`, `kafka`, `api`, `producer` y `consumer` en `Healthy` (15,8 s, 15,8 s, 19,0 s, 30,0 s y 30,0 s), con los volúmenes y la red
+creados en esa misma ejecución (base de Linux nueva). **Resultado: SUPERADA.**
+
+## 4. Alcance
+
+Se ejecutaron en Linux la suite completa, el arranque y la medición de latencia (esta no concluyente). Quedaron fuera, por decisión de la usuaria y por no ser requisito del enunciado, la comprobación de
+propiedad de ficheros de la carga del catálogo (003 T050) y la repetición de los escenarios con el sistema real de las specs 005 y 006. Lo que aporta esta evidencia: el código y las pruebas automáticas
+de las specs 002 a 008 se comportan igual en Linux que en Windows (886 pruebas en verde) y el stack arranca sano desde cero.

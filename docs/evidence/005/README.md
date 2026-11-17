@@ -41,7 +41,7 @@ anteriores de las specs 002 a 004 (sin regresiones) y las nuevas de esta spec:
 
 ## Linux
 
-**Linux (2026-11-17)**: la suite completa (`pytest tests`) pasó en un equipo Linux: **886 pruebas en verde** ([linux-g3.md](../008/linux-g3.md)). No se repitieron los escenarios con el sistema real en Linux.
+**Linux (2026-11-17)**: la suite completa (`pytest tests`) pasó en un equipo Linux: **886 pruebas en verde** ([linux-g3.md](../008/linux-g3.md)).
 
 ## Revisión contra la constitución
 

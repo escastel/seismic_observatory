@@ -956,8 +956,10 @@ figura como superada si su evidencia tiene resultado esperado y observado ejecut
 | 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 y M3 (móvil) | — |
 | 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
 
-Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pendientes de la usuaria** (procedimientos en
-[user-gaps.md](evidence/008/user-gaps.md)): G3, pruebas en Linux de las specs 002, 003 (T050), 005 y 006: el 2026-11-17 la suite completa pasó en Linux (886 pruebas, [linux-g3.md](evidence/008/linux-g3.md)); falta la salida de T050 y la latencia con datos en Linux no fue concluyente (0 eventos). La tarea T057 de la 002 (arranque por una persona ajena) se dio por superada según lo informado: 2,5 min y sin dudas. G4 (panel desde un móvil con datos móviles) se hizo el 2026-11-17 con capturas. G1 (puertos cerrados desde otro dispositivo) y G2 (arranque por una persona ajena) se retiraron del seguimiento a petición de la usuaria; la fila V2 y la tarea T057 de la spec 002 siguen constando como pendientes en [su README](evidence/002/README.md). No se afirma que los escenarios con el sistema real pasen en Linux.
+Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pruebas de la usuaria** ([user-gaps.md](evidence/008/user-gaps.md)): el 2026-11-17 se probó el panel desde un móvil con datos móviles (G4, cerrar y reabrir el túnel con el sitio
+de Netlify, [capturas](evidence/007/README.md)) y en un equipo Linux se levantó el stack (cinco servicios `healthy`) y pasó la suite completa (886 pruebas, [linux-g3.md](evidence/008/linux-g3.md)); la latencia
+en Linux no fue concluyente (0 eventos). La tarea T057 de la 002 (arranque por una persona ajena) se dio por superada según lo informado: 2,5 min y sin dudas. Por no ser requisito del enunciado, y a petición de la usuaria, no se hicieron
+los puertos cerrados desde otro dispositivo, la comprobación de propiedad de ficheros de 003 T050 ni los escenarios con el sistema real de las specs 005 y 006 en Linux.
 
 ### Entregables de §12
 
