@@ -702,11 +702,10 @@ de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1
 - Cifras de tarjetas, tablas y gráficos iguales a `/api/estadisticas` en tres conjuntos de filtros y los dos temas ([W8/W9](evidence/009/w8-w9-cards-charts.md)).
 - Casos límite con respuestas alteradas en el navegador (nulos, sin país, marcas, coordenadas inválidas, 503, 422, desactualizado, inaccesible, truncado de 2.500): [W13](evidence/009/w13-regression.md).
 - Móvil con red lenta emulada: primera tarjeta en 3,6 s y gráficos en 4,6 s ([W14](evidence/009/w14-mobile-weight.md)).
-- Túnel real: solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
+- Túnel real y sitio público de Netlify (tras el merge a `main`): solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
 
 ### Límites
 
-- **No se desplegó en Netlify** en esta sesión (no hay sesión de Netlify en el equipo): falta repetir W15 en el sitio público.
 - Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
 - Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
 - El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.

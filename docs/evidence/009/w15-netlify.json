@@ -1,0 +1,40 @@
+{
+  "t0": "2026-11-17T19:17:51.249Z",
+  "loaded": {
+    "cards": "208",
+    "status": "Al día",
+    "table": "Mostrando 208 de 208 eventos",
+    "msg": "Información: Datos al día."
+  },
+  "title": "seismicobservatory",
+  "consoleErrors": [],
+  "hostsAndCounts": {
+    "seismicobservatoryecr.netlify.app": 24,
+    "": 2,
+    "tile.openstreetmap.org": 18,
+    "modular-guidance-daybreak.ngrok-free.dev": 9,
+    "server.arcgisonline.com": 18
+  },
+  "tunnelPaths": [
+    "/api/eventos",
+    "/api/estadisticas",
+    "/api/salud"
+  ],
+  "tunnelTileOrPlates": 0,
+  "stopped": "2026-11-17T19:17:55.845Z",
+  "closed": {
+    "cards": "208",
+    "status": "Backend inaccesible",
+    "table": "Mostrando 208 de 208 eventos",
+    "msg": "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+  },
+  "started": "2026-11-17T19:18:06.510Z",
+  "reopened": {
+    "cards": "208",
+    "status": "Al día",
+    "table": "Mostrando 208 de 208 eventos",
+    "msg": "Información: Datos al día."
+  },
+  "navigations": 1,
+  "errors": []
+}
