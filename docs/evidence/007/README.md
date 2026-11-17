@@ -52,7 +52,21 @@ Sitio publicado por la usuaria: `https://seismicobservatoryecr.netlify.app`, con
 
 Los únicos errores de CORS de consola aparecen mientras el túnel está cerrado (la página de «endpoint offline» de ngrok no lleva cabeceras CORS) y se tratan como backend inaccesible, como se espera.
 
-**Sigue sin probarse**: el acceso desde otro dispositivo físico (la prueba usa un navegador automatizado de este equipo contra la URL pública) y Linux.
+## Prueba desde un dispositivo físico (2026-11-17)
+
+Hecha por la usuaria con un **móvil Android y datos móviles** (otra red distinta de la del equipo) contra `https://seismicobservatoryecr.netlify.app`, sin recargar ni salir de la pestaña
+(capturas con los botones físicos). El túnel lo paró y reabrió la sesión con `docker compose stop tunnel` y `docker compose --profile tunnel up -d tunnel`. Es la repetición limpia: un primer intento
+no valió porque el navegador recargó la página sin querer (mostró «todavía no hay ninguna lectura correcta» y ND), y un segundo no se atribuye al túnel (no se había parado: ngrok seguía sirviendo 200) y no se usa.
+
+| Id | Qué comprueba | Esperado | Observado | Estado |
+|---|---|---|---|---|
+| M1 | Estado inicial en el móvil | «Datos al día» | «Datos al día»; última lectura 15:30:22 UTC; 179 eventos ([captura](M1-mobile-before.jpg)) | SUPERADA |
+| M2 | **Cerrar el túnel** (§11 prueba 9) | aviso de backend inaccesible; se conserva e identifica la última lectura | túnel parado a las 15:30:35 UTC; en el siguiente refresco: «Error: No se puede contactar con el backend. Se muestra la última lectura correcta» y «Aviso: los datos mostrados son la última lectura correcta, del 2026-11-17 15:30:22 UTC», con los 179 eventos en mapa y estadísticas ([captura](M2-mobile-tunnel-closed.jpg)) | SUPERADA |
+| M3 | **Reabrir el túnel** (§11 prueba 10) | se recupera solo, sin recargar | túnel reabierto a las 15:31:33 UTC; el panel volvió a «Datos al día» con lectura de las 15:32:23 UTC (≈ 50 s) y 180 eventos ([captura](M3-mobile-tunnel-reopened.jpg)) | SUPERADA |
+
+Contraste con ngrok (conector, inspector de tráfico, 2026-11-17, tramos de 30 s): 0 peticiones entre las 15:30:30 y las 15:31:30 UTC (túnel parado) y 3 por tramo antes y después.
+
+**Sigue sin probarse**: Linux.
 
 ## Notas y límites (lo que NO se ha demostrado)
 

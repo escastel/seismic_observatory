@@ -643,7 +643,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente**: la prueba desde otro dispositivo físico y en Linux. El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
+- **Pendiente**: la prueba en Linux. La prueba desde un móvil con datos móviles (cerrar y reabrir el túnel con el sitio de Netlify) se hizo el 2026-11-17 (`docs/evidence/007/`, M1 a M3). El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
 - **Pendiente**: la prueba en Linux.
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
@@ -938,13 +938,13 @@ figura como superada si su evidencia tiene resultado esperado y observado ejecut
 | 6 | Coordenadas inválidas | superada | [004](evidence/004/acceptance.md), [006 V6](evidence/006/v6-geometry.md), [007](evidence/007/README.md) V5 | igual que la 5 |
 | 7 | Evento marítimo | superada | [004](evidence/004/acceptance.md), [006 V7](evidence/006/v7-no-country.md), [007](evidence/007/README.md) V4; C1 de este apartado | — |
 | 8 | Reiniciar el consumidor | superada | [004 V3](evidence/004/restart.md), [005 V7](evidence/005/v7-consumer-restart.md) | Linux (G3) |
-| 9 | Cerrar el túnel | superada | [007](evidence/007/README.md) T2 y V11 | otro dispositivo (G4) |
-| 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 | otro dispositivo (G4) |
+| 9 | Cerrar el túnel | superada | [007](evidence/007/README.md) T2, V11 y M2 (móvil) | — |
+| 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 y M3 (móvil) | — |
 | 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
 
 Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pendientes de la usuaria** (procedimientos en
 [user-gaps.md](evidence/008/user-gaps.md)): G1 puertos cerrados desde otro dispositivo (002 V2), G2 arranque por una persona ajena
-(002 T057), G3 pruebas en Linux de las specs 002, 003 (T050), 005 y 006, y G4 panel desde otro dispositivo físico. Mientras no se
+(002 T057) y G3 pruebas en Linux de las specs 002, 003 (T050), 005 y 006. G4 (panel desde un móvil con datos móviles) se hizo el 2026-11-17. Mientras no se
 ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo.
 
 ### Entregables de §12
@@ -974,9 +974,7 @@ ejecuten, no se afirma que esas pruebas pasen en Linux ni desde otro dispositivo
 
 ### Higiene del repositorio
 
-Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB
-(`db/seeds/historical_2026.jsonl`) existe en el historial de la rama **local** `backup/main-before-fix`, que no está en el remoto; no
-debe empujarse. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
+Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB (`db/seeds/historical_2026.jsonl`) estaba en una rama local de respaldo que no estaba en el remoto; la rama se borró el 2026-11-17 con confirmación de la usuaria. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
 
 ## Modelo conceptual
 
