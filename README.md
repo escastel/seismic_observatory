@@ -1,4 +1,123 @@
-# Observatorio Sísmico
+<div align="center">
+
+# 🌍 Observatorio Sísmico
+
+**Pipeline de streaming ETL con datos reales de terremotos: USGS → Kafka → PostgreSQL → API → panel con mapa.**
+
+[![Panel en Netlify](https://img.shields.io/badge/Panel-Netlify-00C7B7?logo=netlify&logoColor=white)](https://seismicobservatoryecr.netlify.app/)
+[![API en ngrok](https://img.shields.io/badge/API-ngrok-1F1E37?logo=ngrok&logoColor=white)](https://modular-guidance-daybreak.ngrok-free.dev/docs)
+![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
+![Kafka](https://img.shields.io/badge/Apache-Kafka-231F20?logo=apachekafka&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
+![FastAPI](https://img.shields.io/badge/FastAPI-Python_3.11-009688?logo=fastapi&logoColor=white)
+![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white)
+
+<a href="https://seismicobservatoryecr.netlify.app/"><img src="docs/img/panel-light.png" alt="Panel del Observatorio Sísmico: barra de estado, filtros y mapa con los terremotos de las últimas 24 horas" width="820"></a>
+
+</div>
+
+## 🔗 Enlaces
+
+| Qué | Dónde | Notas |
+|---|---|---|
+| 🗺️ **Panel** (mapa, gráficos y tabla) | <https://seismicobservatoryecr.netlify.app/> | Alojado en **Netlify**; siempre carga |
+| 📖 **Documentación interactiva de la API** (Swagger UI, con «Probar») | <https://modular-guidance-daybreak.ngrok-free.dev/docs> | Pasa por **ngrok**; la raíz del dominio redirige aquí |
+| 💓 Estado del servicio | <https://modular-guidance-daybreak.ngrok-free.dev/api/salud> | `ok` o `degraded` |
+| 📄 Contrato OpenAPI | <https://modular-guidance-daybreak.ngrok-free.dev/api/openapi.json> | Solo lectura: `GET` |
+
+> [!IMPORTANT]
+> **El backend corre en un equipo local** (Docker Compose) y se publica con un túnel de ngrok. Si el equipo o el túnel
+> están apagados, el panel de Netlify sigue cargando pero muestra un aviso de «backend inaccesible» con la última lectura, y los
+> enlaces de ngrok no responden. Es el comportamiento previsto por el enunciado, no un fallo.
+>
+> La primera visita a un dominio gratuito de ngrok desde un navegador muestra una página intermedia: pulsa **«Visit Site»**.
+> Hay un límite de **60 peticiones por minuto por visitante** (respuesta 429).
+
+## 🧭 Cómo funciona
+
+```mermaid
+flowchart LR
+    USGS[("USGS<br/>feed all_day.geojson")] -- "GET cada 60 s" --> P
+    NE[("Natural Earth<br/>países")] --> C
+
+    subgraph PC ["Equipo local · Docker Compose"]
+        direction LR
+        P["producer<br/>Python"] -- "earthquakes.live" --> K{{"Kafka"}}
+        K --> C["consumer<br/>validación · cuarentena<br/>punto en polígono"]
+        C -- "transacción y luego offset" --> DB[("PostgreSQL<br/>core · replay")]
+        DB -- "rol de solo lectura" --> A["API FastAPI<br/>127.0.0.1:8000"]
+    end
+
+    A -- "HTTPS" --> N["ngrok<br/>modular-guidance-daybreak<br/>.ngrok-free.dev"]
+    N --> W["Panel Angular + Leaflet<br/>Netlify"]
+```
+
+| Paso | Qué ocurre |
+|---|---|
+| 1 | El **productor** consulta USGS cada 60 s y publica en Kafka solo las versiones nuevas de cada evento. |
+| 2 | El **consumidor** valida, aparta lo inválido en cuarentena (con el motivo) y asigna el país con punto en polígono. |
+| 3 | **PostgreSQL** guarda el estado actual, el historial de versiones y la cuarentena; una versión antigua nunca pisa a una más reciente. |
+| 4 | La **API** (solo lectura) sirve eventos, estadísticas y estado; el **túnel ngrok** la expone por HTTPS. |
+| 5 | El **panel** de Netlify consulta la API cada 60 s y muestra mapa, filtros, gráficos y tabla. |
+
+## 🚀 Arranque rápido
+
+Requisitos: Docker con Compose v2 y Git (detalle en el [apartado 3](#3-requisitos-y-versiones)).
+
+```bash
+git clone https://github.com/escastel/seismic_observatory.git && cd seismic_observatory
+cp .env.example .env          # sustituye cada CHANGE_ME_LOCALLY por una contraseña local
+docker compose up --build -d  # productor, consumidor, Kafka, PostgreSQL y API
+curl -s http://127.0.0.1:8000/api/salud
+```
+
+| Quiero… | Hago… |
+|---|---|
+| Ver la documentación de la API en local | Abrir <http://127.0.0.1:8000/docs> |
+| Publicar la API con ngrok | `docker compose --profile tunnel up -d` ([apartado 5](#5-túnel-para-el-panel-publicado)) |
+| Cargar el histórico de 2025 | [Cargar el histórico](#cargar-el-histórico) |
+| Demostrar la reproducción acelerada | [Reproducción acelerada](#reproducción-acelerada) |
+| Preparar la defensa | [Guion de la defensa](#guion-de-la-defensa) |
+
+## 🖼️ Capturas
+
+| Panel · claro | Panel · oscuro |
+|---|---|
+| <img src="docs/img/panel-light.png" alt="Panel en tema claro" width="420"> | <img src="docs/img/panel-dark.png" alt="Panel en tema oscuro" width="420"> |
+
+| Documentación interactiva de la API (`/docs`) |
+|---|
+| <img src="docs/img/api-docs.png" alt="Swagger UI con los tres endpoints de la API" width="620"> |
+
+## 🗂️ Dónde está cada cosa
+
+| Entregable | Ubicación |
+|---|---|
+| Memoria: decisiones, calidad, modelo, análisis, costes | [docs/report.md](docs/report.md) |
+| Calidad de los datos | [docs/calidad.md](docs/calidad.md) |
+| Evaluación financiera | [docs/evaluacion-financiera.md](docs/evaluacion-financiera.md) |
+| Explicación del flujo y decisión técnica propia | [docs/guion-explicacion.md](docs/guion-explicacion.md) |
+| Evidencias de las pruebas (esperado y observado) | [docs/evidence/](docs/evidence/) |
+| SQL de creación, índices y consultas | [db/sql/](db/sql/) y [db/queries/](db/queries/) |
+| Código | [producer/](producer/) · [consumer/](consumer/) · [api/](api/) · [frontend/](frontend/) · [common/](common/) |
+| Política de tráfico del túnel (60 por minuto) | [tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) |
+| Especificaciones de cada funcionalidad | [specs/](specs/) |
+| Enunciado y material de partida | [resources/](resources/) |
+
+## 📑 Contenido
+
+1. [Objetivo académico](#1-objetivo-académico)
+2. [Arquitectura](#2-arquitectura)
+3. [Requisitos y versiones](#3-requisitos-y-versiones)
+4. [Puesta en marcha](#4-puesta-en-marcha)
+5. [Túnel para el panel publicado](#5-túnel-para-el-panel-publicado)
+6. [Consultar la API](#6-consultar-la-api)
+7. [Datos](#7-datos)
+8. [Pruebas](#8-pruebas)
+9. [Límites tecnológicos](#9-límites-tecnológicos)
+10. [Panel Angular y defensa](#10-panel-angular-y-defensa-spec-007)
+
+---
 
 Sistema local y reproducible de streaming ETL que ingiere, valida, enriquece y sirve los
 terremotos del feed GeoJSON de USGS: productor → Kafka → consumidor → PostgreSQL → API FastAPI,
@@ -154,6 +273,9 @@ docker compose up -d
 ```
 
 ## 5. Túnel para el panel publicado
+
+> **Este proyecto:** dominio de ngrok `modular-guidance-daybreak.ngrok-free.dev` (`NGROK_DOMAIN`) y panel en Netlify
+> `seismicobservatoryecr.netlify.app`, que debe figurar en `CORS_ORIGINS`. El panel lee la URL de la API de `frontend/public/config.json`.
 
 Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` (dominio reservado) en `.env`:
 
