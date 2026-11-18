@@ -27,7 +27,7 @@ No quedan incógnitas. Hallazgos y decisiones, comprobados el 2026-11-18 con el 
 - Cada aviso es un bloque independiente (borde izquierdo de color, icono y texto); orden de apilado: error, aviso, información, éxito. El texto usa el color de texto normal sobre una superficie ligeramente teñida: el contraste de lectura lo da el texto y el color
   (≥ 3:1 frente a la superficie) refuerza el borde y el icono, no es la única señal.
 - Tonos (a ajustar con capturas): oscuro — error `#ff6b6b`, aviso `#ff8a3d`, información `#f2b134`, éxito `#3ecf8e`; claro — error `#c0302f`, aviso `#b85a00`, información `#8a5a00`, éxito `#0f8a5f`.
-- El aviso «no hay eventos para <país>» es de **información**, con la sugerencia de ampliar el periodo.
+- El aviso de «sin eventos» es de **información** y aplica a **cualquier** filtro sin resultados (no solo a un país), en vivo, en otro intervalo o en reproducción. Se muestra además como **aviso emergente** flotante sobre el mapa (no modal; no bloquea el teclado ni los lectores), con las condiciones aplicadas y la sugerencia de ampliar el periodo o quitar filtros; el anuncio a lectores de pantalla lo hace la zona de avisos (el emergente es `aria-hidden`).
 
 ## R3. Barra de estado
 
