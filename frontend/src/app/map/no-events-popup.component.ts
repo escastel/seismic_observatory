@@ -4,7 +4,7 @@ import type { NoEventsText } from '../lib/alerts';
 
 /**
  * Floating, non-modal notice shown over the map when a reading has no events.
- * It is aria-hidden: the alerts zone announces the same message.
+ * Not a live region (the alerts zone announces the same message, so it is not read twice) and not aria-hidden (its close button is focusable).
  */
 @Component({
   selector: 'app-no-events-popup',
