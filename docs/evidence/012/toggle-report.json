@@ -1,0 +1,104 @@
+[
+  {
+    "w": 1366,
+    "scheme": "light",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "rgb(238, 243, 246)",
+    "after": "dark"
+  },
+  {
+    "w": 1366,
+    "scheme": "dark",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "dark",
+    "after": "light"
+  },
+  {
+    "w": 768,
+    "scheme": "light",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "light",
+    "after": "dark"
+  },
+  {
+    "w": 768,
+    "scheme": "dark",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "dark",
+    "after": "light"
+  },
+  {
+    "w": 375,
+    "scheme": "light",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "light",
+    "after": "dark"
+  },
+  {
+    "w": 375,
+    "scheme": "dark",
+    "toggle": {
+      "left": 16,
+      "top": 16,
+      "w": 48
+    },
+    "overlaps": {
+      "logo": false,
+      "h1": false,
+      "zoom": false,
+      "title": false
+    },
+    "before": "dark",
+    "after": "light"
+  }
+]

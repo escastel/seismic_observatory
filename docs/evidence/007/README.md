@@ -66,12 +66,12 @@ no valió porque el navegador recargó la página sin querer (mostró «todavía
 
 Contraste con ngrok (conector, inspector de tráfico, 2026-11-17, tramos de 30 s): 0 peticiones entre las 15:30:30 y las 15:31:30 UTC (túnel parado) y 3 por tramo antes y después.
 
-**Sigue sin probarse**: Linux.
+**Fuera de alcance**: Linux (decisión de la usuaria; no es requisito del enunciado).
 
 ## Notas y límites (lo que NO se ha demostrado)
 
 - **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. El túnel ngrok real sí se cerró y reabrió después (sección «Prueba con el túnel ngrok real»); la prueba desde el sitio de Netlify está en su sección. El umbral de 15 s se ha comprobado con una respuesta retrasada.
 - **Refresco de 60 s**: V2 mostró la actualización automática real (≈3 min hasta que llegó un evento). Los escenarios de fallo forzaron el refresco con «Aplicar filtros» para no esperar 60 s por caso; el ciclo temporizado es el mismo código (`refresh()` rearma el temporizador al terminar).
 - **Teselas de OpenStreetMap**: el navegador sin interfaz recibe 400 en varias teselas (política de uso de OpenStreetMap ante clientes automatizados); no se ha comprobado el fondo en un navegador con interfaz, solo que fronteras y eventos se dibujan.
-- **Prueba en Linux**: pendiente (ver memoria); no se espera diferencia porque todo es TypeScript y Node.
+- **Prueba en Linux**: fuera de alcance por decisión de la usuaria; no se espera diferencia porque todo es TypeScript y Node.
 - **Contraste**: axe-core no reporta fallos de contraste; no se ha medido a mano.

@@ -1,7 +1,7 @@
 # Memoria del Observatorio Sísmico
 
 Este documento reúne las decisiones de diseño del observatorio, su justificación y las evidencias de cada
-funcionalidad (specs 002 a 009). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
+funcionalidad (specs 002 a 011). Las cifras proceden de mediciones y consultas guardadas en `docs/evidence/NNN/`; cada apartado
 indica el instante en que se obtuvieron, porque la base crece con el feed en vivo (por ejemplo, `core` tenía 34.045 eventos el
 2026-11-16, 34.207 el 2026-11-17 y 32.978 terremotos reales en la medición de calidad del 2026-11-16: no son contradicciones, son
 instantes distintos). Los datos sintéticos y de reproducción quedan fuera de todo análisis de datos reales.
@@ -15,14 +15,15 @@ instantes distintos). Los datos sintéticos y de reproducción quedan fuera de t
 5. [API de consulta](#api-de-consulta)
 6. [Panel Angular (spec 007)](#panel-angular-spec-007)
 7. [Panel rediseñado (spec 009)](#panel-rediseñado-spec-009)
-8. [Documentación pública de la API (spec 011)](#documentación-pública-de-la-api-spec-011)
-9. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
-10. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
-11. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
-12. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
-13. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
-14. [Diccionario de datos](#diccionario-de-datos)
-15. [Índices](#índices)
+8. [Ajustes del panel (spec 010)](#ajustes-del-panel-spec-010)
+9. [Documentación pública de la API (spec 011)](#documentación-pública-de-la-api-spec-011)
+10. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
+11. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
+12. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
+13. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
+14. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
+15. [Diccionario de datos](#diccionario-de-datos)
+16. [Índices](#índices)
 
 ## Alcance y decisiones
 
@@ -645,8 +646,8 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 
 ### Límites
 
-- **Pendiente**: la prueba en Linux. La prueba desde un móvil con datos móviles (cerrar y reabrir el túnel con el sitio de Netlify) se hizo el 2026-11-17 (`docs/evidence/007/`, M1 a M3). El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
-- **Pendiente**: la prueba en Linux.
+- La prueba desde un móvil con datos móviles (cerrar y reabrir el túnel con el sitio de Netlify) se hizo el 2026-11-17 (`docs/evidence/007/`, M1 a M3). El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
+- La prueba en Linux queda fuera de alcance por decisión de la usuaria (no es requisito del enunciado).
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
   que prohíbe la spec 006. Esos mismos casos de la API están en [docs/evidence/006/](evidence/006/README.md).
@@ -710,7 +711,7 @@ de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1
 - Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
 - Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
 - El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
-- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; no se probó en Linux.
+- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; la prueba en Linux queda fuera de alcance por decisión de la usuaria.
 
 ## Ajustes del panel (spec 010)
 
@@ -745,7 +746,7 @@ La spec 010 reordena el panel de la 009, añade avisos independientes y corrige 
 
 ### Límites
 
-- Pendiente: la comprobación en el sitio de Netlify tras el merge (X16) y la prueba en Linux. No repetidas: V2 y V13 de la 007; en la interfaz, Albania con 2025 completo y
+- Pendiente: la comprobación en el sitio de Netlify tras el merge (X16). No repetidas: V2 y V13 de la 007; en la interfaz, Albania con 2025 completo y
   la reproducción sin eventos (la API sí está cubierta por pruebas). No se probó con un lector de pantalla real.
 - El motivo del 422 por un periodo de más de 10.000 horas llega en inglés desde la API, tal como fija el contrato de la 006.
 
@@ -799,7 +800,7 @@ Salida de datos: 1 GB al mes (215 MB usados al empezar). Conexiones a endpoints:
 
 - Accesibilidad (axe-core, WCAG A y AA): 2 violaciones graves en la vista cerrada (`color-contrast`, `nested-interactive`) y una crítica más con una operación abierta (`select-name`), todas en la interfaz de Swagger UI 5.17.14. Se aceptan como excepciones de una librería de terceros con integridad fijada; no se cumple al 100 % AA. Swagger UI no tiene tema oscuro.
 - La documentación pasó la prueba de la «persona sin contexto» (obtiene la petición correcta en segundos), que anotó mejoras posibles: el esquema de la respuesta 200 está vacío (solo ejemplo) y no se indica si `min_mag=5` incluye 5,0.
-- Linux: no se ha probado en el otro equipo.
+- Linux: fuera de alcance por decisión de la usuaria (no es requisito del enunciado); consta la comprobación de la spec 008 (G3).
 
 ## Análisis y conclusiones (spec 008)
 

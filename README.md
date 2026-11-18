@@ -693,5 +693,5 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
 | Evento marítimo | Buscar un evento en el mar (por ejemplo, un lugar «Hawaii» sin país) | «Sin país asignado» en la ficha, en la tabla y en el gráfico por país; no aparece en el selector de país |
 | Truncado | Seleccionar 2025 completo (18.302 eventos) | Aviso de respuesta truncada, «Mostrando 1000 de 18302», «Cargar más» para avanzar, y estadísticas con el total |
 
-Estado de las comprobaciones y lo que queda pendiente (túnel ngrok real, Netlify real y Linux):
+Estado de las comprobaciones y lo que queda pendiente (túnel ngrok real y Netlify real):
 [docs/evidence/007/README.md](docs/evidence/007/README.md).
