@@ -95,10 +95,10 @@ Los agentes ejecutan solo `npx vitest run <fichero>`; la sesión principal ejecu
 
 **Independent Test**: X9, X10 y X11.
 
-- [ ] T024 [US4] [A0] En `map/map.component.ts` (y `.css`): selector solo con Simple y Satélite (catálogo de T009), placas activadas por defecto sobre ambos fondos y opcionales, retirar el fondo Relieve y su rama de código, **calor** con `HEAT_GRADIENT` y `HEAT_OPTIONS` (T008) y peso por magnitud (mínimo sin magnitud, nunca cero), leyenda de colores («Menos eventos → Más») y rótulo «densidad de eventos de la muestra · N de TOTAL»
-- [ ] T025 [US4] [A0] En `map/map.component.ts` y `frontend/src/styles.css`: **agrupación** con `iconCreateFunction` propio (`L.divIcon`) usando `clusterStyle` (tamaño y nivel por recuento, anillo y cifra), clases globales `so-cluster` y `so-cluster--1..4` en `styles.css` (Leaflet crea los iconos fuera del componente; en esa falta de estilos estaba la causa del «solo números»), y halo (`haloRadius`) detrás de los eventos sueltos con el mismo brillo; el rótulo «N de TOTAL» sigue visible
-- [ ] T026 [US4] [A0] Quitar los restos de Relieve y Esri: pie de página de `app.component.html`, atribuciones, `docs/` que lo citen como fondo disponible y `grep` del paquete compilado; comprobar que no queda ninguna referencia en `frontend/src` ni en `frontend/dist`
-- [ ] T027 [US4] [A0] Verificar X9 a X11 en ambos temas y fondos con un periodo largo (2025) y uno corto; capturas del calor y la agrupación (antes y después) en `docs/evidence/010/x9-x11-map.md`
+- [X] T024 [US4] [A0] En `map/map.component.ts` (y `.css`): selector solo con Simple y Satélite (catálogo de T009), placas activadas por defecto sobre ambos fondos y opcionales, retirar el fondo Relieve y su rama de código, **calor** con `HEAT_GRADIENT` y `HEAT_OPTIONS` (T008) y peso por magnitud (mínimo sin magnitud, nunca cero), leyenda de colores («Menos eventos → Más») y rótulo «densidad de eventos de la muestra · N de TOTAL»
+- [X] T025 [US4] [A0] En `map/map.component.ts` y `frontend/src/styles.css`: **agrupación** con `iconCreateFunction` propio (`L.divIcon`) usando `clusterStyle` (tamaño y nivel por recuento, anillo y cifra), clases globales `so-cluster` y `so-cluster--1..4` en `styles.css` (Leaflet crea los iconos fuera del componente; en esa falta de estilos estaba la causa del «solo números»), y halo (`haloRadius`) detrás de los eventos sueltos con el mismo brillo; el rótulo «N de TOTAL» sigue visible
+- [X] T026 [US4] [A0] Quitar los restos de Relieve y Esri: pie de página de `app.component.html`, atribuciones, `docs/` que lo citen como fondo disponible y `grep` del paquete compilado; comprobar que no queda ninguna referencia en `frontend/src` ni en `frontend/dist`
+- [X] T027 [US4] [A0] Verificar X9 a X11 en ambos temas y fondos con un periodo largo (2025) y uno corto; capturas del calor y la agrupación (antes y después) en `docs/evidence/010/x9-x11-map.md`
 
 ---
 

@@ -33,7 +33,7 @@ versionado, con calidad auditable e integración espacial:
 
 El túnel ngrok es un sexto servicio opcional, `tunnel`, que solo arranca con
 `--profile tunnel` (apartado 5). El panel Angular no es un contenedor: se publica en Netlify
-desde `frontend/`. Desde la spec 009 tiene tema claro u oscuro según el dispositivo, mapa con fondos Simple, Relieve y Satélite y capas opcionales (calor, agrupación y límites de placas), tarjetas de resumen, gráficos con tabla y ficha de evento; detalle y licencias en [docs/report.md](docs/report.md#panel-rediseñado-spec-009).
+desde `frontend/`. Desde la spec 009 tiene tema claro u oscuro según el dispositivo, mapa con fondos Simple y Satélite (desde la spec 010 se retiró Relieve) y capas opcionales (calor, agrupación y límites de placas), tarjetas de resumen, gráficos con tabla y ficha de evento; detalle y licencias en [docs/report.md](docs/report.md#panel-rediseñado-spec-009).
 
 El modelo de datos, sus decisiones y el diccionario están en
 [specs/002-platform-data-model/data-model.md](specs/002-platform-data-model/data-model.md) y en

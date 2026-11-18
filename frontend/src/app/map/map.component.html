@@ -16,7 +16,7 @@
       (leafletMapReady)="onMapReady($event)"
     ></div>
     @if (sampleVisible()) {
-      <p class="sample" aria-live="polite">{{ sample() }}</p>
+      <p class="sample" aria-live="polite">{{ heatOn() ? 'Densidad de eventos de la muestra · ' + sample() : sample() }}@if (clusterOn()) { · agrupado }</p>
     }
     <div class="map-controls">
       <fieldset class="control-group">
@@ -58,6 +58,9 @@
       <p class="legend-size">
         Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
         con el radio mínimo y borde discontinuo.
+        @if (clusterOn()) {
+          Burbujas: el número es la cantidad de eventos agrupados; el color y el tamaño crecen con ella.
+        }
         @if (heatOn()) {
           Mapa de calor: más intenso donde hay más eventos y mayor magnitud; sin magnitud pesa lo mínimo.
         }
@@ -65,6 +68,12 @@
           Línea discontinua roja: límites de placas tectónicas.
         }
       </p>
+      @if (heatOn()) {
+        <div class="heat-scale">
+          <span class="heat-bar" aria-hidden="true"></span>
+          <span class="heat-ends"><span>Menos eventos</span><span>Más</span></span>
+        </div>
+      }
     </details>
     @if (noEvents(); as ne) {
       @if (!popupDismissed()) {

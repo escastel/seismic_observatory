@@ -28,6 +28,7 @@ import {
 } from '../lib/map-layers';
 import { ThemeService } from '../theme/theme.service';
 import type { NoEventsText } from '../lib/alerts';
+import { clusterStyle, haloRadius, HEAT_GRADIENT, HEAT_OPTIONS } from '../lib/cluster-style';
 import { NoEventsPopupComponent } from './no-events-popup.component';
 
 // Optional layers are loaded on demand so they add nothing to the initial weight.
@@ -84,7 +85,7 @@ export class MapComponent implements OnDestroy {
   protected readonly base = signal<BaseLayerId>(DEFAULT_BASE_LAYER);
   protected readonly heatOn = signal(false);
   protected readonly clusterOn = signal(false);
-  protected readonly platesOn = signal(false);
+  protected readonly platesOn = signal(platesDefault(DEFAULT_BASE_LAYER));
   /** Layer/tile problems go to the page's alerts zone (spec 010); the map shows no notice of its own. */
   readonly notice = output<{ id: string; text: string } | null>();
   private setNotice(id: string | null, text: string | null): void {
@@ -210,7 +211,7 @@ export class MapComponent implements OnDestroy {
       if (id !== DEFAULT_BASE_LAYER) {
         this.setNotice('base_failed', `No se pudo cargar el fondo «${def.label}»; se vuelve al mapa Simple.`);
         this.base.set(DEFAULT_BASE_LAYER);
-        this.platesOn.set(false);
+        this.platesOn.set(platesDefault(DEFAULT_BASE_LAYER));
       } else {
         this.setNotice('tiles_failed', 'No se pudieron cargar las teselas del mapa; los eventos siguen visibles.');
       }
@@ -234,8 +235,19 @@ export class MapComponent implements OnDestroy {
     if (cluster) {
       try {
         await import('leaflet.markercluster');
-        const group = (globalLeaflet() as unknown as { markerClusterGroup: (o?: object) => L.LayerGroup }).markerClusterGroup({
+        const leaflet = globalLeaflet();
+        const group = (leaflet as unknown as { markerClusterGroup: (o?: object) => L.LayerGroup }).markerClusterGroup({
           chunkedLoading: true,
+          // Own icons: the plugin's default CSS is not loaded, which left only bare numbers (spec 010).
+          iconCreateFunction: (cl: { getChildCount: () => number }) => {
+            const count = cl.getChildCount();
+            const { size, level } = clusterStyle(count);
+            return leaflet.divIcon({
+              html: `<span>${count}</span>`,
+              className: `so-cluster so-cluster--${level}`,
+              iconSize: [size, size],
+            });
+          },
         });
         this.eventsLayer.addLayer(group);
         target = group;
@@ -246,8 +258,21 @@ export class MapComponent implements OnDestroy {
     for (const event of drawable) {
       if (event.lat === null || event.lon === null) continue;
       const color = depthColor(depthCategory(event.depthKm).key, theme);
+      const radius = markerRadius(event.mag);
+      if (!cluster) {
+        // Soft halo behind single events, with the same glow as the clusters.
+        target.addLayer(
+          L.circleMarker([event.lat, event.lon], {
+            radius: haloRadius(radius),
+            stroke: false,
+            fillColor: color,
+            fillOpacity: 0.18,
+            interactive: false,
+          }),
+        );
+      }
       const marker = L.circleMarker([event.lat, event.lon], {
-        radius: markerRadius(event.mag),
+        radius,
         color,
         fillColor: color,
         fillOpacity: 0.75,
@@ -272,7 +297,7 @@ export class MapComponent implements OnDestroy {
           e.lon as number,
           typeof e.mag === 'number' && Number.isFinite(e.mag) ? Math.min(1, Math.max(0.1, e.mag / 8)) : 0.1,
         ]);
-      this.heatHolder.addLayer(factory(points, { radius: 18, blur: 20, maxZoom: 6 }));
+      this.heatHolder.addLayer(factory(points, { ...HEAT_OPTIONS, gradient: HEAT_GRADIENT }));
     } catch {
       this.setNotice('heat_failed', 'No se pudo cargar el mapa de calor.');
       this.heatOn.set(false);

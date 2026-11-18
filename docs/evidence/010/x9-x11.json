@@ -1,0 +1,138 @@
+{
+  "dark-default": {
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "platePaths": 0,
+    "sample": null
+  },
+  "dark-heat": {
+    "canvas": true,
+    "paintedPixels": 312571,
+    "sample": "Densidad de eventos de la muestra · Muestra: 1000 de 18302",
+    "legendBar": true
+  },
+  "dark-clusters": {
+    "count": 25,
+    "first": [
+      {
+        "text": "2",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "11",
+        "w": 44,
+        "bg": "rgb(255, 138, 61)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--2 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "3",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "3",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "4",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "7",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      }
+    ]
+  },
+  "dark-satellite-plates": {
+    "platePaths": 0,
+    "platesChecked": true
+  },
+  "light-default": {
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "platePaths": 0,
+    "sample": null
+  },
+  "light-heat": {
+    "canvas": true,
+    "paintedPixels": 312571,
+    "sample": "Densidad de eventos de la muestra · Muestra: 1000 de 18302",
+    "legendBar": true
+  },
+  "light-clusters": {
+    "count": 25,
+    "first": [
+      {
+        "text": "2",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "11",
+        "w": 44,
+        "bg": "rgb(255, 138, 61)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--2 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "3",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "3",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "4",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      },
+      {
+        "text": "7",
+        "w": 34,
+        "bg": "rgb(255, 214, 102)",
+        "radius": "50%",
+        "cls": "leaflet-marker-icon so-cluster so-cluster--1 leaflet-zoom-animated leaflet-interactive"
+      }
+    ]
+  },
+  "requestsHosts": [
+    "127.0.0.1:8000/api",
+    "image/gif;base64,R0lGODlhAQABAAD",
+    "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSIjZmZmZmZmIiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+    "image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxNiIgaGVpZ2h0PSIxNSIgdmlld0JveD0iMCAwIDI0IDI0Ij48cGF0aCBmaWxsPSJXaW5kb3dUZXh0IiBkPSJNMjAgM2gtMVYxaC0ydjJIN1YxSDV2Mkg0Yy0xLjEgMC0yIC45LTIgMnYxNmMwIDEuMS45IDIgMiAyaDE2YzEuMSAwIDItLjkgMi0yVjVjMC0xLjEtLjktMi0yLTJ6bTAgMThINFY4aDE2djEzeiIvPjxwYXRoIGZpbGw9Im5vbmUiIGQ9Ik0wIDBoMjR2MjRIMHoiLz48L3N2Zz4=",
+    "tile.openstreetmap.org/2",
+    "tiles.maps.eox.at/wmts"
+  ]
+}
