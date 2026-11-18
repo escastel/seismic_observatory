@@ -19,10 +19,10 @@
   position: relative;
   max-width: min(26rem, 100%);
   padding: 1rem 2.5rem 1rem 1rem;
-  background: var(--surface);
+  background: color-mix(in srgb, var(--alert-info) 20%, var(--surface));
   color: var(--text);
-  border: 1px solid var(--border);
-  border-left: 4px solid var(--alert-info);
+  border: 1px solid var(--alert-info);
+  border-left: 6px solid var(--alert-info);
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   pointer-events: auto;

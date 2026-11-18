@@ -106,3 +106,26 @@ th {
     width: 100%;
   }
 }
+
+/* Explicit colours: the browser default is unreadable in the dark theme. */
+button.detail,
+button.more {
+  font: inherit;
+  padding: var(--space-1) var(--space-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+button.detail:hover:not(:disabled),
+button.more:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button.more:disabled {
+  color: var(--text-muted);
+  cursor: not-allowed;
+}

@@ -19,24 +19,24 @@
       <p class="sample" aria-live="polite">{{ heatOn() ? 'Densidad de eventos de la muestra · ' + sample() : sample() }}@if (clusterOn()) { · agrupado }</p>
     }
     <div class="map-controls">
-      <fieldset class="control-group">
-        <legend>Mapa base</legend>
+      <div class="control-group" role="group" aria-labelledby="map-base-title">
+        <p class="control-title" id="map-base-title">Mapa base</p>
         @for (b of baseLayers; track b.id) {
           <label class="choice">
             <input type="radio" name="base" [value]="b.id" [checked]="base() === b.id" (change)="chooseBase(b.id)" />
             {{ b.label }}
           </label>
         }
-      </fieldset>
-      <fieldset class="control-group">
-        <legend>Capas</legend>
+      </div>
+      <div class="control-group" role="group" aria-labelledby="map-layers-title">
+        <p class="control-title" id="map-layers-title">Capas</p>
         @for (o of overlays; track o.id) {
           <label class="choice">
             <input type="checkbox" [checked]="isOn(o.id)" (change)="toggle(o.id, $any($event.target).checked)" />
             {{ o.label }}
           </label>
         }
-      </fieldset>
+      </div>
     </div>
     <details class="legend" [open]="legendOpen()" (toggle)="legendOpen.set($any($event.target).open)">
       <summary>Leyenda</summary>
@@ -55,25 +55,28 @@
           </li>
         }
       </ul>
-      <p class="legend-size">
-        Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
-        con el radio mínimo y borde discontinuo.
-        @if (clusterOn()) {
-          Burbujas: el número es la cantidad de eventos agrupados; el color y el tamaño crecen con ella.
-        }
-        @if (heatOn()) {
-          Mapa de calor: más intenso donde hay más eventos y mayor magnitud; sin magnitud pesa lo mínimo.
-        }
-        @if (platesOn()) {
-          Línea discontinua roja: límites de placas tectónicas.
-        }
-      </p>
       @if (heatOn()) {
         <div class="heat-scale">
           <span class="heat-bar" aria-hidden="true"></span>
           <span class="heat-ends"><span>Menos eventos</span><span>Más</span></span>
         </div>
       }
+      <details class="legend-more">
+        <summary>Ver más detalles</summary>
+        <p class="legend-size">
+          Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
+          con el radio mínimo y borde discontinuo.
+          @if (clusterOn()) {
+            Burbujas: el número es la cantidad de eventos agrupados; el color y el tamaño crecen con ella.
+          }
+          @if (heatOn()) {
+            Mapa de calor: más intenso donde hay más eventos y mayor magnitud; sin magnitud pesa lo mínimo.
+          }
+          @if (platesOn()) {
+            Línea discontinua roja: límites de placas tectónicas.
+          }
+        </p>
+      </details>
     </details>
     @if (noEvents(); as ne) {
       @if (!popupDismissed()) {

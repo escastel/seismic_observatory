@@ -1,0 +1,28 @@
+{
+  "dark-controls-title": {
+    "color": "rgb(169, 185, 200)",
+    "parentBg": "color(srgb 0.0705882 0.121569 0.176471 / 0.92)"
+  },
+  "dark-axe-map": [],
+  "dark-ficha-button": {
+    "color": "rgb(232, 238, 244)",
+    "bg": "rgb(26, 42, 59)",
+    "w": 79,
+    "h": 31
+  },
+  "dark-axe-table": [],
+  "dark-axe-popup": [],
+  "light-controls-title": {
+    "color": "rgb(66, 89, 108)",
+    "parentBg": "color(srgb 1 1 1 / 0.92)"
+  },
+  "light-axe-map": [],
+  "light-ficha-button": {
+    "color": "rgb(19, 43, 64)",
+    "bg": "rgb(228, 236, 241)",
+    "w": 79,
+    "h": 31
+  },
+  "light-axe-table": [],
+  "light-axe-popup": []
+}
