@@ -7,12 +7,7 @@
     </div>
   </header>
 
-  @if (service.configError(); as error) {
-    <p class="config-error" role="alert">Error de configuración: {{ error }}. Revisa public/config.json.</p>
-  }
-  @if (bordersError()) {
-    <p class="notice" role="status">No se pudieron cargar las fronteras ni el catálogo de países; el filtro por país no está disponible.</p>
-  }
+  <app-alerts [alerts]="alerts()" />
 
   <app-status-bar
     [statistics]="service.reading()?.statistics ?? null"
@@ -26,15 +21,6 @@
     (apply)="apply($event)"
     (modeChange)="changeMode($event)" />
 
-  @if (metadata(); as md) {
-    @if (events().length < md.total) {
-      <p class="notice" role="status">
-        Respuesta truncada: el mapa y la tabla muestran {{ events().length }} de {{ md.total }} eventos.
-        Las estadísticas corresponden al conjunto completo. Usa «Cargar más» en la tabla para traer el resto.
-      </p>
-    }
-  }
-
   <app-map
     [events]="events()"
     [borders]="borders()"
@@ -43,6 +29,7 @@
     [total]="metadata()?.total ?? 0"
     [theme]="themeService.theme()"
     [noEvents]="noEvents()"
+    (notice)="layerNotice($event)"
     (eventSelected)="openCard($event)" />
 
   <app-charts

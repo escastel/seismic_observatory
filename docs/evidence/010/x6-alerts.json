@@ -1,0 +1,204 @@
+[
+  {
+    "label": "00-baseline",
+    "alerts": []
+  },
+  {
+    "label": "01-unreachable",
+    "alerts": [
+      {
+        "role": "alert",
+        "cls": "alert alert-error",
+        "border": "rgb(255, 107, 107)",
+        "text": "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "02-recovered-success",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-success",
+        "border": "rgb(62, 207, 142)",
+        "text": "Correcto: Conexión recuperada: los datos vuelven a actualizarse.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "02b-recovered-after-9s",
+    "alerts": []
+  },
+  {
+    "label": "01-db503",
+    "alerts": [
+      {
+        "role": "alert",
+        "cls": "alert alert-error",
+        "border": "rgb(255, 107, 107)",
+        "text": "Error: La base de datos no está disponible (503). Esto no significa que no haya eventos.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "01-invalid",
+    "alerts": [
+      {
+        "role": "alert",
+        "cls": "alert alert-error",
+        "border": "rgb(255, 107, 107)",
+        "text": "Error: La respuesta de la API no es válida: Respuesta no válida: metadata",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "01-stats422",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Las estadísticas no están disponibles: el periodo tiene demasiadas ventanas. Se muestran los eventos de este filtro.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "01-statsinvalid",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Las estadísticas no están disponibles: Respuesta no válida: mode: modo distinto del pedido. Se muestran los eventos de este filtro.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "01-stale",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Datos desactualizados: la última consulta correcta a USGS fue hace 3 h 0 min.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "01-truncated",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Se muestran 200 de 4200 eventos en el mapa y la tabla; las cifras y los gráficos cuentan todos.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "03-period-too-long",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Las estadísticas no están disponibles: the period has 235645 hourly windows; narrow it to at most 10000 hours. Se muestran los eventos de este filtro.",
+        "svg": true
+      },
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Se muestran 1000 de 33413 eventos en el mapa y la tabla; las cifras y los gráficos cuentan todos.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "04-replay",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: Se muestran 1000 de 2807 eventos en el mapa y la tabla; las cifras y los gráficos cuentan todos.",
+        "svg": true
+      },
+      {
+        "role": "status",
+        "cls": "alert alert-info",
+        "border": "rgb(242, 177, 52)",
+        "text": "Información: Modo reproducción: los datos mostrados son una reproducción, no datos en vivo.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "05-no-events",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-info",
+        "border": "rgb(242, 177, 52)",
+        "text": "Información: No hay eventos sísmicos ahora mismo en Albania",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "06-tiles-blocked",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: No se pudieron cargar las teselas del mapa; los eventos siguen visibles.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "07-countries-unavailable",
+    "alerts": [
+      {
+        "role": "status",
+        "cls": "alert alert-warning",
+        "border": "rgb(255, 138, 61)",
+        "text": "Aviso: La lista de países no está disponible; el filtro por país no se puede usar ahora.",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "08-config-error",
+    "alerts": [
+      {
+        "role": "alert",
+        "cls": "alert alert-error",
+        "border": "rgb(255, 107, 107)",
+        "text": "Error: No se pudo leer config.json",
+        "svg": true
+      }
+    ]
+  },
+  {
+    "label": "09-light-unreachable",
+    "alerts": [
+      {
+        "role": "alert",
+        "cls": "alert alert-error",
+        "border": "rgb(192, 48, 47)",
+        "text": "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco.",
+        "svg": true
+      }
+    ]
+  }
+]

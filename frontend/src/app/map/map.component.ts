@@ -85,7 +85,11 @@ export class MapComponent implements OnDestroy {
   protected readonly heatOn = signal(false);
   protected readonly clusterOn = signal(false);
   protected readonly platesOn = signal(false);
-  protected readonly notice = signal<string | null>(null);
+  /** Layer/tile problems go to the page's alerts zone (spec 010); the map shows no notice of its own. */
+  readonly notice = output<{ id: string; text: string } | null>();
+  private setNotice(id: string | null, text: string | null): void {
+    this.notice.emit(id !== null && text !== null ? { id, text } : null);
+  }
 
   protected readonly partition = computed(() => partitionDrawable(this.events()));
   protected readonly drawnCount = computed(() => this.partition().drawable.length);
@@ -177,7 +181,7 @@ export class MapComponent implements OnDestroy {
   }
 
   protected chooseBase(id: BaseLayerId): void {
-    this.notice.set(null);
+    this.setNotice(null, null);
     this.base.set(id);
     this.platesOn.set(platesDefault(id));
   }
@@ -204,11 +208,11 @@ export class MapComponent implements OnDestroy {
       // Only a layer that has not drawn a single tile counts as failed.
       if (this.tileErrors < 3 || tilesLoaded > 0) return;
       if (id !== DEFAULT_BASE_LAYER) {
-        this.notice.set(`No se pudo cargar el fondo «${def.label}»; se vuelve al mapa Simple.`);
+        this.setNotice('base_failed', `No se pudo cargar el fondo «${def.label}»; se vuelve al mapa Simple.`);
         this.base.set(DEFAULT_BASE_LAYER);
         this.platesOn.set(false);
       } else {
-        this.notice.set('No se pudieron cargar las teselas del mapa; los eventos siguen visibles.');
+        this.setNotice('tiles_failed', 'No se pudieron cargar las teselas del mapa; los eventos siguen visibles.');
       }
     });
     layer.addTo(map);
@@ -236,7 +240,7 @@ export class MapComponent implements OnDestroy {
         this.eventsLayer.addLayer(group);
         target = group;
       } catch {
-        this.notice.set('No se pudo cargar la agrupación; se muestran los círculos.');
+        this.setNotice('cluster_failed', 'No se pudo cargar la agrupación; se muestran los círculos.');
       }
     }
     for (const event of drawable) {
@@ -270,7 +274,7 @@ export class MapComponent implements OnDestroy {
         ]);
       this.heatHolder.addLayer(factory(points, { radius: 18, blur: 20, maxZoom: 6 }));
     } catch {
-      this.notice.set('No se pudo cargar el mapa de calor.');
+      this.setNotice('heat_failed', 'No se pudo cargar el mapa de calor.');
       this.heatOn.set(false);
     }
   }
@@ -288,7 +292,7 @@ export class MapComponent implements OnDestroy {
         L.geoJSON(this.platesData, { style: { color: '#ff6b6b', weight: 1.5, dashArray: '6 4', fill: false } }),
       );
     } catch {
-      this.notice.set('No se pudieron cargar los límites de placas.');
+      this.setNotice('plates_failed', 'No se pudieron cargar los límites de placas.');
       this.platesOn.set(false);
     }
   }

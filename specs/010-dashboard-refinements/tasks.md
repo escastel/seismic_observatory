@@ -85,9 +85,9 @@ Los agentes ejecutan solo `npx vitest run <fichero>`; la sesión principal ejecu
 
 **Independent Test**: X6.
 
-- [ ] T021 [P] [US2] [A1] Crear `frontend/src/app/alerts/alerts.component.ts|html|css`: lista de bloques independientes de `Alert[]` (T004) con borde, icono SVG y texto por tipo (✕ error, ▲ aviso, ⓘ información, ✓ éxito), `role` según el aviso, el de éxito se cierra solo a los 8 s, apilado por gravedad, sin ocupar espacio si no hay avisos, botón de cierre en los no críticos; colores de los tokens de T002 (contrato §3)
-- [ ] T022 [US2] [A0] Cablear los avisos en `app.component.ts|html`: calcular `buildAlerts` con el estado del servicio, el truncado, el modo, `configError`, el aviso de países y los avisos de capas que emite el mapa (`output()` `notice` de `map.component.ts`, que sustituye a su aviso interno); mostrar `app-alerts` entre la cabecera y la barra de estado; retirar los avisos antiguos dispersos del HTML
-- [ ] T023 [US2] [A0] Verificar X6 provocando cada situación (backend inaccesible con el túnel o la red bloqueada, datos desactualizados, 503 y respuesta no válida con el simulador, truncado, periodo > 10.000 h, fallo de fondo bloqueando el dominio, reproducción, sin eventos, recuperación): tipo, color, icono, texto y rol; capturas en `docs/evidence/010/x6-alerts.md`
+- [X] T021 [P] [US2] [A1] Crear `frontend/src/app/alerts/alerts.component.ts|html|css`: lista de bloques independientes de `Alert[]` (T004) con borde, icono SVG y texto por tipo (✕ error, ▲ aviso, ⓘ información, ✓ éxito), `role` según el aviso, el de éxito se cierra solo a los 8 s, apilado por gravedad, sin ocupar espacio si no hay avisos, botón de cierre en los no críticos; colores de los tokens de T002 (contrato §3)
+- [X] T022 [US2] [A0] Cablear los avisos en `app.component.ts|html`: calcular `buildAlerts` con el estado del servicio, el truncado, el modo, `configError`, el aviso de países y los avisos de capas que emite el mapa (`output()` `notice` de `map.component.ts`, que sustituye a su aviso interno); mostrar `app-alerts` entre la cabecera y la barra de estado; retirar los avisos antiguos dispersos del HTML
+- [X] T023 [US2] [A0] Verificar X6 provocando cada situación (backend inaccesible con el túnel o la red bloqueada, datos desactualizados, 503 y respuesta no válida con el simulador, truncado, periodo > 10.000 h, fallo de fondo bloqueando el dominio, reproducción, sin eventos, recuperación): tipo, color, icono, texto y rol; capturas en `docs/evidence/010/x6-alerts.md`
 
 ---
 

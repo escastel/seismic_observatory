@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, effect, inject, signal } from '@angular/core';
 import type { FeatureCollection } from 'geojson';
 import { ObservatoryService } from './data/observatory.service';
 import { FiltersComponent } from './filters/filters.component';
 import { MapComponent } from './map/map.component';
+import { AlertsComponent } from './alerts/alerts.component';
 import { StatusBarComponent } from './status-bar/status-bar.component';
 import { TableComponent } from './table/table.component';
 import { ChartsComponent } from './charts/charts.component';
@@ -12,7 +13,7 @@ import { ThemeService } from './theme/theme.service';
 import type { MapEvent, Mode, QueryFilters } from './lib/api-types';
 import { buildCountryCatalog } from './lib/countries';
 import { filterChips } from './lib/filter-chips';
-import { noEventsText, type NoEventsText } from './lib/alerts';
+import { buildAlerts, noEventsText, type Alert, type LayerNotice, type NoEventsText } from './lib/alerts';
 
 @Component({
   selector: 'app-root',
@@ -20,6 +21,7 @@ import { noEventsText, type NoEventsText } from './lib/alerts';
   imports: [
     FiltersComponent,
     MapComponent,
+    AlertsComponent,
     StatusBarComponent,
     TableComponent,
     ChartsComponent,
@@ -41,6 +43,45 @@ export class AppComponent implements OnInit {
   protected readonly events = computed(() => this.service.reading()?.events ?? []);
   protected readonly metadata = computed(() => this.service.reading()?.metadata ?? null);
   protected readonly mode = computed<Mode>(() => this.service.filters().mode);
+
+  /** Problems reported by the map layers, by id. */
+  private readonly layerNotices = signal<LayerNotice[]>([]);
+  /** True for a few seconds after the panel recovers from a failure. */
+  private readonly recovered = signal(false);
+  private hadFailure = false;
+
+  protected readonly alerts = computed<Alert[]>(() => {
+    const reading = this.service.reading();
+    const id = reading?.filters.countryId ?? null;
+    const name = id === null ? null : (this.countries().find((c) => c.id === id)?.name ?? null);
+    return buildAlerts({
+      status: this.service.status(),
+      statsFailure: this.service.statsFailure(),
+      reading,
+      countryName: name,
+      configError: this.service.configError(),
+      countriesUnavailable: this.bordersError(),
+      layerNotices: this.layerNotices(),
+      recovered: this.recovered()
+    });
+  });
+
+  constructor() {
+    effect(() => {
+      const failed = this.service.failure() !== null;
+      if (this.hadFailure && !failed) {
+        this.recovered.set(true);
+        setTimeout(() => this.recovered.set(false), 9000);
+      }
+      if (failed) this.recovered.set(false);
+      this.hadFailure = failed;
+    });
+  }
+
+  protected layerNotice(notice: LayerNotice | null): void {
+    if (notice === null) this.layerNotices.set([]);
+    else this.layerNotices.update((list) => [...list.filter((n) => n.id !== notice.id), notice]);
+  }
 
   /** Chips for the filters of the last correct reading (the applied ones, not the form's). */
   protected readonly chips = computed(() => {
