@@ -14,12 +14,14 @@ from typing import Any, AsyncIterator
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from common import settings
 from common.logging import configure
 
 from . import db
+from . import openapi_text as text
+from .docs import CONTENT_SECURITY_POLICY, docs_page
 from .db import DATABASE_ERRORS, DatabaseUnavailable, guard, pool_for
 from .filters import ParameterError, QueryFilters, build_where, parse_filters
 from .queries import (
@@ -60,7 +62,9 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
 
 
 app = FastAPI(
-    title="Observatorio Sísmico",
+    title=text.API_TITLE,
+    description=text.API_DESCRIPTION,
+    openapi_tags=text.TAGS,
     openapi_url=f"{config.api_prefix}/openapi.json",
     docs_url=None,
     redoc_url=None,
@@ -114,16 +118,50 @@ async def unexpected_error_handler(request: Request, exc: Exception) -> Response
     )
 
 
+# --- public documentation -----------------------------------------------------------------
+# /docs (Swagger UI) and / (redirect to it) are not part of the data contract: they stay out
+# of the OpenAPI document. /redoc stays disabled (spec 011 reverses only the /docs part of 006 R7).
+
+
+@app.get("/docs", include_in_schema=False)
+async def docs() -> HTMLResponse:
+    return HTMLResponse(
+        docs_page(f"{config.api_prefix}/openapi.json"),
+        headers={"Content-Security-Policy": CONTENT_SECURITY_POLICY},
+    )
+
+
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    return RedirectResponse("/docs", status_code=307)
+
+
+# --- documented error responses (the shapes the handlers above really produce) -------------
+
+
+def _error_response(description: str, example: dict[str, Any]) -> dict[str, Any]:
+    return {"description": description, "content": {"application/json": {"example": example}}}
+
+
+_R422 = _error_response(text.ERROR_422_DESCRIPTION, text.ERROR_422_EXAMPLE)
+_R503 = _error_response(text.ERROR_503_DESCRIPTION, text.ERROR_503_EXAMPLE)
+_R500 = _error_response(text.ERROR_500_DESCRIPTION, text.ERROR_500_EXAMPLE)
+
+
 # --- shared parameters --------------------------------------------------------------------
 
 
 def common_filters(
-    mode: str = Query(default="live", description="live | replay"),
-    start: datetime | None = Query(default=None, description="ISO 8601 with zone, inclusive"),
-    end: datetime | None = Query(default=None, description="ISO 8601 with zone, exclusive"),
-    min_mag: float | None = Query(default=None),
-    country_id: str | None = Query(default=None),
-    exclude_synthetic: bool = Query(default=False),
+    mode: str = Query(default="live", description=text.MODE_DESCRIPTION, examples=[text.MODE_EXAMPLE]),
+    start: datetime | None = Query(default=None, description=text.START_DESCRIPTION, examples=[text.START_EXAMPLE]),
+    end: datetime | None = Query(default=None, description=text.END_DESCRIPTION, examples=[text.END_EXAMPLE]),
+    min_mag: float | None = Query(default=None, description=text.MIN_MAG_DESCRIPTION, examples=[text.MIN_MAG_EXAMPLE]),
+    country_id: str | None = Query(
+        default=None, description=text.COUNTRY_ID_DESCRIPTION, examples=[text.COUNTRY_ID_EXAMPLE]
+    ),
+    exclude_synthetic: bool = Query(
+        default=False, description=text.EXCLUDE_SYNTHETIC_DESCRIPTION, examples=[text.EXCLUDE_SYNTHETIC_EXAMPLE]
+    ),
 ) -> QueryFilters:
     return parse_filters(mode, start, end, min_mag, country_id, exclude_synthetic)
 
@@ -143,12 +181,26 @@ def _period(where: Any) -> dict[str, Any]:
 # --- GET /api/eventos ---------------------------------------------------------------------
 
 
-@app.get(f"{config.api_prefix}/eventos")
+@app.get(
+    f"{config.api_prefix}/eventos",
+    tags=["eventos"],
+    summary=text.EVENTS_SUMMARY,
+    description=text.EVENTS_DESCRIPTION,
+    responses={
+        200: {
+            "description": text.EVENTS_200_DESCRIPTION,
+            "content": {"application/json": {"example": text.EVENTS_200_EXAMPLE}},
+        },
+        422: _R422,
+        503: _R503,
+        500: _R500,
+    },
+)
 async def events(
     request: Request,
     filters: QueryFilters = Depends(common_filters),
-    limit: int | None = Query(default=None, description="page size, 1 to the documented maximum"),
-    offset: int = Query(default=0, ge=0),
+    limit: int | None = Query(default=None, description=text.LIMIT_DESCRIPTION, examples=[text.LIMIT_EXAMPLE]),
+    offset: int = Query(default=0, ge=0, description=text.OFFSET_DESCRIPTION, examples=[text.OFFSET_EXAMPLE]),
 ) -> Response:
     max_features: int = request.app.state.max_features
     if limit is None:
@@ -198,7 +250,19 @@ async def events(
 # --- GET /api/salud -----------------------------------------------------------------------
 
 
-@app.get(f"{config.api_prefix}/salud")
+@app.get(
+    f"{config.api_prefix}/salud",
+    tags=["salud"],
+    summary=text.HEALTH_SUMMARY,
+    description=text.HEALTH_DESCRIPTION,
+    responses={
+        200: {
+            "description": text.HEALTH_200_DESCRIPTION,
+            "content": {"application/json": {"example": text.HEALTH_200_EXAMPLE}},
+        },
+        500: _R500,
+    },
+)
 async def health(request: Request) -> Response:
     """Always answers 200: «degraded» when a database pool cannot answer. No credentials."""
     states: dict[str, str] = {}
@@ -237,11 +301,19 @@ async def health(request: Request) -> Response:
 # --- GET /api/estadisticas ----------------------------------------------------------------
 
 
-@app.get(f"{config.api_prefix}/estadisticas")
+@app.get(
+    f"{config.api_prefix}/estadisticas",
+    tags=["estadisticas"],
+    summary=text.STATISTICS_SUMMARY,
+    description=text.STATISTICS_DESCRIPTION,
+    responses={200: {"description": text.STATISTICS_200_DESCRIPTION}, 422: _R422, 503: _R503, 500: _R500},
+)
 async def statistics(
     request: Request,
     filters: QueryFilters = Depends(common_filters),
-    baseline_year: int = Query(default=2025, ge=1900, le=2100),
+    baseline_year: int = Query(
+        default=2025, ge=1900, le=2100, description=text.BASELINE_YEAR_DESCRIPTION, examples=[text.BASELINE_YEAR_EXAMPLE]
+    ),
 ) -> Response:
     """Aggregations over the whole filtered set (never over a page), from the current state."""
     replay = filters.mode == "replay"

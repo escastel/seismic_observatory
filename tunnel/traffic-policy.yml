@@ -1,0 +1,28 @@
+# Traffic policy of the public tunnel (spec 011): at most 60 requests per minute per visitor.
+# Over the limit the visitor gets a JSON 429 in Spanish with Retry-After. The 429 carries no
+# Access-Control-Allow-Origin header on purpose: it never opens the API to other origins.
+on_http_request:
+  - name: per-visitor-rate-limit
+    actions:
+      - type: rate-limit
+        config:
+          name: per-visitor
+          # Only evaluate: with enforcement on, ngrok answers an empty 429 itself and the
+          # custom response below never runs.
+          enforce: false
+          algorithm: sliding_window
+          capacity: 60
+          rate: 60s
+          bucket_key:
+            - conn.client_ip
+  - name: too-many-requests
+    expressions:
+      - actions.ngrok.rate_limit.limited
+    actions:
+      - type: custom-response
+        config:
+          status_code: 429
+          headers:
+            content-type: application/json
+            retry-after: "60"
+          body: '{"error":"too_many_requests","message":"Demasiadas peticiones. Espera un minuto antes de volver a probar."}'

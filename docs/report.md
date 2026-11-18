@@ -15,13 +15,14 @@ instantes distintos). Los datos sintéticos y de reproducción quedan fuera de t
 5. [API de consulta](#api-de-consulta)
 6. [Panel Angular (spec 007)](#panel-angular-spec-007)
 7. [Panel rediseñado (spec 009)](#panel-rediseñado-spec-009)
-8. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
-9. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
-10. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
-11. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
-12. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
-13. [Diccionario de datos](#diccionario-de-datos)
-14. [Índices](#índices)
+8. [Documentación pública de la API (spec 011)](#documentación-pública-de-la-api-spec-011)
+9. [Análisis y conclusiones (spec 008)](#análisis-y-conclusiones-spec-008)
+10. [Complejidad y rendimiento (spec 008)](#complejidad-y-rendimiento-spec-008)
+11. [Costes, escalado y mejoras (spec 008)](#costes-escalado-y-mejoras-spec-008) (y [evaluacion-financiera.md](evaluacion-financiera.md))
+12. [Trazabilidad y cierre de entregables (spec 008)](#trazabilidad-y-cierre-de-entregables-spec-008)
+13. [Modelo conceptual](#modelo-conceptual), [lógico](#modelo-lógico) y [físico](#modelo-físico)
+14. [Diccionario de datos](#diccionario-de-datos)
+15. [Índices](#índices)
 
 ## Alcance y decisiones
 
@@ -544,7 +545,7 @@ Se revisaron y se mantienen por los motivos que siguen; la 1 y la 2 se pueden re
 | `date_from`, `date_to`, `min_magnitude`, `max_magnitude`, `format=json` y la respuesta `{items, count, limit, offset}` | No están en el contrato y ningún cliente los usa |
 | `/api/estadisticas/paises`, `/api/estadisticas/timeline` y `/api/health` | Sus datos están en `/api/estadisticas`; Compose usa `/api/salud` |
 | `country` (por nombre) y la propiedad `country` del `Feature` | El contrato filtra por `country_id` y expone `country_name` |
-| Swagger UI y ReDoc | No son contrato y cargan recursos externos; se conserva `/api/openapi.json` |
+| Swagger UI y ReDoc | No son contrato y cargan recursos externos; se conserva `/api/openapi.json`. La spec 011 revierte solo `/docs` (ver «Documentación pública de la API»); `/redoc` sigue desactivada |
 
 El frontend entregado envía `format=geojson` (ignorado sin error) y `country` (ignorado: el filtro por
 país deja de aplicarse); el popup lee `p.country`. **Traspaso a la spec 007**: migrar a `country_id` y a
@@ -747,6 +748,58 @@ La spec 010 reordena el panel de la 009, añade avisos independientes y corrige 
 - Pendiente: la comprobación en el sitio de Netlify tras el merge (X16) y la prueba en Linux. No repetidas: V2 y V13 de la 007; en la interfaz, Albania con 2025 completo y
   la reproducción sin eventos (la API sí está cubierta por pruebas). No se probó con un lector de pantalla real.
 - El motivo del 422 por un periodo de más de 10.000 horas llega en inglés desde la API, tal como fija el contrato de la 006.
+
+## Documentación pública de la API (spec 011)
+
+El dominio público de ngrok sirve ahora una documentación interactiva de la API (Swagger UI) en `/docs`, con «Probar» para los tres endpoints de datos, y la raíz `/` redirige a ella. Evidencia: [evidence/011/README.md](evidence/011/README.md).
+
+### Qué se publica
+
+| Ruta | Respuesta |
+|---|---|
+| `/docs` | Swagger UI en español, con «Probar» solo para `GET` |
+| `/` | redirección temporal (307) a `/docs` |
+| `/api/openapi.json` | contrato OpenAPI con título, descripción, resumen y descripción por operación y por parámetro, ejemplos y las respuestas 200, 422, 503 y 500 (`/api/salud`: 200 y 500, porque siempre responde 200 y marca «degraded» si falla un pool) |
+| `/redoc`, `/admin`, `/metrics` y cualquier otra | 404 |
+
+La descripción general declara que los datos proceden de USGS y que **no son una predicción ni una evaluación de riesgo**. Los tres endpoints de datos, sus parámetros, tipos, valores por defecto, CORS, base de datos, consumidor, productor y panel no cambian (comprobado por pruebas de contrato y por `git diff` vacío en esas carpetas).
+
+### Reversión justificada de la decisión R7 de la spec 006
+
+La spec 006 desactivó `/docs` y `/redoc` porque «no son contrato y cargan recursos externos». Esta spec revierte **solo `/docs`**: sin una documentación visible, la raíz del dominio daba un 404 y quien recibía el enlace no podía probar la API. Medidas compensatorias:
+
+- Los recursos se piden a `cdn.jsdelivr.net` con **versión exacta** (`swagger-ui-dist@5.17.14`) y **Subresource Integrity** (`sha384`); si el hash no coincide el navegador rechaza el script (comprobado con un hash alterado: no se dibuja nada).
+- No pasan por el túnel, para no gastar el tope mensual de 1 GB de salida del plan gratuito de ngrok.
+- `Content-Security-Policy` restrictiva: `default-src 'none'`, scripts y estilos solo de la propia página y de `cdn.jsdelivr.net` (con `'unsafe-inline'` por el bloque de inicialización), `connect-src 'self'`.
+- `supportedSubmitMethods: ["get"]`: la interfaz solo permite probar lecturas, y la API no tiene ninguna ruta de escritura (405 con `POST`, `PUT`, `PATCH` y `DELETE`).
+- `/redoc` sigue desactivada y no hay administración ni métricas por el túnel.
+
+### Recursos externos declarados
+
+Al abrir `/docs`, el navegador se conecta a `cdn.jsdelivr.net`, que ve **la dirección IP y el `Referer`** de quien visita. La propia página lo avisa en una franja visible y la descripción de la API lo repite.
+
+### Página intermedia de ngrok
+
+Un dominio gratuito de ngrok muestra una página intermedia en la primera visita desde un navegador (hay que pulsar «Visit Site»). Además, esa página también se devuelve, en lugar de JSON, a una petición con `User-Agent` de navegador y `Accept: application/json`; por eso la página `/docs` añade `ngrok-skip-browser-warning: true` a cada petición de «Probar» con un `requestInterceptor`. Comprobado por el dominio público: «Probar» recibe JSON real.
+
+### Límite de 60 peticiones por minuto por visitante
+
+Está en [tunnel/traffic-policy.yml](../tunnel/traffic-policy.yml) (política de tráfico de ngrok montada en el servicio `tunnel` de Compose), clave `conn.client_ip`. Al superarlo, la respuesta es un 429 en JSON y en español con `Retry-After: 60` y **sin** `Access-Control-Allow-Origin`.
+
+- **Hallazgo durante la verificación:** con la acción `rate-limit` en su modo por defecto, ngrok responde él mismo con un 429 **vacío** y la regla `custom-response` no llega a ejecutarse. La herramienta de validación de ngrok aprobaba esa política porque solo comprueba la sintaxis. Se corrigió con `enforce: false` (la acción solo evalúa) y la regla `actions.ngrok.rate_limit.limited` responde. Detalle en [z9-rate-limit.md](evidence/011/z9-rate-limit.md).
+- Una ráfaga de 300 peticiones por una sola conexión recibió 53 respuestas 200 y 247 de 429; al minuto volvió a responder 200. El corte no es exactamente 60 (ngrok aplica la capacidad por servidor de entrada con ventana deslizante): es «≈ 60».
+- El uso normal del panel no se limita: 5 minutos con refresco de 60 s dieron 0 respuestas 429 y un máximo de 10 peticiones por minuto.
+- El límite protege el dominio público; la API local (`http://127.0.0.1:8000`) no pasa por el túnel y no está limitada. **No comprobado**: el comportamiento desde un segundo origen distinto.
+
+### Topes del plan gratuito de ngrok
+
+Salida de datos: 1 GB al mes (215 MB usados al empezar). Conexiones a endpoints: 100 por minuto en **toda la cuenta**, no por visitante, y 100 simultáneas; el límite de 60 por minuto por IP no impide que varios visitantes agoten ese tope de la cuenta.
+
+### Limitaciones conocidas
+
+- Accesibilidad (axe-core, WCAG A y AA): 2 violaciones graves en la vista cerrada (`color-contrast`, `nested-interactive`) y una crítica más con una operación abierta (`select-name`), todas en la interfaz de Swagger UI 5.17.14. Se aceptan como excepciones de una librería de terceros con integridad fijada; no se cumple al 100 % AA. Swagger UI no tiene tema oscuro.
+- La documentación pasó la prueba de la «persona sin contexto» (obtiene la petición correcta en segundos), que anotó mejoras posibles: el esquema de la respuesta 200 está vacío (solo ejemplo) y no se indica si `min_mag=5` incluye 5,0.
+- Linux: no se ha probado en el otro equipo.
 
 ## Análisis y conclusiones (spec 008)
 

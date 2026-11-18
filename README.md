@@ -171,6 +171,20 @@ docker compose --profile tunnel stop tunnel
 
 Sin `--profile tunnel` el servicio no arranca, y los cinco obligatorios funcionan igual.
 
+### Documentación interactiva de la API (spec 011)
+
+La API sirve una documentación interactiva (Swagger UI) en `/docs`, con «Probar» para los tres
+endpoints de datos, y la raíz `/` redirige a ella:
+
+- En local: <http://127.0.0.1:8000/docs>.
+- Por el túnel: `https://TU-DOMINIO.ngrok-free.app/docs` (la primera vez, ngrok muestra su página
+  intermedia: pulsa «Visit Site»; «Probar» ya envía `ngrok-skip-browser-warning`).
+
+La página carga Swagger UI desde `cdn.jsdelivr.net` (versión exacta con integridad), que ve la
+dirección IP y el `Referer` del navegador. `/redoc` sigue desactivada. El túnel aplica un límite de
+**60 peticiones por minuto por visitante** (respuesta 429) definido en
+[tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) y montado en el servicio `tunnel`.
+
 ## 6. Consultar la API
 
 Base: `http://127.0.0.1:8000/api` (o la URL del túnel del apartado 5, añadiendo la cabecera
