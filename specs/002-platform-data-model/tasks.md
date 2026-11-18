@@ -7,7 +7,7 @@ description: "Task list for feature 002: platform and data model"
 
 **Input**: Design documents from `/specs/002-platform-data-model/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Prerequisites**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/database.md](contracts/database.md),
 [contracts/runtime.md](contracts/runtime.md), [quickstart.md](quickstart.md)
 
@@ -26,7 +26,7 @@ de offset de [research.md](research.md) §R20, que se corrigen en T037.
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: puede hacerse en paralelo (ficheros distintos, sin dependencias pendientes)
-- **[Story]**: historia de usuario de [spec.md](spec.md) a la que pertenece
+- **[Story]**: historia de usuario de `spec.md` a la que pertenece
 
 ---
 

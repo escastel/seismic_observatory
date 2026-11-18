@@ -491,7 +491,7 @@ Paso a paso en el [README](../README.md#demostración-de-la-defensa).
 ## API de consulta
 
 Esta sección documenta la API conforme al contrato (spec 006). Cierra el principio VIII de la
-constitución: `resources/observatorio-sismico/CONTRATO-API.md` es la fuente de verdad y prevalece sobre
+constitución: `CONTRATO-API.md` del material del enunciado (no versionado en este repositorio) es la fuente de verdad y prevalece sobre
 la API heredada de la spec 001, que se ajustó sin reescribirla desde cero. Contrato HTTP completo en
 [specs/006-query-api/contracts/api.md](../specs/006-query-api/contracts/api.md) y ejemplos de consulta en el
 [README](../README.md#6-consultar-la-api). Evidencia en [docs/evidence/006/](evidence/006/README.md).

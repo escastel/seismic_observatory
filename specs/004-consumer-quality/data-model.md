@@ -1,6 +1,6 @@
 # Data Model: Consumidor y calidad de los datos
 
-**Fecha**: 2026-11-16 · **Spec**: [spec.md](spec.md) · **Decisiones**: [research.md](research.md)
+**Fecha**: 2026-11-16 · **Spec**: `spec.md` · **Decisiones**: [research.md](research.md)
 
 La spec 002 define las tablas; esta funcionalidad las usa con las reglas de abajo y añade tres
 cambios aditivos justificados en [research.md](research.md) R9, en la plantilla idempotente

@@ -5,7 +5,7 @@ description: "Task list for feature 008: analysis, performance, costs and delive
 
 # Tasks: Análisis, rendimiento, costes y cierre de entregables
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/report-sections.md](contracts/report-sections.md),
 [quickstart.md](quickstart.md)
 

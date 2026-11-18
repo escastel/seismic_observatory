@@ -1,6 +1,6 @@
 # Implementation Plan: Rediseño visual y personalización del panel
 
-**Branch**: `009-dashboard-visual-redesign` | **Date**: 2026-11-17 | **Spec**: [spec.md](spec.md)
+**Branch**: `009-dashboard-visual-redesign` | **Date**: 2026-11-17 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/009-dashboard-visual-redesign/spec.md`
 

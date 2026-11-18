@@ -1,6 +1,6 @@
 # Implementation Plan: Documentación interactiva de la API en el dominio público
 
-**Branch**: `011-public-api-docs` | **Date**: 2026-11-18 | **Spec**: [spec.md](spec.md)
+**Branch**: `011-public-api-docs` | **Date**: 2026-11-18 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/011-public-api-docs/spec.md`
 

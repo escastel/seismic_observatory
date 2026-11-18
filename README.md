@@ -101,7 +101,6 @@ curl -s http://127.0.0.1:8000/api/salud
 | Código | [producer/](producer/) · [consumer/](consumer/) · [api/](api/) · [frontend/](frontend/) · [common/](common/) |
 | Política de tráfico del túnel (60 por minuto) | [tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) |
 | Especificaciones de cada funcionalidad | [specs/](specs/) |
-| Enunciado y material de partida | [resources/](resources/) |
 
 ---
 

@@ -1,6 +1,6 @@
 # Implementation Plan: Consumidor y calidad de los datos
 
-**Branch**: `004-consumer-quality` | **Date**: 2026-11-16 | **Spec**: [spec.md](spec.md)
+**Branch**: `004-consumer-quality` | **Date**: 2026-11-16 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/004-consumer-quality/spec.md`
 

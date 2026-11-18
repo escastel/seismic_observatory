@@ -1,6 +1,6 @@
 # Implementation Plan: Reproducción acelerada de una selección histórica
 
-**Branch**: `005-historical-replay` | **Date**: 2026-11-16 | **Spec**: [spec.md](spec.md)
+**Branch**: `005-historical-replay` | **Date**: 2026-11-16 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/005-historical-replay/spec.md`
 

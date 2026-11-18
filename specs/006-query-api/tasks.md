@@ -5,7 +5,7 @@ description: "Task list for feature 006: query API conforming to the contract"
 
 # Tasks: API de consulta conforme al contrato
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/api.md](contracts/api.md),
 [quickstart.md](quickstart.md); contrato normativo
 `resources/observatorio-sismico/CONTRATO-API.md`

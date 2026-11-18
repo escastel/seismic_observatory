@@ -1,6 +1,6 @@
 # Data Model: Plataforma y modelo de datos
 
-**Fecha**: 2026-11-14 · **Spec**: [spec.md](spec.md) · **Decisiones**: [research.md](research.md)
+**Fecha**: 2026-11-14 · **Spec**: `spec.md` · **Decisiones**: [research.md](research.md)
 
 Los nombres de esquemas, tablas y columnas están en inglés (constitución v2.1.0). Este documento
 es la base del modelo conceptual, lógico y físico y del diccionario de datos que se publicarán

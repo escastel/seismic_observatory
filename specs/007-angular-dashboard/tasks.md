@@ -5,7 +5,7 @@ description: "Task list for feature 007: Angular dashboard conforming to the sta
 
 # Tasks: Panel Angular conforme al enunciado
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/ui-contract.md](contracts/ui-contract.md),
 [quickstart.md](quickstart.md); contrato de datos `specs/006-query-api/contracts/api.md`
 

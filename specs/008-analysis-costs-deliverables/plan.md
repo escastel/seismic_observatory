@@ -1,6 +1,6 @@
 # Implementation Plan: Análisis, rendimiento, costes y cierre de entregables
 
-**Branch**: `008-analysis-costs-deliverables` | **Date**: 2026-11-17 | **Spec**: [spec.md](spec.md)
+**Branch**: `008-analysis-costs-deliverables` | **Date**: 2026-11-17 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/008-analysis-costs-deliverables/spec.md`
 

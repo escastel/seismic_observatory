@@ -5,7 +5,7 @@ description: "Task list for feature 009: dashboard visual redesign and personali
 
 # Tasks: Rediseño visual y personalización del panel
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md), [data-model.md](data-model.md),
 [contracts/ui-contract.md](contracts/ui-contract.md), [quickstart.md](quickstart.md)
 
 **Tests**: incluidas (principio IX, FR-027). Pruebas de comportamiento de la lógica pura en `frontend/src/app/lib/*.test.ts` (Vitest): comprueban resultados de funciones, nunca la presencia de

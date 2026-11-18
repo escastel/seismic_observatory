@@ -1,6 +1,6 @@
 # Research: Ingesta desde USGS
 
-**Fecha**: 2026-11-15 · **Spec**: [spec.md](spec.md)
+**Fecha**: 2026-11-15 · **Spec**: `spec.md`
 
 No quedaban marcadores NEEDS CLARIFICATION. Este documento fija las decisiones técnicas. Las
 marcadas como **verificado** se comprobaron el 2026-11-15 con peticiones de solo lectura a los

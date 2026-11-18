@@ -1,6 +1,6 @@
 # Implementation Plan: Ajustes de diseño, distribución y filtrado del panel
 
-**Branch**: `010-dashboard-refinements` | **Date**: 2026-11-18 | **Spec**: [spec.md](spec.md)
+**Branch**: `010-dashboard-refinements` | **Date**: 2026-11-18 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/010-dashboard-refinements/spec.md`
 

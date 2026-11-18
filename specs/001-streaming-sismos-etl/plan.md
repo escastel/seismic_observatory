@@ -1,7 +1,7 @@
 # Implementation Plan: Streaming de sismos con ETL y consulta geoespacial
 
 **Branch**: `001-streaming-sismos-etl` | **Date**: 2026-11-09 | **Spec**:
-[spec.md](./spec.md)
+`spec.md`
 
 **Input**: Feature specification from `/specs/001-streaming-sismos-etl/spec.md`
 

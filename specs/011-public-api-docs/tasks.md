@@ -5,7 +5,7 @@ description: "Task list for feature 011: interactive API documentation on the pu
 
 # Tasks: Documentación interactiva de la API en el dominio público
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md), [data-model.md](data-model.md),
 [contracts/public-surface.md](contracts/public-surface.md), [quickstart.md](quickstart.md)
 
 **Tests**: incluidas (FR-014, FR-015, principio IX). pytest en `tests/query_api/test_public_docs.py` (comportamiento: códigos, cabeceras, contenido, contrato) escrito **antes** de implementar y comprobando que falla;

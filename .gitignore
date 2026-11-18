@@ -61,9 +61,13 @@ Thumbs.db
 .vscode
 .idea/
 
-# Local agent / editor state
-.claude/settings.local.json
-.claude/*.local.*
+# Local agent / editor state and assistant tooling: kept on the author's machine, not published.
+# (.specify/ is published: it documents the Spec-Driven Development method.)
+CLAUDE.md
+.claude/
+.agents/
+skills-lock.json
+specs/*/spec.md
 .ipynb_checkpoints/
 
 # Tunnel configuration (may hold the ngrok authtoken)
@@ -80,13 +84,5 @@ db/seeds/*.jsonl
 *.sql.gz
 pgdata/
 
-# Teacher-provided material. Only the API contract and the source, licence and
-# validation notes of the support package are published; the assignment
-# statement, FAQ, deliverables guide and the starter frontend copy stay local.
-resources/*
-!resources/observatorio-sismico/
-resources/observatorio-sismico/*
-!resources/observatorio-sismico/CONTRATO-API.md
-!resources/observatorio-sismico/FUENTES-Y-LICENCIAS.md
-!resources/observatorio-sismico/VALIDACION.md
-!resources/observatorio-sismico/README.md
+# Teacher-provided material stays local (assignment statement, FAQ, guides, support package).
+resources/

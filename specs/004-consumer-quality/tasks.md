@@ -5,7 +5,7 @@ description: "Task list for feature 004: consumer and data quality"
 
 # Tasks: Consumidor y calidad de los datos
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/rules-catalog.md](contracts/rules-catalog.md),
 [contracts/reprocess.md](contracts/reprocess.md), [quickstart.md](quickstart.md)
 
