@@ -152,7 +152,7 @@ El panel publicado en Netlify, el contrato de la API, las pruebas existentes y l
 ## Assumptions
 
 - La documentación vive en la propia API de consulta (ruta `/docs`) y la raíz **redirige** a ella; la portada con enlaces al panel de Netlify es una alternativa que se decide en el plan si resulta más útil. El plan fija el reparto definitivo entre API y configuración del túnel.
-- El límite se aplica **por dirección de origen** y se diseña con un margen amplio para varias personas detrás de la misma dirección (del orden de cien peticiones por minuto por visitante); el valor exacto se fija y se mide en el plan.
+- El límite se aplica **por dirección de origen** y se diseña con margen para varias personas detrás de la misma dirección; el plan lo fija en 60 peticiones por minuto por visitante porque el plan gratuito de ngrok limita toda la cuenta a 100 conexiones por minuto y a 1 GB de salida al mes.
 - La página intermedia de ngrok en dominios gratuitos no se puede quitar y queda documentada; solo se garantiza que «Probar» funciona desde la documentación una vez dentro.
 - Los datos son públicos de USGS procesados por el proyecto; no hay autenticación ni claves de API para los visitantes (CORS no es autenticación y no se presenta como tal).
 - El contrato, los filtros, los códigos de error y los límites de la API de la spec 006 no cambian; las descripciones y ejemplos de la documentación son metadatos del contrato, no cambios de comportamiento.
