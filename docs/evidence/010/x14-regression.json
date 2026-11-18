@@ -1,0 +1,108 @@
+{
+  "V1": {
+    "events": "193 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "193 events",
+    "apiTotal": 193,
+    "tableRows": 193,
+    "errors": []
+  },
+  "V3_V4_V5": {
+    "rows": [
+      "aka2026wvviba2026-11-18 12:08:26 UTCNDml15,8 km68 km WNW of Karluk, AlaskaEstados UnidosNorth AmericaNorthern America Ver ficha del evento aka2026wvviba",
+      "aka2026wvvgte2026-11-18 12:06:57 UTC1,8ml13,2 km27 km ESE of Skwentna, AlaskaSin país asignadoNorth AmericaNorthern America Ver ficha del evento aka2026wvvgte",
+      "nc754679622026-11-18 11:34:32 UTC1,5md10,8 km<img src=x onerror=\"window.__xss=1\">Estados UnidosNorth AmericaNorthern America Ver ficha del evento nc75467962",
+      "ci413632712026-11-18 11:26:43 UTC0,4ml5,6 km3 km SW of Anza, CAEstados UnidosNorth AmericaNorthern America Ver ficha del evento ci41363271"
+    ],
+    "ndPresent": true,
+    "sinPais": true,
+    "xssExecuted": false,
+    "literalScriptText": true,
+    "omitted": "193 eventos dibujados · 1 omitidos por coordenadas no válidas"
+  },
+  "V6": {
+    "note": "real API total",
+    "realTotal": 193,
+    "realCount": 193,
+    "tableRowsFirst": 193,
+    "alertsFirst": []
+  },
+  "V7": [
+    {
+      "name": "sin filtros",
+      "bar": "194 events",
+      "apiTotal": 194,
+      "map": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "apiEvents": 194,
+      "tableRows": 194,
+      "chartsTotal": "Total de eventos: 194"
+    },
+    {
+      "name": "mag>=5",
+      "bar": "10 events",
+      "apiTotal": 10,
+      "map": "10 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "apiEvents": 10,
+      "tableRows": 10,
+      "chartsTotal": "Total de eventos: 10"
+    },
+    {
+      "name": "país JPN",
+      "bar": "0 events",
+      "apiTotal": 0,
+      "map": "0 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "apiEvents": 0,
+      "tableRows": 0,
+      "chartsTotal": "Total de eventos: 0"
+    }
+  ],
+  "V8": {
+    "periodErr": [
+      "El inicio debe ser anterior al fin."
+    ],
+    "magErr": [],
+    "panelStillShowsReading": "0 eventos dibujados · 0 omitidos por coordenadas no válidas"
+  },
+  "V9_V10": {
+    "liveBefore": "194 events",
+    "replayBarText": "Eventos REPRODUCCIÓN 2807 eventsSin filtros Última ingesta REPRODUCCIÓN 12:42:29 UTC2026-11-18 · Reproducción: la última",
+    "apiReplayTotal": 2807,
+    "label": {
+      "map": true,
+      "anywhere": true
+    },
+    "alertsReplay": [
+      "Aviso: Se muestran 1000 de 2807 eventos en el mapa y la tabla; las cifras y los gráficos cuentan todos.",
+      "Información: Modo reproducción: los datos mostrados son una reproducción, no datos en vivo."
+    ],
+    "liveAfter": "194 events"
+  },
+  "V11": {
+    "eventsBefore": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "failing": {
+      "alerts": [
+        "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+      ],
+      "events": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "tableRows": 194
+    },
+    "recovered": {
+      "alerts": [
+        "Correcto: Conexión recuperada: los datos vuelven a actualizarse."
+      ],
+      "events": "194 eventos dibujados · 0 omitidos por coordenadas no válidas"
+    },
+    "htmlIntermediate": {
+      "alerts": [
+        "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+      ]
+    }
+  },
+  "V13": {
+    "maxEventRequestsInFlight": 4
+  },
+  "card": {
+    "open": true,
+    "focus": "Cerrar",
+    "closedWithEscape": true
+  }
+}
