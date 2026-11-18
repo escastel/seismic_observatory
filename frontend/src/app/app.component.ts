@@ -4,6 +4,7 @@ import { ObservatoryService } from './data/observatory.service';
 import { FiltersComponent } from './filters/filters.component';
 import { MapComponent } from './map/map.component';
 import { AlertsComponent } from './alerts/alerts.component';
+import { ThemeToggleComponent } from './theme-toggle/theme-toggle.component';
 import { StatusBarComponent } from './status-bar/status-bar.component';
 import { TableComponent } from './table/table.component';
 import { ChartsComponent } from './charts/charts.component';
@@ -22,6 +23,7 @@ import { buildAlerts, noEventsText, type Alert, type LayerNotice, type NoEventsT
     FiltersComponent,
     MapComponent,
     AlertsComponent,
+    ThemeToggleComponent,
     StatusBarComponent,
     TableComponent,
     ChartsComponent,
