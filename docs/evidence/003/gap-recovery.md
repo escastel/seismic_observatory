@@ -4,7 +4,7 @@
 - Rama y commit: 003-usgs-ingestion @ 1121109
 - Equipo: MINGW64_NT-10.0-26200 3.5.4-cbe555e0.x86_64 x86_64
 - Motor: Docker 29.1.3 (Docker Desktop (containerized)), Compose 2.40.3-desktop.1; recursos del motor: 12 CPU, 7,6 GiB
-- Ejecutado con la confirmación expresa de la usuaria (T038), porque modifica marcas de tiempo de
+- Ejecutado con la confirmación expresa de la persona autora (T038), porque modifica marcas de tiempo de
   la base local.
 
 **La parada es simulada.** En lugar de esperar 36 horas, se restaron 36 horas al `requested_at`

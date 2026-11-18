@@ -1,6 +1,6 @@
 # G3 · Pruebas en Linux (specs 002, 003, 005 y 006)
 
-**Fecha**: 2026-11-17 · **Rama**: `008-analysis-costs-deliverables` · Ejecutadas por la usuaria; las salidas son capturas de su terminal, transcritas aquí.
+**Fecha**: 2026-11-17 · **Rama**: `008-analysis-costs-deliverables` · Ejecutadas por la persona autora; las salidas son capturas de su terminal, transcritas aquí.
 **Equipo**: Intel Core i5-10600 @ 3,30 GHz, 12 núcleos lógicos, 7,6 GiB de RAM, Linux 6.12.51 (según la cabecera que imprime `api_latency.py`).
 
 ## 1. Suite completa en el contenedor `tests`
@@ -34,6 +34,6 @@ creados en esa misma ejecución (base de Linux nueva). **Resultado: SUPERADA.**
 
 ## 4. Alcance
 
-Se ejecutaron en Linux la suite completa, el arranque y la medición de latencia (esta no concluyente). Quedaron fuera, por decisión de la usuaria y por no ser requisito del enunciado, la comprobación de
+Se ejecutaron en Linux la suite completa, el arranque y la medición de latencia (esta no concluyente). Quedaron fuera, por decisión de la persona autora y por no ser requisito del enunciado, la comprobación de
 propiedad de ficheros de la carga del catálogo (003 T050) y la repetición de los escenarios con el sistema real de las specs 005 y 006. Lo que aporta esta evidencia: el código y las pruebas automáticas
 de las specs 002 a 008 se comportan igual en Linux que en Windows (886 pruebas en verde) y el stack arranca sano desde cero.

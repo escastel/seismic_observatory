@@ -37,7 +37,7 @@
 - La especificación nombra USGS, su feed de 24 horas y su catálogo histórico porque son las
   fuentes de datos obligatorias, no una decisión de diseño. No nombra tablas, topics, lenguajes
   ni bibliotecas: la correspondencia con el modelo de la spec 002 se hace en `/speckit-plan`.
-- Sin marcadores [NEEDS CLARIFICATION]. Decisiones confirmadas por la usuaria el 2026-11-15,
+- Sin marcadores [NEEDS CLARIFICATION]. Decisiones confirmadas por la persona autora el 2026-11-15,
   con el enunciado, las FAQ y la guía de entregables a la vista: recuperación de huecos con
   aviso y orden manual, para todas las magnitudes; carga histórica manual, por meses, ampliable
   a 2026; y dos requisitos añadidos (contenido del mensaje, §5.4; documentación de la respuesta

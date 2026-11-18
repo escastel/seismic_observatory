@@ -1,6 +1,6 @@
 # Entorno y estado base (spec 009)
 
-Fecha: 2026-11-17. Equipo: Windows 11 (Git Bash), `DESKTOP-9149IE8`. Rama `009-dashboard-visual-redesign`.
+Fecha: 2026-11-17. Equipo: Windows 11 (Git Bash). Rama `009-dashboard-visual-redesign`.
 
 | Elemento | Valor |
 |---|---|

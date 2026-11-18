@@ -120,7 +120,7 @@ definición medible.
 
 ### User Story 4 - Trazabilidad y cierre de entregables (Priority: P2)
 
-La evaluadora (y la usuaria antes de entregar) dispone de una matriz que enlaza cada una de las
+La evaluadora (y la persona autora antes de entregar) dispone de una matriz que enlaza cada una de las
 11 pruebas de aceptación de §11 con su spec y su evidencia en `docs/evidence/002` a `007`, cada
 entregable de §12 con su fichero y cada criterio de §13 con su sección de la memoria. Los huecos
 quedan señalados con lo que falta por demostrar.
@@ -142,18 +142,18 @@ debe tener destino existente o un hueco explícito con su procedimiento.
    credenciales, volúmenes ni datos descargados, y los hallazgos se corrigen o se documentan.
 4. **Given** las pruebas pendientes en el equipo Linux (specs 002, 003, 005 y 006) y la
    comprobación del panel desde otro dispositivo físico, **When** se cierra, **Then** cada una
-   figura como hueco con procedimiento para que la usuaria lo ejecute, no como superada.
+   figura como hueco con procedimiento para que la persona autora lo ejecute, no como superada.
 
 ---
 
 ### User Story 5 - Guion de apoyo para la explicación individual (Priority: P3)
 
-La usuaria dispone de un guion que recorre el flujo completo (USGS, Kafka, consumidor,
+La persona autora dispone de un guion que recorre el flujo completo (USGS, Kafka, consumidor,
 PostgreSQL, API, panel) con los puntos que conviene poder explicar, las decisiones de diseño y
 dónde está la evidencia de cada una.
 
 **Why this priority**: ayuda, pero la explicación y la decisión técnica propia las redacta y
-defiende la usuaria; no es evaluable por sí mismo.
+defiende la persona autora; no es evaluable por sí mismo.
 
 **Independent Test**: seguir el guion con el sistema levantado y comprobar que cada paso remite a
 un fichero o evidencia existente.
@@ -162,7 +162,7 @@ un fichero o evidencia existente.
 
 1. **Given** el guion, **When** se sigue paso a paso, **Then** cada etapa del flujo tiene su
    descripción breve, su evidencia y las preguntas previsibles, sin texto redactado como
-   decisión propia de la usuaria.
+   decisión propia de la persona autora.
 
 ---
 
@@ -250,9 +250,9 @@ un fichero o evidencia existente.
   implique reescribir historia requiere confirmación explícita.
 - **FR-023**: Las pruebas pendientes en Linux (specs 002, 003, 005 y 006) y la comprobación del
   panel desde otro dispositivo MUST figurar como huecos con procedimiento ejecutable por la
-  usuaria.
+  persona autora.
 - **FR-024**: MUST entregarse un guion de apoyo del flujo completo que no sustituya la
-  explicación ni la decisión técnica propias de la usuaria.
+  explicación ni la decisión técnica propias de la persona autora.
 
 **Restricciones transversales**
 
@@ -295,14 +295,14 @@ un fichero o evidencia existente.
   tienen entrada en la matriz, con 0 enlaces rotos y 0 pruebas superadas sin evidencia.
 - **SC-006**: La revisión de higiene encuentra 0 ficheros de datos descargados, credenciales,
   `node_modules` o volúmenes versionados, o cada hallazgo está resuelto o documentado.
-- **SC-007**: Cada hueco que depende de la usuaria tiene un procedimiento que puede ejecutarse en
+- **SC-007**: Cada hueco que depende de la persona autora tiene un procedimiento que puede ejecutarse en
   menos de 30 minutos y una ruta de evidencia asignada.
 - **SC-008**: Una persona que no conoce el proyecto puede localizar la evidencia de cualquier
   prueba de aceptación en menos de 2 minutos desde la matriz.
 
 ## Assumptions
 
-- La explicación individual y la decisión técnica propia las redacta y defiende la usuaria; el
+- La explicación individual y la decisión técnica propia las redacta y defiende la persona autora; el
   guion solo organiza el material.
 - Las conclusiones se eligen con los datos reales a la vista; los temas candidatos (reparto por
   país o subregión incluido «Sin país asignado», últimas 24 h frente a media diaria de 2025 con
@@ -310,16 +310,16 @@ un fichero o evidencia existente.
   prescriben.
 - El análisis vive en `docs/report.md` con consultas reproducibles, sin notebook ni informes
   automáticos, como `docs/calidad.md`.
-- Los equipos de medición son el Windows 11 de la usuaria y, cuando esté disponible, el Linux;
+- Los equipos de medición son el Windows 11 de la persona autora y, cuando esté disponible, el Linux;
   las medidas de un equipo no se extrapolan a otro sin decirlo.
 - La medición con 1.000.000 de filas usa el esquema sintético aislado de la 002; si el equipo no
   lo soporta, se mide el máximo alcanzable y se documenta.
 - Los precios de hardware, electricidad y servicios son supuestos con fecha y fuente, no medidas.
 - No hay beneficio económico definido para el observatorio, por lo que el ROI por defecto es «no
-  se estima»; solo cambia si la usuaria define un beneficio medible.
+  se estima»; solo cambia si la persona autora define un beneficio medible.
 - Fuera de alcance: nuevas funciones del panel o de la API, contratar servicios cloud, generación
   automática de informes y la explicación oral.
-- Dependencias externas de la usuaria: pruebas en Linux de las specs 002, 003, 005 y 006 y la
+- Dependencias externas de la persona autora: pruebas en Linux de las specs 002, 003, 005 y 006 y la
   comprobación del panel desde otro dispositivo físico; la spec deja procedimiento y hueco.
 - Orquestación según `CLAUDE.md`: la sesión principal hace mediciones, cifras y conclusiones;
   agentes Haiku, tablas y redacción mecánica a partir de la evidencia; nunca dos ejecuciones de

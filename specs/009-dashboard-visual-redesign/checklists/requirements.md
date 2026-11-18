@@ -32,6 +32,6 @@
 ## Notes
 
 - Las referencias a la API (006), al túnel, a Netlify y a la comprobación automática de accesibilidad vienen del enunciado, de la constitución y de la 007; no son decisiones nuevas de implementación. No se nombran bibliotecas ni fuentes concretas de mapa: se eligen en el plan.
-- Sin marcadores de aclaración: las decisiones (tema por dispositivo, mapas, capas, mejoras y bibliotecas) las tomó la usuaria; la referencia del relieve y el nombre y logotipo son dependencias con valor provisional documentado.
+- Sin marcadores de aclaración: las decisiones (tema por dispositivo, mapas, capas, mejoras y bibliotecas) las tomó la persona autora; la referencia del relieve y el nombre y logotipo son dependencias con valor provisional documentado.
 - Se excluye a propósito la tarjeta de «magnitud máxima» (la API no la entrega y recalcularla sobre la muestra del mapa va contra el principio VII); queda en Assumptions.
 - Listo para `/speckit-plan` (se puede saltar `/speckit-clarify`).

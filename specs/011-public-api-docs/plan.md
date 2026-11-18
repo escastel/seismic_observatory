@@ -85,4 +85,4 @@ docs/report.md, README.md, docs/evidence/011/
 
 | Violación | Por qué es necesaria | Alternativa más simple descartada |
 |-----------|----------------------|-----------------------------------|
-| Principio I («superficie mínima»): se publica `/docs` y una redirección en `/` (revierte R7 de la 006) | La usuaria quiere que personas externas puedan leer y probar la API desde el dominio público | No publicar nada (estado actual: el visitante ve un 404 y no sabe usar la API); compensado con límite por visitante, recursos de versión exacta con SRI, ausencia de escritura y declaración de lo que ve el navegador |
+| Principio I («superficie mínima»): se publica `/docs` y una redirección en `/` (revierte R7 de la 006) | La persona autora quiere que personas externas puedan leer y probar la API desde el dominio público | No publicar nada (estado actual: el visitante ve un 404 y no sabe usar la API); compensado con límite por visitante, recursos de versión exacta con SRI, ausencia de escritura y declaración de lo que ve el navegador |

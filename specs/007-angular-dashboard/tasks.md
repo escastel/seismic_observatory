@@ -138,7 +138,7 @@ No hacen commit, no tocan `.env`, no ejecutan `down -v` e informan en menos de 2
 
 ## Phase 9: User Story 7 - Despliegue en Netlify tras el túnel (P2)
 
-**Objetivo**: configuración y procedimiento; la publicación real la hace la usuaria.
+**Objetivo**: configuración y procedimiento; la publicación real la hace la persona autora.
 
 **Prueba independiente**: seguir el README hasta tener el panel funcionando en local con la API; build limpio (V15).
 
@@ -150,7 +150,7 @@ No hacen commit, no tocan `.env`, no ejecutan `down -v` e informan en menos de 2
 
 ## Phase 10: User Story 8 - Evidencia y cierre (P3)
 
-- [X] T035 [US8] [A0] Completar `docs/evidence/007/` (índice con esperado/observado y capturas con los filtros usados de V1–V15); la comprobación con Netlify y ngrok reales se deja como pendiente de la usuaria, indicada como tal
+- [X] T035 [US8] [A0] Completar `docs/evidence/007/` (índice con esperado/observado y capturas con los filtros usados de V1–V15); la comprobación con Netlify y ngrok reales se deja como pendiente de la persona autora, indicada como tal
 - [X] T036 [US8] [A2] Apartado de la spec 007 en `docs/report.md` a partir de la evidencia: qué muestra el panel, decisiones, divergencias resueltas del panel entregado y estado de cada prueba (superada solo con evidencia)
 
 ---

@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Spec 010: ajustes de diseño, distribución y filtrado del panel rediseñado en la 009, a petición de la usuaria, sin cambiar el contrato de la API de consulta (006). Panel más limpio e intuitivo, con el mapa visible nada más entrar, cabecera, avisos, estado y filtros más compactos y un arreglo del filtrado cuando un país no tiene eventos."
+**Input**: User description: "Spec 010: ajustes de diseño, distribución y filtrado del panel rediseñado en la 009, a petición de la persona autora, sin cambiar el contrato de la API de consulta (006). Panel más limpio e intuitivo, con el mapa visible nada más entrar, cabecera, avisos, estado y filtros más compactos y un arreglo del filtrado cuando un país no tiene eventos."
 
 **Depende de**: `specs/009-dashboard-visual-redesign` (panel rediseñado, integrado en `main`, PR #10), `specs/007-angular-dashboard` y
 `specs/006-query-api` (contrato HTTP, fuente de verdad: no se modifica). Parte de `main`.
@@ -14,7 +14,7 @@
 **Trazabilidad**: constitución principios VI, VII y VIII; enunciado §8 (puntos 1 a 7), §9 y pruebas 9 y 10 de §11.
 
 **Referencia visual aprobada**: [references/mockup/](references/mockup/index.html) (capturas en oscuro, claro, móvil, con detalles abiertos y con el aviso de
-«sin eventos») y los comentarios de la usuaria en [references/](references/) (calor actual, idea de calor y agrupación actual). Le gustan el estilo, el diseño y el color del mockup.
+«sin eventos») y los comentarios de la persona autora en [references/](references/) (calor actual, idea de calor y agrupación actual). Le gustan el estilo, el diseño y el color del mockup.
 
 **Naturaleza**: presentación del panel más **una corrección de la API** (`GET /api/estadisticas` incumple su propio contrato cuando ningún evento cumple el filtro). No añade datos ni
 métricas y no cambia lo que el enunciado exige del panel.
@@ -26,7 +26,7 @@ métricas y no cambia lo que el enunciado exige del panel.
 Al abrir el panel se ve, de arriba abajo, la cabecera con el logotipo y el nombre, una zona de avisos, una barra de estado, los filtros en una sola línea con su título y el
 mapa con su selector de capas y su leyenda; después, el análisis y la tabla. En móvil el mapa también asoma sin tener que desplazarse mucho.
 
-**Why this priority**: es el cambio de distribución que la usuaria pidió con más claridad («que nada más entrar veas el mapa») y condiciona el resto.
+**Why this priority**: es el cambio de distribución que la persona autora pidió con más claridad («que nada más entrar veas el mapa») y condiciona el resto.
 
 **Independent Test**: abrir el panel en escritorio y en móvil y comprobar el orden, que el mapa queda a la vista y que el estado, los filtros y los avisos siguen siendo legibles y operables.
 
@@ -63,7 +63,7 @@ información (el color de la marca, ámbar) y éxito (verde).
 Al filtrar por un país que no tiene eventos en el periodo (por ejemplo Albania), el mapa y la tabla quedan vacíos y aparece un aviso claro, en lugar de seguir mostrando todos los
 eventos del mundo.
 
-**Why this priority**: es un fallo real encontrado por la usuaria: el panel muestra datos que no corresponden al filtro, lo que contradice que mapa, tabla y estadísticas apliquen los mismos filtros (principio VII).
+**Why this priority**: es un fallo real encontrado por la persona autora: el panel muestra datos que no corresponden al filtro, lo que contradice que mapa, tabla y estadísticas apliquen los mismos filtros (principio VII).
 
 **Independent Test**: con el sistema real, filtrar por Albania en las últimas 24 h y comprobar que mapa y tabla quedan vacíos, el total es 0, las estadísticas se muestran y aparece el aviso; probar también un país con eventos.
 
@@ -81,7 +81,7 @@ eventos del mundo.
 El mapa ofrece solo dos fondos, Simple y Satélite; las placas tectónicas son una capa opcional sobre cualquiera, activada por defecto; el mapa de calor tiene un degradado
 de amarillo a rojo oscuro bien visible con su leyenda; la agrupación son burbujas con color y tamaño según el número de eventos, con anillo y cifra, y los eventos sueltos conservan su color por profundidad con el mismo brillo.
 
-**Why this priority**: mejora lo que ya existía y que la usuaria encontró poco visual, pero el mapa ya cumple lo exigido sin ello.
+**Why this priority**: mejora lo que ya existía y que la persona autora encontró poco visual, pero el mapa ya cumple lo exigido sin ello.
 
 **Independent Test**: activar cada capa sobre cada fondo en ambos temas con un periodo largo (más de 1.000 eventos) y otro corto, y comprobar legibilidad, leyendas y rótulo de muestra.
 
@@ -99,7 +99,7 @@ de amarillo a rojo oscuro bien visible con su leyenda; la agrupación son burbuj
 Un botón flotante con un sol y una luna permite pasar entre el tema oscuro y el claro. Por defecto el panel sigue el dispositivo (oscuro si no hay preferencia); al pulsar el botón, la
 elección manual manda y se recuerda en el navegador.
 
-**Why this priority**: es una comodidad que la usuaria pidió expresamente; el tema ya se adapta al dispositivo sin él.
+**Why this priority**: es una comodidad que la persona autora pidió expresamente; el tema ya se adapta al dispositivo sin él.
 
 **Independent Test**: pulsar el botón en ambos sentidos, recargar y comprobar que la elección se conserva; probar con el almacenamiento bloqueado; operarlo con teclado y con lector de pantalla.
 
@@ -228,7 +228,7 @@ El rediseño no rompe lo que la 007 y la 009 ya demostraron: periodo, filtros, u
 
 ## Assumptions
 
-- La usuaria ha aprobado el mockup, los colores de los avisos (rojo, naranja intenso, ámbar de la marca y verde), el orden de la página y las decisiones del mapa; no quedan dependencias suyas.
+- La persona autora ha aprobado el mockup, los colores de los avisos (rojo, naranja intenso, ámbar de la marca y verde), el orden de la página y las decisiones del mapa; no quedan dependencias suyas.
 - El mockup es una referencia de estilo y distribución, no un diseño píxel a píxel; los detalles finos se ajustan en la implementación con capturas.
 - «Naranja intenso» para los avisos y «ámbar» para la información se distinguen además por su icono y texto; los tonos exactos se eligen en el plan garantizando contraste en ambos temas.
 - La elección manual de tema se guarda solo en el navegador de la persona (comodidad individual), con tolerancia a que no esté disponible.

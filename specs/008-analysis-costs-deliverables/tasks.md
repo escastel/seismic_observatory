@@ -37,7 +37,7 @@ listados en su tarea y no hace commit. Dos agentes a la vez solo si sus ficheros
 ## Phase 1: Setup
 
 - [x] T001 [A0] Comprobar rama `008-analysis-costs-deliverables`, `.specify/feature.json` y que el stack arranca (skill `verify-stack`); guardar el estado base (recuentos de `core.event_current`, versión de PostgreSQL, equipo) en `docs/evidence/008/00-environment.md`
-- [x] T002 [A0] Leer `docs/evidence/002` a `007` (README de cada una), `docs/report.md` (índice) y los §8, §10, §11, §12 y §13 del enunciado en `C:\Users\Casa\Downloads\resources`; anotar en `docs/evidence/008/00-environment.md` las 11 pruebas de §11 y los entregables de §12
+- [x] T002 [A0] Leer `docs/evidence/002` a `007` (README de cada una), `docs/report.md` (índice) y los §8, §10, §11, §12 y §13 del enunciado en la carpeta local `resources`; anotar en `docs/evidence/008/00-environment.md` las 11 pruebas de §11 y los entregables de §12
 
 ---
 
@@ -93,7 +93,7 @@ listados en su tarea y no hace commit. Dos agentes a la vez solo si sus ficheros
 - [x] T017 [US3] [A0] Medir tamaños reales (base, volúmenes de Kafka, bytes de una respuesta de la API y peticiones por día cada 60 s) y guardarlos en `docs/evidence/008/cost-measurements.md`
 - [x] T018 [P] [US3] [A0] Consultar los límites actuales de Netlify y ngrok (plan gratuito) en su documentación oficial y anotar fecha, enlace y consecuencia de superarlos en `docs/evidence/008/free-tier-limits.md`
 - [x] T019 [US3] [A2] Con T017 y T018 y los supuestos que fije la sesión principal (potencia, tarifa, horas, amortización), preparar la tabla de partidas «Medida/Supuesto» en `docs/evidence/008/cost-table.md`; no inventar importes
-- [x] T020 [US3] [A0] Revisar `docs/evaluacion-financiera.md` frente al principio IX: retirar o justificar cada flujo, ROI «no estimado» salvo beneficio medible definido por la usuaria; reescribir el fichero
+- [x] T020 [US3] [A0] Revisar `docs/evaluacion-financiera.md` frente al principio IX: retirar o justificar cada flujo, ROI «no estimado» salvo beneficio medible definido por la persona autora; reescribir el fichero
 - [x] T021 [US3] [A0] Redactar en `docs/report.md` el apartado «Costes» (partidas, cuotas gratuitas, escalado y mejoras, ROI)
 
 **Checkpoint**: US3 verificable.
@@ -111,7 +111,7 @@ listados en su tarea y no hace commit. Dos agentes a la vez solo si sus ficheros
 - [x] T024 [US4] [A0] Verificar T023 y volcar las tres matrices en `docs/report.md` (apartado «Trazabilidad»)
 - [x] T025 [US4] [A0] Revisar `docs/report.md`: índice, enlaces (todos resuelven) y cifras repetidas coherentes; corregir y registrar en `docs/evidence/008/report-coherence.md`
 - [x] T026 [US4] [A0] Revisión de higiene con `git ls-files` (sin `node_modules`, `.env`, volúmenes, datos, copias `*.bak`/`*.orig`) y búsqueda de secretos sin imprimirlos; resultado en `docs/evidence/008/repository-hygiene.md`; no reescribir historia sin confirmación
-- [x] T027 [US4] [A0] Redactar los huecos de la usuaria (Linux de las specs 002, 003, 005 y 006; panel desde otro dispositivo) con procedimiento y ruta de evidencia en `docs/evidence/008/user-gaps.md` y enlazarlos desde la matriz
+- [x] T027 [US4] [A0] Redactar los huecos de la persona autora (Linux de las specs 002, 003, 005 y 006; panel desde otro dispositivo) con procedimiento y ruta de evidencia en `docs/evidence/008/user-gaps.md` y enlazarlos desde la matriz
 
 ---
 
@@ -119,7 +119,7 @@ listados en su tarea y no hace commit. Dos agentes a la vez solo si sus ficheros
 
 **Independent Test**: seguir el guion con el sistema levantado.
 
-- [x] T028 [US5] [A2] Redactar `docs/guion-explicacion.md` con el flujo USGS → Kafka → consumidor → PostgreSQL → API → panel, decisiones y enlace a la evidencia de cada etapa, a partir de `docs/report.md` y `docs/evidence/`; sin redactar decisiones propias de la usuaria
+- [x] T028 [US5] [A2] Redactar `docs/guion-explicacion.md` con el flujo USGS → Kafka → consumidor → PostgreSQL → API → panel, decisiones y enlace a la evidencia de cada etapa, a partir de `docs/report.md` y `docs/evidence/`; sin redactar decisiones propias de la persona autora
 - [x] T029 [US5] [A0] Revisar T028 y comprobar que cada enlace resuelve
 
 ---

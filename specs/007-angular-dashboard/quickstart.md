@@ -33,5 +33,5 @@ Contratos: [api.md](../006-query-api/contracts/api.md) y [ui-contract.md](contra
 | V14 | Teclado y lector | recorrer filtros, modo, tabla y «Cargar más» solo con teclado | foco visible; estados anunciados; la tabla sustituye al mapa |
 | V15 | Despliegue | `npm run build`; servir `dist/observatorio/browser` | arranca con la configuración; sin secretos en el paquete |
 
-Las pruebas con Netlify y el túnel ngrok reales las ejecuta la usuaria con el procedimiento del
+Las pruebas con Netlify y el túnel ngrok reales las ejecuta la persona autora con el procedimiento del
 README; la evidencia local usa `http://localhost:4200`.

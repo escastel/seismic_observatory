@@ -9,7 +9,7 @@ la salida.
 | Escenario | Esperado | Observado | Resultado | Evidencia |
 |---|---|---|---|---|
 | V1 | Cinco servicios sanos en menos de 3 min, sin `tunnel`; diez arranques desde cero | 10 arranques entre 15,2 y 22,4 s (mediana 15,7 s); `tunnel` solo con su perfil | SUPERADA | [cold-starts.md](cold-starts.md), [startup.md](startup.md) |
-| V2 | Solo `api` publica puerto, en `127.0.0.1:8000`; 5432, 9092 y 8000 cerrados desde otro dispositivo | Solo `api 127.0.0.1:8000`; desde la IP de red local del propio equipo, todos cerrados | SUPERADA en el equipo; la prueba desde otro dispositivo se descartó el 2026-11-17 a petición de la usuaria por no ser necesaria para el enunciado (§9 exige exponer solo la API, y lo garantiza la publicación de puertos de `compose.yaml`) | [startup.md](startup.md) |
+| V2 | Solo `api` publica puerto, en `127.0.0.1:8000`; 5432, 9092 y 8000 cerrados desde otro dispositivo | Solo `api 127.0.0.1:8000`; desde la IP de red local del propio equipo, todos cerrados | SUPERADA en el equipo; la prueba desde otro dispositivo se descartó el 2026-11-17 a petición de la persona autora por no ser necesaria para el enunciado (§9 exige exponer solo la API, y lo garantiza la publicación de puertos de `compose.yaml`) | [startup.md](startup.md) |
 | V3 | Tablas en `core` y `replay`, 177 países, 49.673 días | 10 tablas en `core`, 6 en `replay`, 177 países, 1900-01-01 a 2035-12-31 sin huecos | SUPERADA | [model-structure.md](model-structure.md) |
 | V4 | FAQ 12: `new`, `duplicate`, `revised`, `duplicate`, `new`; 2 eventos, 3 versiones, 5 mensajes; nulos, profundidad negativa, sin país y rangos | Igual; `tests/db/test_event_versions.py`, `test_event_constraints.py`, `test_provenance.py` en verde | SUPERADA | [db-tests.txt](db-tests.txt) |
 | V5 | 1.000 pasadas no cambian ningún recuento | 30 eventos, 40 versiones, 5 rechazos y 50 mensajes tras la 1.ª y la 1.000.ª pasada | SUPERADA | [db-tests.txt](db-tests.txt) |
@@ -26,7 +26,7 @@ Pruebas automáticas: 161 superadas (`tests/db`, `tests/unit`, `tests/contract`)
 
 ## SC-001: arranque por una persona ajena al proyecto (T057)
 
-**SUPERADA (según lo informado por la usuaria, 2026-11-17).** Una persona ajena al proyecto levantó el sistema siguiendo solo el `README.md`: **tardó 2,5 min** (esperado: menos de 3 minutos con las imágenes ya descargadas), **sin dudas** y sin correcciones al README. No se guardó captura ni salida: el dato es el que comunicó la usuaria.
+**SUPERADA (según lo informado por la persona autora, 2026-11-17).** Una persona ajena al proyecto levantó el sistema siguiendo solo el `README.md`: **tardó 2,5 min** (esperado: menos de 3 minutos con las imágenes ya descargadas), **sin dudas** y sin correcciones al README. No se guardó captura ni salida: el dato es el que comunicó la persona autora.
 
 ## Revisión constitucional (v2.1.0, T058)
 

@@ -215,11 +215,11 @@ Como persona que presenta el proyecto, quiero un procedimiento documentado para 
 construir el panel contra su URL y publicarlo en Netlify, y comprobarlo desde otro dispositivo,
 para la defensa.
 
-**Why this priority**: es §9; la publicación efectiva la hace la usuaria, la spec entrega el
+**Why this priority**: es §9; la publicación efectiva la hace la persona autora, la spec entrega el
 procedimiento y su comprobación.
 
 **Independent Test**: seguir el procedimiento del README en un equipo limpio hasta tener el panel
-funcionando en local con la API; la publicación se valida con la usuaria.
+funcionando en local con la API; la publicación se valida con la persona autora.
 
 **Acceptance Scenarios**:
 
@@ -455,7 +455,7 @@ instrucciones.
 - El periodo de refresco es de 60 s y el tiempo máximo de petición de 15 s, ambos de §9 y configurables.
 - Angular, ngx-leaflet y Leaflet permanecen en las versiones fijadas; no se añaden dependencias salvo
   que una biblioteca resuelva un requisito y quede fijada.
-- La publicación en Netlify y el túnel ngrok los ejecuta la usuaria; esta spec entrega la
+- La publicación en Netlify y el túnel ngrok los ejecuta la persona autora; esta spec entrega la
   configuración, el procedimiento y su comprobación local.
 - Las conclusiones redactadas y el análisis narrativo quedan para la spec 008; el panel solo muestra
   las cifras que las sostienen.

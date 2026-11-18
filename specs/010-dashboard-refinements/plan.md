@@ -60,7 +60,7 @@ specs/010-dashboard-refinements/
 ├── data-model.md          # entidades de presentación
 ├── quickstart.md          # escenarios X1..X16
 ├── contracts/ui-contract.md
-├── references/            # mockup aprobado y comentarios de la usuaria
+├── references/            # mockup aprobado y comentarios de la persona autora
 └── tasks.md               # /speckit-tasks
 ```
 

@@ -32,7 +32,7 @@ Para ejecutar los escenarios se cambió temporalmente `apiUrl` de `frontend/publ
 
 ## Prueba con el túnel ngrok real (2026-11-17)
 
-Hecha desde esta sesión con el servicio `tunnel` de Compose y el dominio reservado de la cuenta (`modular-guidance-daybreak.ngrok-free.dev`, comprobado con el conector de ngrok: cuenta `Ester`, un dominio, sin agentes antes de levantarlo). El túnel se paró al terminar; antes de la prueba no estaba levantado.
+Hecha con el servicio `tunnel` de Compose y el dominio reservado de la cuenta (`modular-guidance-daybreak.ngrok-free.dev`, comprobado con la API de ngrok: un dominio y sin agentes conectados antes de levantarlo). El túnel se paró al terminar; antes de la prueba no estaba levantado.
 
 | Id | Qué comprueba | Esperado | Observado | Estado |
 |---|---|---|---|---|
@@ -42,7 +42,7 @@ Hecha desde esta sesión con el servicio `tunnel` de Compose y el dominio reserv
 
 ## Prueba desde Netlify (2026-11-17)
 
-Sitio publicado por la usuaria: `https://seismicobservatoryecr.netlify.app`, con el panel de la spec 007 (su `config.json` apunta al dominio del túnel) y el origen exacto del sitio añadido a `CORS_ORIGINS` (preflight comprobado: el sitio y `http://localhost:4200` reciben 200 con su origen; un origen ajeno, 400). Navegador automatizado sobre la URL pública, API real a través del túnel ngrok real. Datos en bruto: [netlify-real.json](netlify-real.json).
+Sitio publicado por la persona autora: `https://seismicobservatoryecr.netlify.app`, con el panel de la spec 007 (su `config.json` apunta al dominio del túnel) y el origen exacto del sitio añadido a `CORS_ORIGINS` (preflight comprobado: el sitio y `http://localhost:4200` reciben 200 con su origen; un origen ajeno, 400). Navegador automatizado sobre la URL pública, API real a través del túnel ngrok real. Datos en bruto: [netlify-real.json](netlify-real.json).
 
 | Id | Qué comprueba | Esperado | Observado | Estado |
 |---|---|---|---|---|
@@ -54,7 +54,7 @@ Los únicos errores de CORS de consola aparecen mientras el túnel está cerrado
 
 ## Prueba desde un dispositivo físico (2026-11-17)
 
-Hecha por la usuaria con un **móvil Android y datos móviles** (otra red distinta de la del equipo) contra `https://seismicobservatoryecr.netlify.app`, sin recargar ni salir de la pestaña
+Hecha por la persona autora con un **móvil Android y datos móviles** (otra red distinta de la del equipo) contra `https://seismicobservatoryecr.netlify.app`, sin recargar ni salir de la pestaña
 (capturas con los botones físicos). El túnel lo paró y reabrió la sesión con `docker compose stop tunnel` y `docker compose --profile tunnel up -d tunnel`. Es la repetición limpia: un primer intento
 no valió porque el navegador recargó la página sin querer (mostró «todavía no hay ninguna lectura correcta» y ND), y un segundo no se atribuye al túnel (no se había parado: ngrok seguía sirviendo 200) y no se usa.
 
@@ -66,12 +66,12 @@ no valió porque el navegador recargó la página sin querer (mostró «todavía
 
 Contraste con ngrok (conector, inspector de tráfico, 2026-11-17, tramos de 30 s): 0 peticiones entre las 15:30:30 y las 15:31:30 UTC (túnel parado) y 3 por tramo antes y después.
 
-**Fuera de alcance**: Linux (decisión de la usuaria; no es requisito del enunciado).
+**Fuera de alcance**: Linux (decisión de la persona autora; no es requisito del enunciado).
 
 ## Notas y límites (lo que NO se ha demostrado)
 
 - **V11 «túnel»**: se ha cerrado el acceso simulando el corte de red en el navegador y con respuestas 503 y no JSON. El túnel ngrok real sí se cerró y reabrió después (sección «Prueba con el túnel ngrok real»); la prueba desde el sitio de Netlify está en su sección. El umbral de 15 s se ha comprobado con una respuesta retrasada.
 - **Refresco de 60 s**: V2 mostró la actualización automática real (≈3 min hasta que llegó un evento). Los escenarios de fallo forzaron el refresco con «Aplicar filtros» para no esperar 60 s por caso; el ciclo temporizado es el mismo código (`refresh()` rearma el temporizador al terminar).
 - **Teselas de OpenStreetMap**: el navegador sin interfaz recibe 400 en varias teselas (política de uso de OpenStreetMap ante clientes automatizados); no se ha comprobado el fondo en un navegador con interfaz, solo que fronteras y eventos se dibujan.
-- **Prueba en Linux**: fuera de alcance por decisión de la usuaria; no se espera diferencia porque todo es TypeScript y Node.
+- **Prueba en Linux**: fuera de alcance por decisión de la persona autora; no se espera diferencia porque todo es TypeScript y Node.
 - **Contraste**: axe-core no reporta fallos de contraste; no se ha medido a mano.

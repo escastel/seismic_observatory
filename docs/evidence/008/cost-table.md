@@ -1,24 +1,24 @@
-# Tabla de partidas de coste y ROI (T019, actualizada el 2026-11-17 con los datos de la usuaria)
+# Tabla de partidas de coste y ROI (T019, actualizada el 2026-11-17 con los datos de la persona autora)
 
 Las columnas separan lo **medido** (enlace a evidencia) de lo **supuesto** (valor y razón). Medidas: [cost-measurements.md](cost-measurements.md)
-y [free-tier-limits.md](free-tier-limits.md). Los valores S1, S2, S4, S7 y S8 **los dio la usuaria** (se indica); S3, S5, S6 y S9 siguen siendo
-supuestos del autor; S10 a S12 definen el beneficio del ROI y también son de la usuaria. Ninguno procede de una medición.
+y [free-tier-limits.md](free-tier-limits.md). Los valores S1, S2, S4, S7 y S8 **los dio la persona autora** (se indica); S3, S5, S6 y S9 siguen siendo
+supuestos del autor; S10 a S12 definen el beneficio del ROI y también son de la persona autora. Ninguno procede de una medición.
 
 ## Supuestos
 
 | Id | Supuesto | Valor | Origen y razón |
 |---|---|---|---|
-| S1 | Precio de compra del portátil | 675 € | la usuaria: comprado hace 4 años |
-| S2 | Vida útil total para amortizar | 6 años (lineal, 112,50 €/año) | la usuaria: «todavía puedo sacarle rentabilidad»; se imputa al 100 % al proyecto (cota superior: es de uso general) |
+| S1 | Precio de compra del portátil | 675 € | la persona autora: comprado hace 4 años |
+| S2 | Vida útil total para amortizar | 6 años (lineal, 112,50 €/año) | la persona autora: «todavía puedo sacarle rentabilidad»; se imputa al 100 % al proyecto (cota superior: es de uso general) |
 | S3 | Potencia media adicional del stack | 35 W | autor; **no medida** (haría falta un vatímetro) |
-| S4 | Tarifa eléctrica | 0,23 €/kWh | la usuaria |
+| S4 | Tarifa eléctrica | 0,23 €/kWh | la persona autora |
 | S5 | Horas de funcionamiento | 8.760 h/año (24/7) | autor; escenario más caro: la defensa solo exige unas horas |
 | S6 | Coste del almacenamiento local | 0,20 €/GB | autor; SSD de ≈ 100 € por 512 GB |
-| S7 | Mantenimiento | 2 h/mes a 15 €/h | la usuaria |
-| S8 | Desarrollo | 200 h a 15 €/h | la usuaria: «unas 200 h» (estimación, no cronometradas) |
+| S7 | Mantenimiento | 2 h/mes a 15 €/h | la persona autora |
+| S8 | Desarrollo | 200 h a 15 €/h | la persona autora: «unas 200 h» (estimación, no cronometradas) |
 | S9 | Tasa de descuento | 10 % | la de la evaluación anterior; sin fuente, solo como parámetro |
-| S10 | Beneficio: tiempo manual evitado por consulta | 2 h | la usuaria: hacer a mano una vista equivalente a la del panel descargando y filtrando el catálogo de USGS (estimación, **no cronometrada**) |
-| S11 | Frecuencia de esa consulta sin observatorio | 1 por día laborable = 260/año | la usuaria |
+| S10 | Beneficio: tiempo manual evitado por consulta | 2 h | la persona autora: hacer a mano una vista equivalente a la del panel descargando y filtrando el catálogo de USGS (estimación, **no cronometrada**) |
+| S11 | Frecuencia de esa consulta sin observatorio | 1 por día laborable = 260/año | la persona autora |
 | S12 | Valor de la hora evitada | 15 €/h | la misma tarifa que S7 y S8 |
 
 ## Partidas de coste

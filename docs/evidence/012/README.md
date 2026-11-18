@@ -23,4 +23,4 @@ Pruebas: `vitest run` 199 en verde (18 ficheros); `ng build` compila. **No compr
 
 - `.env.example`: añadida `API_MAX_FEATURES` (se usaba en `compose.yaml` con valor por defecto 1000).
 - `docs/report.md`: el índice incluye «Ajustes del panel (spec 010)» y la introducción dice «specs 002 a 011».
-- La prueba en Linux deja de figurar como pendiente: queda fuera de alcance por decisión de la usuaria (no es requisito del enunciado). Se actualizaron `docs/report.md`, `README.md` y los README de evidencias 007, 009, 010 y 011. La comprobación de la spec 008 (G3, 886 pruebas) se conserva como estaba.
+- La prueba en Linux deja de figurar como pendiente: queda fuera de alcance por decisión de la persona autora (no es requisito del enunciado). Se actualizaron `docs/report.md`, `README.md` y los README de evidencias 007, 009, 010 y 011. La comprobación de la spec 008 (G3, 886 pruebas) se conserva como estaba.

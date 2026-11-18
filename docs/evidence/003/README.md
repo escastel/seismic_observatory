@@ -23,7 +23,7 @@ ejecutado; cada fichero enlazado incluye la orden, la cabecera de equipo y commi
 
 ## Linux
 
-La tarea T050 (permisos de `./data` con el usuario propio en Linux) se **descartó el 2026-11-17 a petición de la usuaria** por no ser un requisito del enunciado; no se ejecutó
+La tarea T050 (permisos de `./data` con el usuario propio en Linux) se **descartó el 2026-11-17 a petición de la persona autora** por no ser un requisito del enunciado; no se ejecutó
 la comprobación de propiedad de ficheros y no se da por observada. Ese día sí se levantó el stack en Linux (todos los servicios `healthy`) y pasó la suite completa
 (886 pruebas, [linux-g3.md](../008/linux-g3.md)).
 

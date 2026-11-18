@@ -182,7 +182,7 @@ y revisar `docs/evidence/006/`.
 
 - [X] T043 [A0] Ejecutar la suite completa una sola vez: `pytest tests/unit tests/contract` y después `tests/db` y `tests/query_api` (nunca a la vez), y guardar el resumen en `docs/evidence/006/tests.txt`; si algo falla, corregir el código, no la prueba.
 - [X] T044 [A0] Revisar el repositorio antes de versionar: `git status`, que no haya `.env`, datos, `*.bak` ni `*.orig` (nada de datos en Git), que `docs/evidence/006/` no contenga credenciales ni valores de `.env`, que los finales de línea sean LF y que `.specify/feature.json` apunte a `specs/006-query-api`.
-- [X] T045 [A0] Actualizar la memoria del proyecto (`MEMORY.md` y el fichero de estado de la spec 006: qué queda hecho, evidencia y comprobaciones pendientes, p. ej. prueba en Linux) y marcar en `specs/006-query-api/tasks.md` lo completado; commit en la rama `006-query-api` con la atribución indicada (sin `git add -A`). *El commit queda pendiente de que la usuaria lo pida.*
+- [X] T045 [A0] Actualizar la memoria del proyecto (`MEMORY.md` y el fichero de estado de la spec 006: qué queda hecho, evidencia y comprobaciones pendientes, p. ej. prueba en Linux) y marcar en `specs/006-query-api/tasks.md` lo completado; commit en la rama `006-query-api` con la atribución indicada (sin `git add -A`). *El commit queda pendiente de que la persona autora lo pida.*
 
 ---
 

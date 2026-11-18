@@ -14,7 +14,7 @@
 
 El túnel de ngrok reenvía todo el tráfico del dominio a la API de consulta. La API solo expone `GET /api/eventos`, `GET /api/estadisticas` y `GET /api/salud` (solo lectura) y su contrato legible por máquinas en `/api/openapi.json`. En la spec 006 (decisión R7) se desactivaron las páginas de documentación interactiva `/docs` y `/redoc` por dos motivos: **superficie mínima** (principio I de la constitución) y porque esas páginas cargaban recursos de un CDN con versión flotante y no formaban parte del contrato.
 
-Esta spec cambia esa decisión a petición de la usuaria: quien reciba la dirección pública debe poder **leer cómo se usa la API y probarla** sin instalar nada. La decisión de R7 queda registrada como revertida, con este motivo, y se compensa con un límite de peticiones, recursos de interfaz de versión exacta y una declaración de lo que ve el navegador del visitante. Lo que **no** cambia: la API sigue siendo de solo lectura, no se publica nada más por el túnel (Kafka y PostgreSQL nunca), no hay secretos y el contrato de los endpoints existentes queda intacto.
+Esta spec cambia esa decisión a petición de la persona autora: quien reciba la dirección pública debe poder **leer cómo se usa la API y probarla** sin instalar nada. La decisión de R7 queda registrada como revertida, con este motivo, y se compensa con un límite de peticiones, recursos de interfaz de versión exacta y una declaración de lo que ve el navegador del visitante. Lo que **no** cambia: la API sigue siendo de solo lectura, no se publica nada más por el túnel (Kafka y PostgreSQL nunca), no hay secretos y el contrato de los endpoints existentes queda intacto.
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -157,4 +157,4 @@ El panel publicado en Netlify, el contrato de la API, las pruebas existentes y l
 - Los datos son públicos de USGS procesados por el proyecto; no hay autenticación ni claves de API para los visitantes (CORS no es autenticación y no se presenta como tal).
 - El contrato, los filtros, los códigos de error y los límites de la API de la spec 006 no cambian; las descripciones y ejemplos de la documentación son metadatos del contrato, no cambios de comportamiento.
 - Los textos visibles y la documentación van en español; código, identificadores y ficheros en inglés. LF en todo el repositorio, también en Windows.
-- Se trabaja en la rama `011-public-api-docs`, nunca directamente en `main`; el push, el PR y el merge piden confirmación explícita de la usuaria.
+- Se trabaja en la rama `011-public-api-docs`, nunca directamente en `main`; el push, el PR y el merge piden confirmación explícita de la persona autora.

@@ -25,7 +25,7 @@ Quien abre el panel lo ve en el tema claro u oscuro que usa su dispositivo, sin 
 (que cambia con el tema), un relieve con las placas tectónicas o el satélite. Sobre cualquiera puede activar un mapa de calor de densidad y la
 agrupación de eventos, además de los círculos por magnitud y profundidad.
 
-**Why this priority**: es el cambio más visible y el que la usuaria pidió con más detalle; el mapa es el elemento central del panel.
+**Why this priority**: es el cambio más visible y el que la persona autora pidió con más detalle; el mapa es el elemento central del panel.
 
 **Independent Test**: abrir el panel con el dispositivo en modo claro y en modo oscuro y recorrer los cuatro mapas y las dos capas; en todos los
 casos los eventos siguen siendo legibles, los filtros se aplican igual y los datos mostrados no cambian.
@@ -79,7 +79,7 @@ y si faltan valores se muestran como ND. Las transiciones son suaves y se desact
 
 El panel tiene nombre, logotipo, paleta y tipografía propios del proyecto, coherentes en los dos temas y en móvil.
 
-**Why this priority**: personaliza el panel, pero depende de que la usuaria apruebe el diseño del logotipo; el resto funciona sin él.
+**Why this priority**: personaliza el panel, pero depende de que la persona autora apruebe el diseño del logotipo; el resto funciona sin él.
 
 **Independent Test**: revisar el panel en ambos temas, en escritorio y móvil, y comprobar que nombre, logotipo y paleta son los aprobados y que el contraste es suficiente.
 
@@ -198,14 +198,14 @@ El rediseño no rompe nada de lo que la 007 ya demostró: filtros coherentes ent
 
 ## Assumptions
 
-- **Referencia visual del mapa (recibida el 2026-11-17)**: [references/map-reference.png](references/map-reference.png), aportada por la usuaria como referencia de estilo (no forma parte del panel ni se redistribuye; su procedencia no consta). Muestra un mapa oscuro de relieve con los **límites de placas tectónicas como líneas discontinuas rojas**, círculos de eventos con brillo (color por profundidad: amarillo < 70 km, naranja 70–300 km, morado ≥ 300 km; tamaño por magnitud), una **leyenda** abajo a la izquierda, un **selector de capas** arriba a la derecha («Relieve + Placas», «Mapa de calor», «Satelital», «Oscuro neutro»), un chip de **«Filtros aplicados»** y botones de zoom. Se toma como guía de estilo del **tema oscuro**, con una variante clara equivalente para el tema claro: la spec mantiene el mapa de calor como **capa opcional sobre cualquier fondo** y no como un fondo más, y rotula el trazo como límites de placas (no «fallas»).
-- **Cambios frente a la referencia**: el interruptor **2D/3D** de la imagen queda fuera de alcance (mapa 3D o globo excluido); la usuaria puede revisarlo más adelante.
-- **Identidad (decidida el 2026-11-17)**: el nombre es **seismicobservatory** y el logotipo es una **«S» con una decoración sencilla que represente el panel** (por ejemplo una onda sísmica). El diseño concreto del logotipo lo propone el plan y lo aprueba la usuaria; hasta entonces, un logotipo provisional con la «S».
+- **Referencia visual del mapa (recibida el 2026-11-17)**: [references/map-reference.png](references/map-reference.png), aportada por la persona autora como referencia de estilo (no forma parte del panel ni se redistribuye; su procedencia no consta). Muestra un mapa oscuro de relieve con los **límites de placas tectónicas como líneas discontinuas rojas**, círculos de eventos con brillo (color por profundidad: amarillo < 70 km, naranja 70–300 km, morado ≥ 300 km; tamaño por magnitud), una **leyenda** abajo a la izquierda, un **selector de capas** arriba a la derecha («Relieve + Placas», «Mapa de calor», «Satelital», «Oscuro neutro»), un chip de **«Filtros aplicados»** y botones de zoom. Se toma como guía de estilo del **tema oscuro**, con una variante clara equivalente para el tema claro: la spec mantiene el mapa de calor como **capa opcional sobre cualquier fondo** y no como un fondo más, y rotula el trazo como límites de placas (no «fallas»).
+- **Cambios frente a la referencia**: el interruptor **2D/3D** de la imagen queda fuera de alcance (mapa 3D o globo excluido); la persona autora puede revisarlo más adelante.
+- **Identidad (decidida el 2026-11-17)**: el nombre es **seismicobservatory** y el logotipo es una **«S» con una decoración sencilla que represente el panel** (por ejemplo una onda sísmica). El diseño concreto del logotipo lo propone el plan y lo aprueba la persona autora; hasta entonces, un logotipo provisional con la «S».
 - Las fuentes concretas de teselas, satélite y límites de placas se eligen en el plan, comprobando licencia, atribución y política de uso; las de uso gratuito sin clave se prefieren, y ninguna clave va al frontend ni a Git.
 - El tema sigue el del dispositivo y, si este no expresa preferencia, es el oscuro; no se añade un conmutador manual (puede considerarse más adelante). La referencia visual es oscura; el diseño claro del relieve con placas se deriva con la misma jerarquía visual.
 - Una cifra de «magnitud máxima» no forma parte de las tarjetas porque la API de estadísticas no la entrega y recalcularla sobre la muestra del mapa está prohibido; si se quisiera, requeriría un cambio justificado del contrato.
 - El mapa sigue mostrando como mucho 1.000 eventos por petición; la agrupación y el mapa de calor trabajan sobre esa muestra y así se rotulan.
 - Las pruebas de la 007 (Vitest, comprobaciones en navegador, accesibilidad automática) se reutilizan y se amplían; no se rehace la lógica de datos.
 - Fuera de alcance: cambios en la API, el modelo o el contrato; nuevos datos o métricas; mapa 3D o globo; regiones oceánicas en la API o el panel (queda para una spec posterior, la 008 hizo la versión solo de análisis en C5); cuentas o autenticación; servicios cloud nuevos.
-- Dependencias externas de la usuaria: aprobar el diseño del logotipo (una «S» con decoración sencilla) que se proponga en el plan.
+- Dependencias externas de la persona autora: aprobar el diseño del logotipo (una «S» con decoración sencilla) que se proponga en el plan.
 - Orquestación según `CLAUDE.md`: la sesión principal hace integración, navegador real, evidencias y memoria; agentes Sonnet para componentes y pruebas; Haiku para documentación; nunca dos ejecuciones de `tests/db` a la vez.
