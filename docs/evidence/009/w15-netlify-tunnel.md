@@ -1,12 +1,21 @@
 # W15: túnel real y Netlify
 
-Fecha: 2026-11-17. Estado: **PARCIAL**. Túnel real comprobado; **despliegue en Netlify no hecho**.
+Fecha: 2026-11-17. Estado: **SUPERADA**. Túnel real y sitio público de Netlify comprobados tras el merge a `main` (PR #10).
 
-## Netlify: no desplegado
+## Netlify (tras el merge a `main`, 2026-11-17 19:17 UTC)
 
-La usuaria autorizó el despliegue, pero este equipo no tiene la CLI de Netlify ni sesión iniciada (no hay `NETLIFY_AUTH_TOKEN` ni configuración de Netlify) y el proyecto no permite publicar mediante `git push` desde esta sesión. No se probó el sitio público `seismicobservatoryecr.netlify.app`. Para cerrarlo hay que publicar la compilación (`npm run build` en `frontend/`, carpeta `dist/observatorio/browser`) y repetir esta comprobación contra la URL pública.
+Netlify publica al hacer merge a `main`. Sitio `https://seismicobservatoryecr.netlify.app` (título «seismicobservatory»; `datos/placas.geojson` responde 200). Navegador automatizado sobre la URL pública, API real a través del túnel ngrok real, refresco acelerado a 5 s solo para la prueba. En bruto: [w15-netlify.json](w15-netlify.json), [w15-netlify-smoke.json](w15-netlify-smoke.json).
 
-## Túnel real de ngrok (con la compilación de producción servida en `http://localhost:4200`)
+| Comprobación | Observado | Estado |
+|---|---|---|
+| Carga desde Netlify | 208 eventos en tarjetas y tabla, «Al día», sin errores de consola ni de aplicación ([captura](w15n-tunnel-open.png)) | SUPERADA |
+| Qué pasa por el túnel | solo `/api/eventos`, `/api/estadisticas` y `/api/salud`; 0 peticiones de teselas o placas al host del túnel (teselas OSM y Esri directas a sus proveedores) | SUPERADA |
+| Inspector de tráfico de ngrok (conector) | 15 peticiones en la ventana: `/api/estadisticas` 5, `/api/eventos` 5, `/api/salud` 5; ninguna de teselas ni de `placas.geojson` | SUPERADA |
+| Cerrar el túnel | 19:17:55 parado; a los 9 s «Backend inaccesible» con la última lectura y 208 eventos conservados ([captura](w15n-tunnel-closed.png)) | SUPERADA |
+| Reabrir el túnel | 19:18:06 arrancado; en el refresco siguiente «Al día», 208 eventos, una sola navegación ([captura](w15n-tunnel-reopened.png)) | SUPERADA |
+| Temas, capas y accesibilidad en el sitio público | fondo `rgb(11, 21, 32)` en oscuro y `rgb(238, 243, 246)` en claro; 5 tarjetas y 4 gráficos; calor (1 lienzo) y agrupación (10 grupos); axe 0 violaciones en ambos temas; sin desplazamiento horizontal a 390 px | SUPERADA |
+
+## Antes del merge: túnel real de ngrok (con la compilación de producción servida en `http://localhost:4200`)
 
 `config.json` del repositorio apunta al dominio reservado del túnel (`modular-guidance-daybreak.ngrok-free.dev`). Refresco acelerado a 5 s solo para la prueba. En bruto: [w15.json](w15.json).
 

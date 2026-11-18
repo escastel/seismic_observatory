@@ -1,0 +1,43 @@
+{
+  "standard": "axe-core, WCAG 2.0/2.1 A y AA",
+  "date": "2026-11-18",
+  "states": {
+    "dark-base": [],
+    "dark-detalles-abierto": [],
+    "dark-burbujas": [],
+    "dark-calor": [],
+    "dark-sin-eventos-popup": [],
+    "dark-avisos-visibles": [],
+    "dark-movil": [],
+    "light-base": [],
+    "light-detalles-abierto": [],
+    "light-burbujas": [],
+    "light-calor": [],
+    "light-sin-eventos-popup": [],
+    "light-avisos-visibles": [],
+    "light-movil": []
+  },
+  "keyboard": {
+    "reachesThemeButton": true,
+    "reachesAlertCloseButtons": true,
+    "popupCloseButtonInTabOrder": true,
+    "popupIsAriaHidden": false,
+    "popupHasButton": true,
+    "firstTabStops": [
+      "Restablecer|BUTTON",
+      "Mapa interactivo de terremotos|DIV",
+      "Zoom in|A",
+      "Zoom out|A",
+      "INPUT|INPUT",
+      "INPUT|INPUT",
+      "INPUT|INPUT",
+      "INPUT|INPUT",
+      "Leyenda|SUMMARY",
+      "Cerrar aviso|BUTTON",
+      "Ver tabla de datos|SUMMARY",
+      "Ver tabla de datos|SUMMARY",
+      "Ver tabla de datos|SUMMARY",
+      "Ver tabla de datos|SUMMARY"
+    ]
+  }
+}

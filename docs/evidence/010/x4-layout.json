@@ -1,0 +1,120 @@
+{
+  "desktop-dark": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "eyebrowOrTagline": false,
+    "statusBar": {
+      "top": 98,
+      "bottom": 179,
+      "h": 81
+    },
+    "filters": {
+      "top": 199,
+      "bottom": 410,
+      "h": 211
+    },
+    "map": {
+      "top": 470,
+      "bottom": 1028,
+      "h": 558
+    },
+    "filterFormHeight": {
+      "top": 241,
+      "bottom": 367,
+      "h": 126
+    },
+    "viewport": 900,
+    "overflowX": false,
+    "metrics": [
+      "Eventos 202 eventsSin filtros",
+      "Última ingesta 12:09:29 UTC2026-11-18 · Hace 22 s",
+      "Estado ● Al día Datos al día.",
+      "Periodo Últimas 24 h UTC2026-11-17 12:09:50 UTC – 2026-11-18 12:09:50 UTC. Inicio inclusivo, fin exclusivo; periodo por defecto. Sin filtros",
+      "Sin valor 0 · 0 eventosmagnitud · profundidad. Sin magnitud: 0. Sin profundidad: 0. Sin filtros"
+    ],
+    "chips": [
+      "Modo: en vivo",
+      "Periodo: por defecto",
+      "Sin mínimo de magnitud",
+      "Todos los países"
+    ]
+  },
+  "desktop-light": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "eyebrowOrTagline": false,
+    "statusBar": {
+      "top": 98,
+      "bottom": 179,
+      "h": 81
+    },
+    "filters": {
+      "top": 199,
+      "bottom": 410,
+      "h": 211
+    },
+    "map": {
+      "top": 470,
+      "bottom": 1028,
+      "h": 558
+    },
+    "filterFormHeight": {
+      "top": 241,
+      "bottom": 367,
+      "h": 126
+    },
+    "viewport": 900,
+    "overflowX": false,
+    "metrics": [
+      "Eventos 202 eventsSin filtros",
+      "Última ingesta 12:09:29 UTC2026-11-18 · Hace 27 s",
+      "Estado ● Al día Datos al día.",
+      "Periodo Últimas 24 h UTC2026-11-17 12:09:56 UTC – 2026-11-18 12:09:56 UTC. Inicio inclusivo, fin exclusivo; periodo por defecto. Sin filtros",
+      "Sin valor 0 · 0 eventosmagnitud · profundidad. Sin magnitud: 0. Sin profundidad: 0. Sin filtros"
+    ],
+    "chips": [
+      "Modo: en vivo",
+      "Periodo: por defecto",
+      "Sin mínimo de magnitud",
+      "Todos los países"
+    ]
+  },
+  "mobile-dark": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "eyebrowOrTagline": false,
+    "statusBar": {
+      "top": 80,
+      "bottom": 159,
+      "h": 79
+    },
+    "filters": {
+      "top": 179,
+      "bottom": 301,
+      "h": 122
+    },
+    "map": {
+      "top": 385,
+      "bottom": 858,
+      "h": 473
+    },
+    "filterFormHeight": {
+      "top": 0,
+      "bottom": 0,
+      "h": 0
+    },
+    "viewport": 844,
+    "overflowX": false,
+    "metrics": [
+      "Eventos 202 eventsSin filtros",
+      "Última ingesta 12:09:29 UTC2026-11-18 · Hace 33 s",
+      "Estado ● Al día Datos al día."
+    ],
+    "chips": [
+      "Modo: en vivo",
+      "Periodo: por defecto",
+      "Sin mínimo de magnitud",
+      "Todos los países"
+    ]
+  }
+}

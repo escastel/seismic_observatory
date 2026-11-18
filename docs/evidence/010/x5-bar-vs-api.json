@@ -1,0 +1,21 @@
+[
+  {
+    "caso": "sin filtro",
+    "barra": "202 events",
+    "api_total": 202
+  },
+  {
+    "caso": "magnitud mínima 5",
+    "barra": "10 events",
+    "api_total": 10
+  },
+  {
+    "caso": "país JPN",
+    "barra": "0 events",
+    "api_total": 0
+  },
+  {
+    "detalles": "Última lectura correcta del panel2026-11-18 12:10:26 UTCGeneración de la respuesta (API)2026-11-18 12:10:26 UTCÚltima ingesta2026-11-18 12:09:29 UTCEventos en cuarentena2 (geometría no válida: 0)Eventos sin magnitud0 (incluidos)PeriodoÚltimas 24 h UTCSin valor0 · 0 eventos",
+    "expanded": "true"
+  }
+]

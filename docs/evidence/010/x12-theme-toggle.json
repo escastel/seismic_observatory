@@ -1,0 +1,135 @@
+{
+  "toggle": {
+    "before": {
+      "dataTheme": null,
+      "bg": "rgb(11, 21, 32)",
+      "label": "Cambiar a tema claro",
+      "stored": null,
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#0b1520",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    },
+    "after": {
+      "dataTheme": "light",
+      "bg": "rgb(238, 243, 246)",
+      "label": "Cambiar a tema oscuro",
+      "stored": "light",
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#eef3f6",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    },
+    "extraApiRequestsDuringToggle": 0,
+    "sameReading": true
+  },
+  "reload": {
+    "dataTheme": "light",
+    "bg": "rgb(238, 243, 246)",
+    "label": "Cambiar a tema oscuro",
+    "stored": "light",
+    "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "total": "194 events",
+    "metaThemeColor": [
+      "#eef3f6",
+      "#eef3f6"
+    ],
+    "tileFilter": "",
+    "chartText": true
+  },
+  "deviceChangeWithManual": {
+    "dataTheme": "light",
+    "bg": "rgb(238, 243, 246)",
+    "label": "Cambiar a tema oscuro",
+    "stored": "light",
+    "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "total": "194 events",
+    "metaThemeColor": [
+      "#eef3f6",
+      "#eef3f6"
+    ],
+    "tileFilter": "",
+    "chartText": true
+  },
+  "keyboard": {
+    "focusStyle": {
+      "outline": "solid 3px",
+      "w": 48,
+      "h": 48
+    },
+    "afterEnter": "dark",
+    "afterSpace": "light"
+  },
+  "auto": {
+    "deviceLight": {
+      "dataTheme": null,
+      "bg": "rgb(238, 243, 246)",
+      "label": "Cambiar a tema oscuro",
+      "stored": null,
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#0b1520",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    },
+    "deviceChangedToDark": {
+      "dataTheme": null,
+      "bg": "rgb(11, 21, 32)",
+      "label": "Cambiar a tema claro",
+      "stored": null,
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#0b1520",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    }
+  },
+  "blockedStorage": {
+    "before": {
+      "dataTheme": null,
+      "bg": "rgb(11, 21, 32)",
+      "label": "Cambiar a tema claro",
+      "stored": "ERROR",
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#0b1520",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    },
+    "after": {
+      "dataTheme": "light",
+      "bg": "rgb(238, 243, 246)",
+      "label": "Cambiar a tema oscuro",
+      "stored": "ERROR",
+      "drawn": "194 eventos dibujados · 0 omitidos por coordenadas no válidas",
+      "total": "194 events",
+      "metaThemeColor": [
+        "#eef3f6",
+        "#eef3f6"
+      ],
+      "tileFilter": "",
+      "chartText": true
+    }
+  },
+  "reducedMotion": {
+    "transitionDuration": "0s",
+    "animationDuration": "0s"
+  }
+}

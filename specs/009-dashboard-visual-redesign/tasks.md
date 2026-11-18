@@ -107,7 +107,7 @@ no se solapan. Los agentes de `frontend/` ejecutan solo `npm test` de sus ficher
 - [X] T026 [US5] [A0] Accesibilidad (W12): axe-core WCAG A y AA en claro y oscuro, recorrido con teclado, foco visible, contraste; corregir lo que salga y guardar `docs/evidence/009/w12-a11y.json`
 - [X] T027 [US5] [A0] No regresión (W13): `npm test` completo (las 106 pruebas anteriores más las nuevas), repetir V1 a V15 de la 007 con el panel rediseñado (API real y simulador), cierre y reapertura del túnel con el simulador; `git diff 008-analysis-costs-deliverables` vacío en los ficheros que no se pueden tocar; evidencia en `docs/evidence/009/w13-regression.md`
 - [X] T028 [US5] [A0] Móvil y peso (W14): viewport de móvil, red lenta emulada, `npm run build`; medir peso inicial y comprobar carga diferida de Chart.js, calor, agrupación, placas y teselas; evidencia en `docs/evidence/009/w14-mobile-weight.md`
-- [ ] T029 [US5] [A0] **Pedir confirmación**, desplegar a Netlify y repetir en el sitio real con el túnel (W15): cerrar y reabrir el túnel; con el conector de ngrok comprobar que no hay peticiones de teselas ni de placas en el inspector de tráfico; evidencia en `docs/evidence/009/w15-netlify-tunnel.md`
+- [X] T029 [US5] [A0] **Pedir confirmación**, desplegar a Netlify y repetir en el sitio real con el túnel (W15): cerrar y reabrir el túnel; con el conector de ngrok comprobar que no hay peticiones de teselas ni de placas en el inspector de tráfico; evidencia en `docs/evidence/009/w15-netlify-tunnel.md`
 
 ---
 

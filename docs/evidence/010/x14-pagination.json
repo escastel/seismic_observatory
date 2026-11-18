@@ -1,0 +1,10 @@
+{
+  "firstRows": 1000,
+  "summary": "Mostrando 1000 de 2807 eventos",
+  "afterLoadMore": {
+    "rows": 2807,
+    "uniqueIds": 2807,
+    "summary": "Mostrando 2807 de 2807 eventos",
+    "buttonDisabled": true
+  }
+}

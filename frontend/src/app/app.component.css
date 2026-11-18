@@ -4,10 +4,7 @@ h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.25rem); letter-spacing: .01em; }
 .brand-header { display: grid; gap: var(--space-3); }
 .brand { display: flex; align-items: center; gap: var(--space-3); }
 .brand-logo { width: 48px; height: 48px; color: var(--text); flex: none; }
-.tagline { margin: 0; color: var(--text-muted); }
-.eyebrow { letter-spacing: .15em; font-size: var(--text-xs); font-weight: 700; color: var(--accent); margin: 0; }
-.config-error { padding: 12px 16px; border-left: 4px solid var(--error); background: var(--error-bg); color: var(--error); margin: 0; }
-.notice { padding: 12px 16px; border-left: 4px solid var(--warning); background: var(--warning-bg); color: var(--warning); margin: 0; }
+.brand-s { color: var(--brand-accent); }
 .skip { position: absolute; left: -999px; top: 0; background: var(--surface); color: var(--text); padding: 8px 12px; z-index: 1000; }
 .skip:focus { left: 8px; top: 8px; outline: 3px solid var(--focus); }
 footer p { font-size: var(--text-sm); color: var(--text-muted); margin: var(--space-2) 0; }

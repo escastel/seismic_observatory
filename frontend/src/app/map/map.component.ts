@@ -27,6 +27,9 @@ import {
   type Theme,
 } from '../lib/map-layers';
 import { ThemeService } from '../theme/theme.service';
+import type { NoEventsText } from '../lib/alerts';
+import { clusterStyle, haloRadius, HEAT_GRADIENT, HEAT_OPTIONS } from '../lib/cluster-style';
+import { NoEventsPopupComponent } from './no-events-popup.component';
 
 // Optional layers are loaded on demand so they add nothing to the initial weight.
 type HeatFactory = (points: Array<[number, number, number]>, options: object) => L.Layer;
@@ -39,7 +42,7 @@ function globalLeaflet(): typeof L {
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [LeafletDirective],
+  imports: [LeafletDirective, NoEventsPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './map.component.html',
   styleUrl: './map.component.css',
@@ -52,7 +55,14 @@ export class MapComponent implements OnDestroy {
   /** Real total of the period (metadata.total), for the sample label. */
   readonly total = input<number>(0);
   readonly theme = input<Theme | null>(null);
+  /** Set when the last correct reading has no events; shown as a floating pop-up. */
+  readonly noEvents = input<NoEventsText | null>(null);
   readonly eventSelected = output<MapEvent>();
+  protected readonly popupDismissed = signal(false);
+  /** The legend starts folded on narrow screens, open on wide ones. */
+  protected readonly legendOpen = signal(
+    typeof window === 'undefined' || !window.matchMedia ? true : !window.matchMedia('(max-width: 760px)').matches,
+  );
 
   private readonly themeService = inject(ThemeService);
   protected readonly currentTheme = computed<Theme>(() => this.theme() ?? this.themeService.theme());
@@ -75,8 +85,12 @@ export class MapComponent implements OnDestroy {
   protected readonly base = signal<BaseLayerId>(DEFAULT_BASE_LAYER);
   protected readonly heatOn = signal(false);
   protected readonly clusterOn = signal(false);
-  protected readonly platesOn = signal(false);
-  protected readonly notice = signal<string | null>(null);
+  protected readonly platesOn = signal(platesDefault(DEFAULT_BASE_LAYER));
+  /** Layer/tile problems go to the page's alerts zone (spec 010); the map shows no notice of its own. */
+  readonly notice = output<{ id: string; text: string } | null>();
+  private setNotice(id: string | null, text: string | null): void {
+    this.notice.emit(id !== null && text !== null ? { id, text } : null);
+  }
 
   protected readonly partition = computed(() => partitionDrawable(this.events()));
   protected readonly drawnCount = computed(() => this.partition().drawable.length);
@@ -103,6 +117,12 @@ export class MapComponent implements OnDestroy {
   private tileErrors = 0;
 
   constructor() {
+    // A new filter without events shows the pop-up again.
+    effect(() => {
+      const value = this.noEvents();
+      if (value) this.popupDismissed.set(false);
+    });
+
     // Base layer: rebuilt when the choice or the theme changes.
     effect(() => {
       const map = this.map();
@@ -162,7 +182,7 @@ export class MapComponent implements OnDestroy {
   }
 
   protected chooseBase(id: BaseLayerId): void {
-    this.notice.set(null);
+    this.setNotice(null, null);
     this.base.set(id);
     this.platesOn.set(platesDefault(id));
   }
@@ -189,11 +209,11 @@ export class MapComponent implements OnDestroy {
       // Only a layer that has not drawn a single tile counts as failed.
       if (this.tileErrors < 3 || tilesLoaded > 0) return;
       if (id !== DEFAULT_BASE_LAYER) {
-        this.notice.set(`No se pudo cargar el fondo «${def.label}»; se vuelve al mapa Simple.`);
+        this.setNotice('base_failed', `No se pudo cargar el fondo «${def.label}»; se vuelve al mapa Simple.`);
         this.base.set(DEFAULT_BASE_LAYER);
-        this.platesOn.set(false);
+        this.platesOn.set(platesDefault(DEFAULT_BASE_LAYER));
       } else {
-        this.notice.set('No se pudieron cargar las teselas del mapa; los eventos siguen visibles.');
+        this.setNotice('tiles_failed', 'No se pudieron cargar las teselas del mapa; los eventos siguen visibles.');
       }
     });
     layer.addTo(map);
@@ -215,20 +235,44 @@ export class MapComponent implements OnDestroy {
     if (cluster) {
       try {
         await import('leaflet.markercluster');
-        const group = (globalLeaflet() as unknown as { markerClusterGroup: (o?: object) => L.LayerGroup }).markerClusterGroup({
+        const leaflet = globalLeaflet();
+        const group = (leaflet as unknown as { markerClusterGroup: (o?: object) => L.LayerGroup }).markerClusterGroup({
           chunkedLoading: true,
+          // Own icons: the plugin's default CSS is not loaded, which left only bare numbers (spec 010).
+          iconCreateFunction: (cl: { getChildCount: () => number }) => {
+            const count = cl.getChildCount();
+            const { size, level } = clusterStyle(count);
+            return leaflet.divIcon({
+              html: `<span>${count}</span>`,
+              className: `so-cluster so-cluster--${level}`,
+              iconSize: [size, size],
+            });
+          },
         });
         this.eventsLayer.addLayer(group);
         target = group;
       } catch {
-        this.notice.set('No se pudo cargar la agrupación; se muestran los círculos.');
+        this.setNotice('cluster_failed', 'No se pudo cargar la agrupación; se muestran los círculos.');
       }
     }
     for (const event of drawable) {
       if (event.lat === null || event.lon === null) continue;
       const color = depthColor(depthCategory(event.depthKm).key, theme);
+      const radius = markerRadius(event.mag);
+      if (!cluster) {
+        // Soft halo behind single events, with the same glow as the clusters.
+        target.addLayer(
+          L.circleMarker([event.lat, event.lon], {
+            radius: haloRadius(radius),
+            stroke: false,
+            fillColor: color,
+            fillOpacity: 0.18,
+            interactive: false,
+          }),
+        );
+      }
       const marker = L.circleMarker([event.lat, event.lon], {
-        radius: markerRadius(event.mag),
+        radius,
         color,
         fillColor: color,
         fillOpacity: 0.75,
@@ -253,9 +297,9 @@ export class MapComponent implements OnDestroy {
           e.lon as number,
           typeof e.mag === 'number' && Number.isFinite(e.mag) ? Math.min(1, Math.max(0.1, e.mag / 8)) : 0.1,
         ]);
-      this.heatHolder.addLayer(factory(points, { radius: 18, blur: 20, maxZoom: 6 }));
+      this.heatHolder.addLayer(factory(points, { ...HEAT_OPTIONS, gradient: HEAT_GRADIENT }));
     } catch {
-      this.notice.set('No se pudo cargar el mapa de calor.');
+      this.setNotice('heat_failed', 'No se pudo cargar el mapa de calor.');
       this.heatOn.set(false);
     }
   }
@@ -273,7 +317,7 @@ export class MapComponent implements OnDestroy {
         L.geoJSON(this.platesData, { style: { color: '#ff6b6b', weight: 1.5, dashArray: '6 4', fill: false } }),
       );
     } catch {
-      this.notice.set('No se pudieron cargar los límites de placas.');
+      this.setNotice('plates_failed', 'No se pudieron cargar los límites de placas.');
       this.platesOn.set(false);
     }
   }

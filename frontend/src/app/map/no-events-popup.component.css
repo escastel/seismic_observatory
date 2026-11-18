@@ -1,0 +1,86 @@
+:host {
+  position: absolute;
+  inset: 0;
+  z-index: 1100; /* above the Leaflet panes and controls (400-1000) */
+  display: block;
+  pointer-events: none;
+}
+
+.popup-layer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+  box-sizing: border-box;
+}
+
+.popup {
+  position: relative;
+  max-width: min(26rem, 100%);
+  padding: 1rem 2.5rem 1rem 1rem;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-left: 4px solid var(--alert-info);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  pointer-events: auto;
+}
+
+.popup-title {
+  margin: 0 0 0.5rem;
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+.popup-conditions {
+  margin: 0 0 0.5rem;
+  padding-left: 1.1rem;
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+}
+
+.popup-suggestion {
+  margin: 0;
+  font-size: var(--text-sm);
+}
+
+.popup-close {
+  position: absolute;
+  top: 0.4rem;
+  right: 0.4rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  font-size: 1.25rem;
+  line-height: 1;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.popup-close:hover {
+  border-color: var(--border);
+}
+
+.popup-close:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .popup {
+    animation: popup-in var(--transition) both;
+  }
+
+  @keyframes popup-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+}

@@ -1,0 +1,90 @@
+:host {
+  display: block;
+}
+
+:host:empty {
+  display: none;
+}
+
+.alerts {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.alert {
+  --tone: var(--alert-info);
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border-left: 4px solid var(--tone);
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--tone) 12%, var(--surface));
+  color: var(--text, inherit);
+}
+
+.alert-error {
+  --tone: var(--alert-error);
+}
+
+.alert-warning {
+  --tone: var(--alert-warning);
+}
+
+.alert-info {
+  --tone: var(--alert-info);
+}
+
+.alert-success {
+  --tone: var(--alert-success);
+}
+
+.alert-icon {
+  flex: none;
+  margin-top: 1px;
+  color: var(--tone);
+}
+
+.alert-text {
+  flex: 1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+
+.alert-close {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  padding: 0;
+  border: 0;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+}
+
+.alert-close:hover {
+  background: color-mix(in srgb, var(--tone) 20%, transparent);
+}
+
+.alert-close:focus-visible {
+  outline: 2px solid var(--tone);
+  outline-offset: 1px;
+}
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}

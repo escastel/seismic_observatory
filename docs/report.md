@@ -664,7 +664,7 @@ Evidencia en [docs/evidence/009/](evidence/009/README.md); cifras del 2026-11-17
 
 - **Tema**: oscuro por defecto y claro cuando el dispositivo lo pide (`prefers-color-scheme`), con cambio en vivo y sin
   perder la lectura. Los tokens de diseño están en `frontend/src/styles.css`.
-- **Mapa**: fondo **Simple**, **Relieve** o **Satélite**; el simple y el relieve tienen variante clara y oscura (filtro CSS sobre las
+- **Mapa**: fondo **Simple**, **Relieve** o **Satélite** (la spec 010 retiró Relieve); el simple y el relieve tienen variante clara y oscura (filtro CSS sobre las
   teselas). Capas opcionales: **mapa de calor**, **agrupación** y **límites de placas** (activadas por defecto solo con Relieve).
   El calor y la agrupación se rotulan «Muestra: N de TOTAL» (o «Todos los eventos del periodo») porque la API entrega como mucho 1.000 eventos.
 - **Tarjetas de resumen**: eventos, última ingesta, estado, periodo y registros sin valor, siempre desde `Statistics` y el estado del
@@ -702,15 +702,51 @@ de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1
 - Cifras de tarjetas, tablas y gráficos iguales a `/api/estadisticas` en tres conjuntos de filtros y los dos temas ([W8/W9](evidence/009/w8-w9-cards-charts.md)).
 - Casos límite con respuestas alteradas en el navegador (nulos, sin país, marcas, coordenadas inválidas, 503, 422, desactualizado, inaccesible, truncado de 2.500): [W13](evidence/009/w13-regression.md).
 - Móvil con red lenta emulada: primera tarjeta en 3,6 s y gráficos en 4,6 s ([W14](evidence/009/w14-mobile-weight.md)).
-- Túnel real: solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
+- Túnel real y sitio público de Netlify (tras el merge a `main`): solo `/api/eventos`, `/api/estadisticas` y `/api/salud` pasan por ngrok (inspector de tráfico); cerrar y reabrir el túnel se recupera sin recargar ([W15](evidence/009/w15-netlify-tunnel.md)).
 
 ### Límites
 
-- **No se desplegó en Netlify** en esta sesión (no hay sesión de Netlify en el equipo): falta repetir W15 en el sitio público.
 - Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
 - Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
 - El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
 - No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; no se probó en Linux.
+
+## Ajustes del panel (spec 010)
+
+La spec 010 reordena el panel de la 009, añade avisos independientes y corrige un fallo real al filtrar sin resultados. Evidencia en
+[docs/evidence/010/](evidence/010/README.md); mediciones del 2026-11-18 con la API local y Chrome.
+
+### Qué cambia
+
+- **Cabecera**: «Seismic Observatory» (sin antetítulo ni lema). **Barra de estado** única (eventos, última ingesta, estado, periodo y sin valor, con «Detalles»)
+  que sustituye al panel de estado y a las cinco tarjetas; las cifras salen siempre de `/api/estadisticas`.
+- **Filtros**: título «Filtros», controles en una línea y chips con los filtros aplicados; en móvil, un botón que despliega el formulario.
+- **Avisos**: zona de bloques independientes por gravedad (error rojo, aviso naranja, información ámbar, éxito verde que caduca a los 8 s), cada uno con
+  icono y texto. Los problemas de capas del mapa pasan a esta zona.
+- **Sin eventos**: cualquier filtro sin resultados muestra un aviso emergente sobre el mapa con las condiciones aplicadas y un aviso de información.
+- **Mapa**: solo fondos **Simple** y **Satélite** (se retiró **Relieve** y su atribución de Esri); límites de placas activados por defecto; mapa de calor
+  visible (degradado propio y leyenda) y agrupación en burbujas con estilos propios (antes salían solo números porque no se cargaba el CSS de
+  `leaflet.markercluster`); halo tras los eventos sueltos.
+- **Tema**: botón flotante sol/luna; la elección manual se recuerda en el navegador (`seismic-theme`) y, sin elección, se sigue al dispositivo.
+
+### Cambios en lo existente (justificados)
+
+- `api/app/stats.py`: `GET /api/estadisticas` devolvía `period.end: null` cuando ningún evento cumplía el filtro, incumpliendo el contrato de la 006.
+  Ahora `period.start` y `period.end` son siempre números (prueba escrita antes: 3 fallos; después, 26 en verde). El contrato no cambia.
+- `frontend/src/app/data/observatory.service.ts` (7 líneas): una respuesta de estadísticas no válida ya no descarta el refresco entero ni deja a la vista la
+  lectura de otro filtro; se muestran los eventos del filtro nuevo con el aviso de estadísticas. La red caída y el 503 siguen conservando la última lectura.
+- `adapt.ts`, `api-types.ts`, `filters.ts`, `status.ts`, `config.ts` y `summary.ts`: sin diferencias con `origin/main`.
+
+### Resultados
+
+- 199 pruebas de Vitest y 79 de `tests/query_api` en verde; axe-core sin violaciones en 14 estados; el paquete inicial crece unos 17 kB (+5 %) sin dependencias nuevas.
+- Por el túnel de ngrok solo pasan peticiones `/api/*` (11 de 11 en el inspector); teselas y placas no.
+
+### Límites
+
+- Pendiente: la comprobación en el sitio de Netlify tras el merge (X16) y la prueba en Linux. No repetidas: V2 y V13 de la 007; en la interfaz, Albania con 2025 completo y
+  la reproducción sin eventos (la API sí está cubierta por pruebas). No se probó con un lector de pantalla real.
+- El motivo del 422 por un periodo de más de 10.000 horas llega en inglés desde la API, tal como fija el contrato de la 006.
 
 ## Análisis y conclusiones (spec 008)
 

@@ -1,0 +1,52 @@
+<section class="statusbar" [attr.aria-label]="label()">
+  <ul class="metrics">
+    @for (m of bar().metrics; track m.id) {
+      <li class="metric" [class.wide-only]="!m.visibleOnNarrow" [attr.data-metric]="m.id" [attr.data-tone]="m.tone">
+        <span class="label">
+          {{ m.label }}
+          @if (m.badge) {
+            <span class="badge">{{ m.badge }}</span>
+          }
+        </span>
+        <b class="value">
+          @if (icon(m.tone)) {
+            <span class="icon" aria-hidden="true">{{ icon(m.tone) }}</span>
+          }
+          {{ m.value }}
+          @if (m.unit) {
+            <span class="unit">{{ m.unit }}</span>
+          }
+        </b>
+        <span class="sub" [attr.title]="m.detail">{{ m.detail }}</span>
+      </li>
+    }
+  </ul>
+  <button
+    type="button"
+    class="more"
+    aria-controls="status-bar-details"
+    [attr.aria-expanded]="open()"
+    (click)="toggle()"
+  >
+    Detalles <span aria-hidden="true">{{ open() ? '▴' : '▾' }}</span>
+  </button>
+</section>
+
+@if (open()) {
+  <section class="details" id="status-bar-details" role="region" aria-label="Detalles del sistema">
+    <dl class="grid">
+      @for (d of bar().details; track d.id) {
+        <div class="item" [attr.data-detail]="d.id">
+          <dt>{{ d.label }}</dt>
+          <dd>{{ d.value }}</dd>
+        </div>
+      }
+      @for (m of hiddenOnNarrow(); track m.id) {
+        <div class="item narrow-only" [attr.data-detail]="m.id">
+          <dt>{{ m.label }}</dt>
+          <dd>{{ m.value }}{{ m.unit ? ' ' + m.unit : '' }}</dd>
+        </div>
+      }
+    </dl>
+  </section>
+}

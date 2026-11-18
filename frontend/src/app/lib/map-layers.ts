@@ -3,7 +3,7 @@
 
 export type Theme = 'dark' | 'light';
 
-export type BaseLayerId = 'simple' | 'relief' | 'satellite';
+export type BaseLayerId = 'simple' | 'satellite';
 export type OverlayLayerId = 'circles' | 'heat' | 'cluster' | 'plates';
 
 export interface BaseLayer {
@@ -28,8 +28,6 @@ export interface OverlayLayer {
 }
 
 const OSM_TILES = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
-const RELIEF_TILES =
-  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Shaded_Relief/MapServer/tile/{z}/{y}/{x}';
 const SATELLITE_TILES =
   'https://tiles.maps.eox.at/wmts/1.0.0/s2cloudless-2021_3857/default/g/{z}/{y}/{x}.jpg';
 
@@ -42,17 +40,6 @@ export const BASE_LAYERS: readonly BaseLayer[] = [
     tiles: () => OSM_TILES,
     filter: (theme) =>
       theme === 'dark' ? 'invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9)' : 'none',
-  },
-  {
-    id: 'relief',
-    label: 'Relieve',
-    attribution: 'Tiles © Esri — Source: Esri',
-    maxZoom: 13,
-    tiles: () => RELIEF_TILES,
-    filter: (theme) =>
-      theme === 'dark'
-        ? 'grayscale(1) invert(1) brightness(0.7) sepia(0.3) hue-rotate(180deg) saturate(1.5)'
-        : 'none',
   },
   {
     id: 'satellite',
@@ -72,7 +59,7 @@ export const OVERLAY_LAYERS: readonly OverlayLayer[] = [
   {
     id: 'plates',
     label: 'Límites de placas',
-    defaultEnabled: false,
+    defaultEnabled: true,
     attribution: 'Límites de placas: PB2002 (P. Bird, 2003); datos de H. Ahlenius, Nordpil',
     usesSample: false,
   },
@@ -97,9 +84,9 @@ export function baseLayer(id: BaseLayerId): BaseLayer {
   return BASE_LAYERS.find((layer) => layer.id === id) ?? BASE_LAYERS[0];
 }
 
-/** Plates are on by default only with the relief base layer (ui-contract §2). */
-export function platesDefault(base: BaseLayerId): boolean {
-  return base === 'relief';
+/** Plates are on by default over every base layer (spec 010, research R5). */
+export function platesDefault(_base: BaseLayerId): boolean {
+  return true;
 }
 
 /** Cluster replaces the individual circles; heat combines with either. */
