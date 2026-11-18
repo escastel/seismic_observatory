@@ -1,7 +1,7 @@
 :host {
   position: absolute;
   inset: 0;
-  z-index: 5;
+  z-index: 1100; /* above the Leaflet panes and controls (400-1000) */
   display: block;
   pointer-events: none;
 }
