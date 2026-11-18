@@ -1,0 +1,56 @@
+{
+  "base": "http://127.0.0.1:8000",
+  "console": [
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)",
+    "error: Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)",
+    "error: Failed to load resource: the server responded with a status of 422 (Unprocessable Entity)"
+  ],
+  "failedRequests": [],
+  "runs": [
+    {
+      "label": "2-salud",
+      "apiPath": "/api/salud",
+      "params": {},
+      "status": "Code",
+      "body": "{\n  \"status\": \"ok\",\n  \"database\": \"ok\",\n  \"replay_database\": \"ok\",\n  \"generated\": 1795012010556,\n  \"last_ingestion\": 1795011992734\n}",
+      "curl": "curl -X 'GET' \\\n  'http://127.0.0.1:8000/api/salud' \\\n  -H 'accept: application/json' \\\n  -H 'ngrok-skip-browser-warning: true'"
+    },
+    {
+      "label": "3-eventos-minmag5",
+      "apiPath": "/api/eventos",
+      "params": {
+        "min_mag": 5
+      },
+      "status": "Code",
+      "body": "{\n  \"type\": \"FeatureCollection\",\n  \"metadata\": {\n    \"generated\": 1795012012540,\n    \"last_ingestion\": 1795011992734,\n    \"mode\": \"live\",\n    \"count\": 9,\n    \"total\": 9,\n    \"truncated\": false,\n    \"limit\": 1000,\n    \"offset\": 0,\n    \"next_offset\": null,\n    \"period\": {\n      \"start\": 1794925612540,\n      \"end\": null,\n      \"default_applied\": true\n    },\n    \"null_magnitude\": {\n      \"count\": 0,\n ",
+      "curl": "curl -X 'GET' \\\n  'http://127.0.0.1:8000/api/eventos?offset=0&mode=live&min_mag=5&exclude_synthetic=false' \\\n  -H 'accept: application/json' \\\n  -H 'ngrok-skip-browser-warning: true'"
+    },
+    {
+      "label": "4-eventos-422-limit0",
+      "apiPath": "/api/eventos",
+      "params": {
+        "limit": 0
+      },
+      "status": "Code",
+      "body": "{\n  \"error\": \"invalid_parameters\",\n  \"detail\": [\n    {\n      \"param\": \"limit\",\n      \"message\": \"must be between 1 and 1000\"\n    }\n  ]\n}",
+      "curl": "curl -X 'GET' \\\n  'http://127.0.0.1:8000/api/eventos?limit=0&offset=0&mode=live&min_mag=5&exclude_synthetic=false' \\\n  -H 'accept: application/json' \\\n  -H 'ngrok-skip-browser-warning: true'"
+    },
+    {
+      "label": "5-eventos-minmag-abc",
+      "apiPath": "/api/eventos",
+      "params": {
+        "min_mag": "abc"
+      },
+      "status": "Code",
+      "body": "{\n  \"error\": \"invalid_parameters\",\n  \"detail\": [\n    {\n      \"param\": \"min_mag\",\n      \"message\": \"Input should be a valid number, unable to parse string as a number\"\n    }\n  ]\n}",
+      "curl": "curl -X 'GET' \\\n  'http://127.0.0.1:8000/api/eventos?limit=0&offset=0&mode=live&min_mag=5abc&exclude_synthetic=false' \\\n  -H 'accept: application/json' \\\n  -H 'ngrok-skip-browser-warning: true'"
+    }
+  ],
+  "interstitialShown": false,
+  "title": "Observatorio Sísmico · API",
+  "operations": [
+    "/api/eventos",
+    "/api/salud",
+    "/api/estadisticas"
+  ]
+}

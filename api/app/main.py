@@ -14,12 +14,13 @@ from typing import Any, AsyncIterator
 from fastapi import Depends, FastAPI, Query, Request
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import Response
+from fastapi.responses import HTMLResponse, RedirectResponse, Response
 
 from common import settings
 from common.logging import configure
 
 from . import db
+from .docs import CONTENT_SECURITY_POLICY, docs_page
 from .db import DATABASE_ERRORS, DatabaseUnavailable, guard, pool_for
 from .filters import ParameterError, QueryFilters, build_where, parse_filters
 from .queries import (
@@ -112,6 +113,24 @@ async def unexpected_error_handler(request: Request, exc: Exception) -> Response
     return JsonResponse(
         {"error": "internal_error", "detail": "Unexpected error; see the API log"}, status_code=500
     )
+
+
+# --- public documentation -----------------------------------------------------------------
+# /docs (Swagger UI) and / (redirect to it) are not part of the data contract: they stay out
+# of the OpenAPI document. /redoc stays disabled (spec 011 reverses only the /docs part of 006 R7).
+
+
+@app.get("/docs", include_in_schema=False)
+async def docs() -> HTMLResponse:
+    return HTMLResponse(
+        docs_page(f"{config.api_prefix}/openapi.json"),
+        headers={"Content-Security-Policy": CONTENT_SECURITY_POLICY},
+    )
+
+
+@app.get("/", include_in_schema=False)
+async def root() -> RedirectResponse:
+    return RedirectResponse("/docs", status_code=307)
 
 
 # --- shared parameters --------------------------------------------------------------------
