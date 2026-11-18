@@ -35,4 +35,4 @@ Donde el sistema real no produce el caso, las respuestas se alteraron en el nave
 
 - **V2 (W13)**: comprobar un evento nuevo real sin recargar; en la prueba no se esperó a un evento nuevo de USGS.
 - **V8 (W13)**: repetir los filtros inválidos (inicio igual o posterior al fin; más de 10.000 horas).
-- **Linux**: no consta en esta carpeta ninguna prueba en Linux; `CLAUDE.md` exige que los cambios funcionen en ambos equipos.
+- **Linux**: no consta en esta carpeta ninguna prueba en Linux; queda fuera de alcance por decisión de la usuaria (no es requisito del enunciado). `CLAUDE.md` sigue pidiendo que los cambios funcionen en ambos equipos.

@@ -2,6 +2,8 @@ main > * { min-width: 0; }
 main { max-width: 1200px; margin: auto; padding: var(--space-5); display: grid; gap: 20px; }
 h1 { margin: 0; font-size: clamp(1.6rem, 4vw, 2.25rem); letter-spacing: .01em; }
 .brand-header { display: grid; gap: var(--space-3); }
+/* The floating theme toggle sits fixed at the top left (16px + 48px): keep the brand clear of it. */
+@media (max-width: 1280px) { .brand-header { padding-inline-start: 60px; } }
 .brand { display: flex; align-items: center; gap: var(--space-3); }
 .brand-logo { width: 48px; height: 48px; color: var(--text); flex: none; }
 .brand-s { color: var(--brand-accent); }

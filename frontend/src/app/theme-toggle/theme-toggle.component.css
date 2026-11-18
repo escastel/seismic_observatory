@@ -1,6 +1,6 @@
 :host {
   position: fixed;
-  right: var(--space-4);
+  left: var(--space-4);
   top: var(--space-4);
   z-index: 1200;
 }
