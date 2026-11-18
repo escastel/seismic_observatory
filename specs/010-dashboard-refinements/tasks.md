@@ -118,7 +118,7 @@ Los agentes ejecutan solo `npx vitest run <fichero>`; la sesión principal ejecu
 
 - [X] T031 [US6] [A0] Accesibilidad (X13): axe-core (WCAG A y AA) en claro y oscuro con avisos visibles, «Detalles» abierto, el aviso emergente y las burbujas; recorrido con teclado y contraste de avisos, burbujas y el botón de tema; corregir lo que salga y guardar `docs/evidence/010/x13-a11y.json`
 - [X] T032 [US6] [A0] No regresión (X14): `npm test` completo (las pruebas anteriores más las nuevas), `docker compose -f compose.yaml -f compose.dev.yaml run --rm tests python -m pytest tests/query_api -q` una sola vez, V1 a V15 de la 007 y los escenarios W de la 009 con el panel nuevo, cierre y reapertura del túnel con el simulador; `git diff origin/main` vacío en `adapt.ts`, `api-types.ts`, `filters.ts`, `status.ts` y `config.ts`; evidencia en `docs/evidence/010/x14-regression.md`
-- [ ] T033 [US6] [A0] Peso y red (X15): `npm run build`, comparar el peso inicial con la 009 (`docs/evidence/009/w14-weight.json`) y, con el panel abierto y el túnel levantado, comprobar con el inspector de tráfico de ngrok que solo hay peticiones `/api/*` y ninguna de teselas ni de placas; evidencia en `docs/evidence/010/x15-weight-network.md`
+- [X] T033 [US6] [A0] Peso y red (X15): `npm run build`, comparar el peso inicial con la 009 (`docs/evidence/009/w14-weight.json`) y, con el panel abierto y el túnel levantado, comprobar con el inspector de tráfico de ngrok que solo hay peticiones `/api/*` y ninguna de teselas ni de placas; evidencia en `docs/evidence/010/x15-weight-network.md`
 
 ---
 

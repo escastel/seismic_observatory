@@ -1,0 +1,16 @@
+{
+  "hosts": {
+    "localhost:4200": 32,
+    "": 2,
+    "tile.openstreetmap.org": 24,
+    "modular-guidance-daybreak.ngrok-free.dev": 11,
+    "tiles.maps.eox.at": 24
+  },
+  "bytes": {
+    "app": 4549975,
+    "api": 71638,
+    "tiles": 178041,
+    "other": 0
+  },
+  "events": "0 eventos dibujados · 0 omitidos por coordenadas no válidas"
+}
