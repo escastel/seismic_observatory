@@ -38,7 +38,7 @@ mismos mensajes de error junto al campo que en la 007.
 - Calor: degradado amarillo → rojo oscuro, radio y opacidad altos; leyenda de colores («Menos eventos → Más»). No se llama peligrosidad ni riesgo.
 - Agrupación: burbujas con cifra, anillo, tamaño (34, 44, 54, 64 px) y color (amarillo, ámbar, naranja rojizo, rojo) por recuento; eventos sueltos con su color de profundidad y halo.
 - Leyendas dentro del mapa (profundidad, tamaño, ND, agrupación y calor), plegables en móvil.
-- Sin eventos: nota sobre el mapa «No hay eventos sísmicos ahora mismo en <país>» (o la genérica) con sugerencia de ampliar el periodo; `aria-hidden` (el anuncio va por la zona de avisos).
+- Sin eventos (cualquier filtro, periodo o modo): **aviso emergente** flotante sobre el mapa, no modal, con botón de cierre: título «No hay eventos registrados con las condiciones del filtro», las condiciones aplicadas (país, periodo en UTC, magnitud mínima, modo) y la sugerencia de ampliar el periodo o quitar filtros; con un solo país y el periodo por defecto, «No hay eventos sísmicos ahora mismo en <país>». Es `role="status"` y no roba el foco; además se muestra el aviso de información en la zona de avisos (solo uno de los dos se anuncia: el emergente `aria-hidden` al cerrarse y la zona de avisos como anuncio principal). Desaparece solo al llegar eventos.
 - Fallo de fondo o capa: aviso de tipo aviso y vuelta a Simple; los eventos no se pierden.
 
 ## 7. Botón de tema

@@ -69,7 +69,7 @@ eventos del mundo.
 
 **Acceptance Scenarios**:
 
-1. **Given** un filtro de país sin eventos en el periodo, **When** se aplica, **Then** el mapa y la tabla quedan vacíos, la barra de estado muestra total 0 y aparece el aviso «No hay eventos sísmicos ahora mismo en <país>» sugiriendo ampliar el periodo.
+1. **Given** un filtro (país, periodo, magnitud mínima o modo) que ningún evento cumple, **When** se aplica, **Then** el mapa y la tabla quedan vacíos, la barra de estado muestra total 0, aparece un aviso emergente flotante sobre el mapa («No hay eventos registrados con las condiciones del filtro») con las condiciones aplicadas y una sugerencia de ampliar el periodo o quitar filtros, y el aviso de información de la zona de avisos; el aviso emergente se puede cerrar y vuelve a salir con el siguiente filtro sin eventos.
 2. **Given** el mismo filtro, **When** se consultan las estadísticas de la API, **Then** el periodo devuelto tiene inicio y fin numéricos (el fin es «ahora» si no hay eventos), igual que cuando sí hay eventos.
 3. **Given** que los eventos llegan bien pero las estadísticas fallan por cualquier otro motivo, **When** ocurre, **Then** el panel muestra los eventos de **ese** filtro, señala el fallo de las estadísticas y no conserva la lectura de otro filtro.
 4. **Given** un país con eventos, **When** se filtra, **Then** el comportamiento es el de siempre (mapa, tabla y estadísticas coinciden).
@@ -130,7 +130,8 @@ El rediseño no rompe lo que la 007 y la 009 ya demostraron: periodo, filtros, u
 
 ### Edge Cases
 
-- Filtro por un país sin eventos con un periodo cerrado (inicio y fin dados) y con el periodo por defecto.
+- Filtro sin eventos con un periodo cerrado (inicio y fin dados), con el periodo por defecto (tiempo real), con otro intervalo y en modo reproducción.
+- El aviso emergente se cierra y el filtro sigue sin eventos (la zona de avisos conserva el aviso de información); al cambiar de filtro a uno con eventos desaparece.
 - Filtro sin eventos junto con un mínimo de magnitud muy alto.
 - Fallan a la vez los eventos y las estadísticas (se mantiene el aviso de backend inaccesible con la última lectura).
 - Varios avisos a la vez (se apilan por gravedad: error, aviso, información, éxito) y un aviso de éxito que caduca.
@@ -186,7 +187,7 @@ El rediseño no rompe lo que la 007 y la 009 ya demostraron: periodo, filtros, u
 
 **Filtrado sin eventos (corrección)**
 
-- **FR-022**: Al filtrar por un país sin eventos en el periodo, el mapa y la tabla MUST quedar vacíos, el total MUST ser 0 y MUST aparecer un aviso «No hay eventos sísmicos ahora mismo en <país>» que sugiera ampliar el periodo; el panel MUST NOT seguir mostrando eventos de otro filtro.
+- **FR-022**: Cuando ningún evento cumple los filtros aplicados (un país sin eventos, otro periodo, un mínimo de magnitud alto, el modo en vivo o la reproducción), el mapa y la tabla MUST quedar vacíos, el total MUST ser 0 y MUST aparecer un **aviso emergente sobre el mapa** (tarjeta flotante, no modal, que se puede cerrar) que diga «No hay eventos registrados con las condiciones del filtro» e indique las condiciones aplicadas (país, periodo, magnitud mínima, modo) y sugiera ampliar el periodo o quitar filtros; además MUST aparecer el aviso de información en la zona de avisos. El panel MUST NOT seguir mostrando eventos de otro filtro. Con un solo país filtrado el texto nombra al país («No hay eventos sísmicos ahora mismo en <país>» si el periodo es el de las últimas 24 h).
 - **FR-023**: `GET /api/estadisticas` MUST devolver siempre un periodo con inicio y fin numéricos, como exige el contrato de la 006; cuando ningún evento cumple el filtro y no se dio fin, el fin MUST ser el instante actual. Es una corrección que hace cumplir el contrato, no un cambio del contrato.
 - **FR-024**: Si los eventos llegan bien y solo falla la respuesta de estadísticas, el panel MUST mostrar los eventos de ese filtro, señalar el fallo de las estadísticas y MUST NOT conservar la lectura de otro filtro.
 
