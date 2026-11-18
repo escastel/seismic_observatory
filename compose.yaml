@@ -283,9 +283,19 @@ services:
   tunnel:
     image: ngrok/ngrok:3.39.13-alpine
     profiles: ["tunnel"]
-    command: ["http", "http://api:8000", "--url", "${NGROK_DOMAIN}", "--log", "stdout"]
+    command:
+      - http
+      - http://api:8000
+      - --url
+      - ${NGROK_DOMAIN}
+      - --traffic-policy-file
+      - /etc/ngrok/traffic-policy.yml
+      - --log
+      - stdout
     environment:
       NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN}
+    volumes:
+      - ./tunnel/traffic-policy.yml:/etc/ngrok/traffic-policy.yml:ro
     depends_on:
       api:
         condition: service_healthy

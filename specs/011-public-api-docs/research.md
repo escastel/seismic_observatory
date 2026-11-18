@@ -57,3 +57,7 @@ contrato. `/` responde con una redirección temporal a `/docs`; cualquier otra r
 
 Sesión principal: `api/app/docs.py` y `main.py`, `compose.yaml` y la política del túnel, todo lo que toca Docker, ngrok y el navegador, evidencias y memoria. Sonnet (en segundo plano): `test_public_docs.py` y el texto de los
 metadatos de OpenAPI a partir de un fichero. Haiku: el README de evidencia. Cada agente toca solo los ficheros de su tarea, sin commit.
+
+## Corrección posterior a R4 (verificación T016)
+
+La política de R4 se había validado solo con la herramienta de ngrok, que comprueba la sintaxis. Con la acción `rate-limit` en su modo por defecto, ngrok responde él mismo con un 429 vacío (`Retry-After` propio, sin cuerpo) y la regla `custom-response` nunca se ejecuta. Se añadió `enforce: false` a la acción: solo evalúa, y la regla `actions.ngrok.rate_limit.limited` devuelve el 429 en español. Evidencia: `docs/evidence/011/z9-rate-limit.md`.

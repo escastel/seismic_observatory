@@ -1,0 +1,77 @@
+{
+  "axe": {
+    "violations": [
+      {
+        "id": "color-contrast",
+        "impact": "serious",
+        "help": "Elements must meet minimum color contrast ratio thresholds",
+        "nodes": 6,
+        "sample": "small:nth-child(1) > pre"
+      },
+      {
+        "id": "nested-interactive",
+        "impact": "serious",
+        "help": "Interactive controls must not be nested",
+        "nodes": 3,
+        "sample": "#operations-eventos-events_api_eventos_get > .opblock-summary.opblock-summary-get > .opblock-summary-control"
+      }
+    ],
+    "passes": 18
+  },
+  "axeExpanded": [
+    {
+      "id": "color-contrast",
+      "impact": "serious",
+      "help": "Elements must meet minimum color contrast ratio thresholds",
+      "nodes": 18,
+      "sample": "small:nth-child(1) > .version"
+    },
+    {
+      "id": "nested-interactive",
+      "impact": "serious",
+      "help": "Interactive controls must not be nested",
+      "nodes": 3,
+      "sample": "#operations-eventos-events_api_eventos_get > .opblock-summary.opblock-summary-get > .opblock-summary-control"
+    },
+    {
+      "id": "select-name",
+      "impact": "critical",
+      "help": "Select element must have an accessible name",
+      "nodes": 1,
+      "sample": ".parameters-col_description > select"
+    }
+  ],
+  "scripts": [
+    {
+      "url": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui.css",
+      "integrity": "sha384-wxLW6kwyHktdDGr6Pv1zgm/VGJh99lfUbzSn6HNHBENZlCN7W602k9VkGdxuFvPn",
+      "crossorigin": "anonymous"
+    },
+    {
+      "url": "https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui-bundle.js",
+      "integrity": "sha384-wmyclcVGX/WhUkdkATwhaK1X1JtiNrr2EoYJ+diV3vj4v6OC5yCeSu+yW13SYJep",
+      "crossorigin": "anonymous"
+    }
+  ],
+  "hosts_light": [
+    "127.0.0.1:8000",
+    "cdn.jsdelivr.net",
+    ""
+  ],
+  "csp": "default-src 'none'; script-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; style-src 'self' https://cdn.jsdelivr.net 'unsafe-inline'; img-src 'self' data: https://cdn.jsdelivr.net; connect-src 'self'",
+  "console_light": [
+    "error: Failed to load resource: the server responded with a status of 404 (Not Found)"
+  ],
+  "hosts_dark": [
+    "127.0.0.1:8000",
+    "cdn.jsdelivr.net"
+  ],
+  "console_dark": [],
+  "tampered": {
+    "swaggerUiBundleDefined": false,
+    "operationsRendered": 0,
+    "console": [
+      "Failed to find a valid digest in the 'integrity' attribute for resource 'https://cdn.jsdelivr.net/npm/swagger-ui-dist@5.17.14/swagger-ui-bundle.js' with computed SHA-384 integrity 'wmyclcVGX/WhUkdkATw"
+    ]
+  }
+}
