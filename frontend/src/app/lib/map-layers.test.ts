@@ -10,22 +10,19 @@ import {
 } from './map-layers';
 
 describe('base layers', () => {
-  it('offers simple, relief and satellite, simple by default', () => {
-    expect(BASE_LAYERS.map((l) => l.id)).toEqual(['simple', 'relief', 'satellite']);
+  it('offers simple and satellite, simple by default', () => {
+    expect(BASE_LAYERS.map((l) => l.id)).toEqual(['simple', 'satellite']);
     expect(DEFAULT_BASE_LAYER).toBe('simple');
   });
 
   it('uses the providers from research R2', () => {
     expect(baseLayer('simple').tiles('light')).toContain('tile.openstreetmap.org');
-    expect(baseLayer('relief').tiles('light')).toContain('World_Shaded_Relief');
     expect(baseLayer('satellite').tiles('dark')).toContain('s2cloudless-2021_3857');
   });
 
-  it('filters simple and relief only in the dark theme', () => {
-    for (const id of ['simple', 'relief'] as const) {
-      expect(baseLayer(id).filter('light')).toBe('none');
-      expect(baseLayer(id).filter('dark')).not.toBe('none');
-    }
+  it('filters simple only in the dark theme', () => {
+    expect(baseLayer('simple').filter('light')).toBe('none');
+    expect(baseLayer('simple').filter('dark')).not.toBe('none');
   });
 
   it('keeps satellite identical in both themes', () => {
@@ -40,15 +37,21 @@ describe('base layers', () => {
       expect(layer.maxZoom).toBeGreaterThan(0);
     }
     expect(baseLayer('simple').attribution).toBe('© OpenStreetMap contributors');
-    expect(baseLayer('relief').attribution).toBe('Tiles © Esri — Source: Esri');
     expect(baseLayer('satellite').attribution).toContain('EOX IT Services GmbH');
   });
 });
 
+describe('relief removal', () => {
+  it('no longer offers relief nor Esri', () => {
+    expect(BASE_LAYERS.some((l) => (l.id as string) === 'relief')).toBe(false);
+    expect(BASE_LAYERS.some((l) => l.attribution.includes('Esri'))).toBe(false);
+  });
+});
+
 describe('overlays', () => {
-  it('has circles on by default and the rest optional', () => {
+  it('has circles and plates on by default and the rest optional', () => {
     const defaults = OVERLAY_LAYERS.filter((l) => l.defaultEnabled).map((l) => l.id);
-    expect(defaults).toEqual(['circles']);
+    expect(defaults).toEqual(['circles', 'plates']);
     expect(OVERLAY_LAYERS.map((l) => l.id)).toEqual(['circles', 'heat', 'cluster', 'plates']);
   });
 
@@ -57,10 +60,9 @@ describe('overlays', () => {
     expect(plates?.attribution).toContain('PB2002');
   });
 
-  it('enables plates by default only with relief', () => {
-    expect(platesDefault('relief')).toBe(true);
-    expect(platesDefault('simple')).toBe(false);
-    expect(platesDefault('satellite')).toBe(false);
+  it('enables plates by default over both base layers', () => {
+    expect(platesDefault('simple')).toBe(true);
+    expect(platesDefault('satellite')).toBe(true);
   });
 
   it('replaces circles with clusters', () => {

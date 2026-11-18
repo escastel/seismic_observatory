@@ -52,12 +52,17 @@ async def hourly_counts(
         end = high + timedelta(milliseconds=1)
         if filters.mode == "live":
             end = max(end, now)
+    # No matching event: the contract still requires a numeric period (spec 010).
+    if end is None:
+        end = now
+    if start is None:
+        start = end
     period = {
-        "start": to_ms(start) if start else None,
-        "end": to_ms(end) if end else None,
+        "start": to_ms(start),
+        "end": to_ms(end),
         "default_applied": where.default_applied,
     }
-    if start is None or end is None:
+    if start >= end:
         return period, []
 
     first = _floor_hour_ms(start)

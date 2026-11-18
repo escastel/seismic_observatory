@@ -112,6 +112,56 @@ def test_more_than_10000_windows_is_422(api) -> None:
     assert body["detail"][0]["param"] and body["detail"][0]["message"]
 
 
+# --- no event matches the filter (spec 010) ------------------------------------------------
+
+
+def assert_numeric_period(body: dict) -> None:
+    assert isinstance(body["period"]["start"], int) and isinstance(body["period"]["end"], int)
+    assert body["period"]["start"] <= body["period"]["end"]
+
+
+def test_live_default_period_without_matching_events_still_has_a_numeric_period(api) -> None:
+    api.add_event(version("N1", datetime.now(timezone.utc) - timedelta(hours=2), country_id="ESP"))
+
+    body = stats(api, country_id="ALB")
+
+    assert body["total"] == 0
+    assert body["period"]["default_applied"] is True
+    assert_numeric_period(body)
+    items = body["hourly"]["items"]
+    assert 24 <= len(items) <= 25
+    assert all(item["count"] == 0 for item in items)
+
+
+def test_live_default_period_with_no_events_at_all_has_a_numeric_period(api) -> None:
+    body = stats(api)
+
+    assert body["total"] == 0
+    assert_numeric_period(body)
+    assert 24 <= len(body["hourly"]["items"]) <= 25
+
+
+def test_a_given_period_without_events_keeps_the_given_values(api) -> None:
+    body = stats(api, **day_params(), country_id="ALB")
+
+    assert body["total"] == 0
+    assert body["period"] == {
+        "start": int(START.timestamp() * 1000),
+        "end": int(END.timestamp() * 1000),
+        "default_applied": False,
+    }
+    assert len(body["hourly"]["items"]) == 24
+
+
+def test_replay_without_events_nor_start_has_an_empty_period_and_no_windows(api) -> None:
+    body = stats(api, mode="replay")
+
+    assert body["total"] == 0
+    assert_numeric_period(body)
+    assert body["period"]["start"] == body["period"]["end"]
+    assert body["hourly"]["items"] == []
+
+
 # --- countries ---------------------------------------------------------------------------
 
 

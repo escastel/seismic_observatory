@@ -4,6 +4,7 @@ import { adaptEvents, adaptHealth, adaptStatistics, parseFailure } from '../lib/
 import type { ApiFailure, Health, Mode, PanelConfig, QueryFilters, Reading, Statistics } from '../lib/api-types';
 import { parseConfig } from '../lib/config';
 import { eventParams, statsParams } from '../lib/filters';
+import { statsFailureKeepsEvents } from '../lib/stats-tolerance';
 import { derivePanelStatus } from '../lib/status';
 
 export const PAGE_SIZE = 1000;
@@ -11,6 +12,10 @@ export const PAGE_SIZE = 1000;
 type Fetched = { ok: true; body: unknown } | { ok: false; failure: ApiFailure };
 
 /**
+ * Spec 010 (justified change): a statistics failure that is only a bad answer (422 or an invalid
+ * response) no longer discards the whole refresh; the valid events of the new filter are shown with
+ * `statistics = null` and `statsFailure`, instead of keeping another filter's reading.
+ *
  * Reads the 006 API. One refresh cycle at a time (the timer is re-armed when a cycle ends),
  * a sequence number discards late responses, and the last correct reading is kept on failure.
  */
@@ -141,7 +146,7 @@ export class ObservatoryService implements OnDestroy {
       const adaptedStats = this.adapt(stats, (b) => adaptStatistics(b, filters.mode));
       if (adaptedStats.ok) {
         statistics = adaptedStats.value;
-      } else if (adaptedStats.failure.kind === 'invalid_parameters') {
+      } else if (statsFailureKeepsEvents(adaptedStats.failure)) {
         this.statsFailure.set(adaptedStats.failure);
       } else {
         return this.fail(adaptedStats.failure);
