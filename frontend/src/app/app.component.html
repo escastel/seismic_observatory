@@ -49,6 +49,7 @@
     [mode]="mode()"
     [total]="metadata()?.total ?? 0"
     [theme]="themeService.theme()"
+    [noEvents]="noEvents()"
     (eventSelected)="openCard($event)" />
 
   <app-charts

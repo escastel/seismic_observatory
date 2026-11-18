@@ -12,6 +12,7 @@ import { LogoComponent } from './brand/logo.component';
 import { ThemeService } from './theme/theme.service';
 import type { MapEvent, Mode, QueryFilters } from './lib/api-types';
 import { buildCountryCatalog } from './lib/countries';
+import { noEventsText, type NoEventsText } from './lib/alerts';
 
 @Component({
   selector: 'app-root',
@@ -41,6 +42,15 @@ export class AppComponent implements OnInit {
   protected readonly events = computed(() => this.service.reading()?.events ?? []);
   protected readonly metadata = computed(() => this.service.reading()?.metadata ?? null);
   protected readonly mode = computed<Mode>(() => this.service.filters().mode);
+
+  /** Conditions of the filter when the last correct reading has no events (any filter, any mode). */
+  protected readonly noEvents = computed<NoEventsText | null>(() => {
+    const reading = this.service.reading();
+    if (!reading || this.service.status().showingPreviousReading || reading.metadata.total !== 0) return null;
+    const id = reading.filters.countryId;
+    const name = id === null ? null : (this.countries().find((c) => c.id === id)?.name ?? null);
+    return noEventsText(reading.filters, name);
+  });
 
   async ngOnInit(): Promise<void> {
     void this.loadBorders();

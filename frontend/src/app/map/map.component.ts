@@ -27,6 +27,8 @@ import {
   type Theme,
 } from '../lib/map-layers';
 import { ThemeService } from '../theme/theme.service';
+import type { NoEventsText } from '../lib/alerts';
+import { NoEventsPopupComponent } from './no-events-popup.component';
 
 // Optional layers are loaded on demand so they add nothing to the initial weight.
 type HeatFactory = (points: Array<[number, number, number]>, options: object) => L.Layer;
@@ -39,7 +41,7 @@ function globalLeaflet(): typeof L {
 @Component({
   selector: 'app-map',
   standalone: true,
-  imports: [LeafletDirective],
+  imports: [LeafletDirective, NoEventsPopupComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './map.component.html',
   styleUrl: './map.component.css',
@@ -52,7 +54,10 @@ export class MapComponent implements OnDestroy {
   /** Real total of the period (metadata.total), for the sample label. */
   readonly total = input<number>(0);
   readonly theme = input<Theme | null>(null);
+  /** Set when the last correct reading has no events; shown as a floating pop-up. */
+  readonly noEvents = input<NoEventsText | null>(null);
   readonly eventSelected = output<MapEvent>();
+  protected readonly popupDismissed = signal(false);
 
   private readonly themeService = inject(ThemeService);
   protected readonly currentTheme = computed<Theme>(() => this.theme() ?? this.themeService.theme());
@@ -103,6 +108,12 @@ export class MapComponent implements OnDestroy {
   private tileErrors = 0;
 
   constructor() {
+    // A new filter without events shows the pop-up again.
+    effect(() => {
+      const value = this.noEvents();
+      if (value) this.popupDismissed.set(false);
+    });
+
     // Base layer: rebuilt when the choice or the theme changes.
     effect(() => {
       const map = this.map();

@@ -1,0 +1,14 @@
+<div class="popup-layer">
+  <section class="popup" role="status" aria-hidden="true">
+    <button type="button" class="popup-close" aria-label="Cerrar aviso" (click)="close()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+    <h3 class="popup-title">{{ text().title }}</h3>
+    <ul class="popup-conditions">
+      @for (condition of text().conditions; track condition) {
+        <li>{{ condition }}</li>
+      }
+    </ul>
+    <p class="popup-suggestion">{{ text().suggestion }}</p>
+  </section>
+</div>

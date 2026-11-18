@@ -32,14 +32,21 @@
 
   <p class="map-notice" role="status">{{ notice() }}</p>
 
-  <div
-    class="map-container"
-    role="region"
-    aria-label="Mapa interactivo de terremotos"
-    leaflet
-    [leafletOptions]="options"
-    (leafletMapReady)="onMapReady($event)"
-  ></div>
+  <div class="map-frame">
+    <div
+      class="map-container"
+      role="region"
+      aria-label="Mapa interactivo de terremotos"
+      leaflet
+      [leafletOptions]="options"
+      (leafletMapReady)="onMapReady($event)"
+    ></div>
+    @if (noEvents(); as ne) {
+      @if (!popupDismissed()) {
+        <app-no-events-popup [text]="ne" (dismissed)="popupDismissed.set(true)" />
+      }
+    }
+  </div>
 
   <p class="attributions">{{ attributions().join(' · ') }}</p>
   <p class="map-note">La tabla situada debajo del mapa es la alternativa accesible con los mismos datos.</p>
