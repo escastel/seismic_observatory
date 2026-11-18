@@ -126,7 +126,7 @@ Los agentes ejecutan solo `npx vitest run <fichero>`; la sesión principal ejecu
 
 - [X] T034 [P] [A2] Con la evidencia de `docs/evidence/010/`, redactar `docs/evidence/010/README.md` (resumen de X1 a X16 con esperado/observado, estado y capturas enlazadas) sin inventar cifras
 - [X] T035 [A0] Actualizar `docs/report.md` (apartado del panel: nueva distribución, avisos, barra de estado, mapa y botón de tema; el cambio justificado de `api/app/stats.py` y el de `observatory.service.ts`), `README.md` si cita el panel o el fondo Relieve, y revisar enlaces
-- [ ] T036 [A0] Actualizar la memoria del proyecto (`MEMORY.md` y fichero de estado de la 010), revisar `git status` y commit sin `git add -A`; sin push. **Tras el merge a `main` y con confirmación**: X16 (sitio de Netlify con Albania y túnel cerrado y reabierto) en `docs/evidence/010/x16-netlify.md` **(memoria y commit hechos; sin marcar hasta cerrar X16 tras el merge)**
+- [X] T036 [A0] Actualizar la memoria del proyecto (`MEMORY.md` y fichero de estado de la 010), revisar `git status` y commit sin `git add -A`; sin push. **Tras el merge a `main` y con confirmación**: X16 (sitio de Netlify con Albania y túnel cerrado y reabierto) en `docs/evidence/010/x16-netlify.md` (X16 hecho el 2026-11-18, ver x16-netlify.md)
 
 ---
 

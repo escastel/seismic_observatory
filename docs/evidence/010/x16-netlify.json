@@ -1,0 +1,96 @@
+{
+  "load": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "map": "192 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "192 events",
+    "rows": 192,
+    "popup": null,
+    "alerts": [],
+    "theme": null,
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "toggle": true
+  },
+  "apiTotalNow": 192,
+  "albania": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "map": "0 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "0 events",
+    "rows": 0,
+    "popup": "No hay eventos sísmicos ahora mismo en Albania",
+    "alerts": [
+      "Información: No hay eventos sísmicos ahora mismo en Albania"
+    ],
+    "theme": null,
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "toggle": true
+  },
+  "beforeClose": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "map": "192 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "192 events",
+    "rows": 192,
+    "popup": null,
+    "alerts": [],
+    "theme": null,
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "toggle": true
+  },
+  "tunnelClosed": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "map": "192 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "192 events",
+    "rows": 192,
+    "popup": null,
+    "alerts": [
+      "Error: No se puede contactar con el backend. Se muestra la última lectura correcta. Se reintentará en el siguiente refresco."
+    ],
+    "theme": null,
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "toggle": true
+  },
+  "tunnelBackAfterSeconds": true,
+  "tunnelReopened": {
+    "title": "Seismic Observatory",
+    "h1": "Seismic Observatory",
+    "map": "192 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "bar": "192 events",
+    "rows": 192,
+    "popup": null,
+    "alerts": [],
+    "theme": null,
+    "baseOptions": [
+      "Simple",
+      "Satélite"
+    ],
+    "platesChecked": true,
+    "toggle": true
+  },
+  "noReload": true,
+  "hosts": {
+    "seismicobservatoryecr.netlify.app": 23,
+    "": 1,
+    "tile.openstreetmap.org": 18,
+    "modular-guidance-daybreak.ngrok-free.dev": 17
+  },
+  "pageErrors": []
+}
