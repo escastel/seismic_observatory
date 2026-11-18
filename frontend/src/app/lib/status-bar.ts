@@ -36,6 +36,29 @@ function count(n: number | null | undefined): string {
   return typeof n === 'number' && Number.isFinite(n) ? String(n) : ND;
 }
 
+/** Short value for the bar; the full text stays in `detail` and in the «Detalles» panel. */
+function compactCard(card: SummaryCard, statistics: Statistics | null): SummaryCard {
+  const period = statistics?.period;
+  if (card.id === 'lastIngestion') {
+    const match = /\d{2}:\d{2}:\d{2}/.exec(card.value);
+    return match ? { ...card, value: match[0], detail: `${card.value.slice(0, 10)} · ${card.detail}` } : card;
+  }
+  if (card.id === 'period' && period) {
+    const short = (ms: number) => formatUtc(ms).slice(5, 16);
+    const value = period.defaultApplied
+      ? statistics?.mode === 'replay' ? 'Todo el periodo' : 'Últimas 24 h'
+      : `${short(period.start)} → ${short(period.end)}`;
+    return { ...card, value, detail: `${card.value}. ${card.detail}` };
+  }
+  if (card.id === 'unvalued') {
+    const [mag, depth] = card.value.split(' magnitud · ');
+    return depth !== undefined
+      ? { ...card, value: `${mag} · ${depth.replace(' profundidad', '')}`, detail: `magnitud · profundidad. ${card.detail}` }
+      : card;
+  }
+  return card;
+}
+
 export function buildStatusBar(
   statistics: Statistics | null,
   status: PanelStatus | null,
@@ -44,7 +67,7 @@ export function buildStatusBar(
   const replay = statistics?.mode === 'replay' || reading?.filters.mode === 'replay';
 
   const metrics: StatusMetric[] = buildSummaryCards(statistics, status).map((card) => ({
-    ...card,
+    ...compactCard(card, statistics),
     badge: replay ? (card.badge ?? REPLAY_LABEL) : card.badge,
     visibleOnNarrow: NARROW_IDS.includes(card.id)
   }));

@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, effect, input, output, si
 
 import type { Mode, QueryFilters } from '../lib/api-types';
 import type { CountryOption } from '../lib/countries';
+import type { FilterChip } from '../lib/filter-chips';
 import { parseUtcInput, toUtcInput, validateFilters, type FilterErrors } from '../lib/filters';
 
 @Component({
@@ -14,6 +15,8 @@ import { parseUtcInput, toUtcInput, validateFilters, type FilterErrors } from '.
 export class FiltersComponent {
   readonly filters = input.required<QueryFilters>();
   readonly countries = input<CountryOption[]>([]);
+  readonly chips = input<FilterChip[]>([]);
+  protected readonly open = signal(false);
 
   readonly apply = output<QueryFilters>();
   readonly modeChange = output<Mode>();

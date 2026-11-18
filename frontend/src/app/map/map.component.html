@@ -6,30 +6,6 @@
     }
   </p>
 
-  <div class="controls">
-    <fieldset class="control-group">
-      <legend>Mapa base</legend>
-      @for (b of baseLayers; track b.id) {
-        <label class="choice">
-          <input type="radio" name="base" [value]="b.id" [checked]="base() === b.id" (change)="chooseBase(b.id)" />
-          {{ b.label }}
-        </label>
-      }
-    </fieldset>
-    <fieldset class="control-group">
-      <legend>Capas</legend>
-      @for (o of overlays; track o.id) {
-        <label class="choice">
-          <input type="checkbox" [checked]="isOn(o.id)" (change)="toggle(o.id, $any($event.target).checked)" />
-          {{ o.label }}
-        </label>
-      }
-    </fieldset>
-    @if (sampleVisible()) {
-      <p class="sample">{{ sample() }}</p>
-    }
-  </div>
-
   <p class="map-notice" role="status">{{ notice() }}</p>
 
   <div class="map-frame">
@@ -41,6 +17,57 @@
       [leafletOptions]="options"
       (leafletMapReady)="onMapReady($event)"
     ></div>
+    @if (sampleVisible()) {
+      <p class="sample" aria-live="polite">{{ sample() }}</p>
+    }
+    <div class="map-controls">
+      <fieldset class="control-group">
+        <legend>Mapa base</legend>
+        @for (b of baseLayers; track b.id) {
+          <label class="choice">
+            <input type="radio" name="base" [value]="b.id" [checked]="base() === b.id" (change)="chooseBase(b.id)" />
+            {{ b.label }}
+          </label>
+        }
+      </fieldset>
+      <fieldset class="control-group">
+        <legend>Capas</legend>
+        @for (o of overlays; track o.id) {
+          <label class="choice">
+            <input type="checkbox" [checked]="isOn(o.id)" (change)="toggle(o.id, $any($event.target).checked)" />
+            {{ o.label }}
+          </label>
+        }
+      </fieldset>
+    </div>
+    <details class="legend" [open]="legendOpen()" (toggle)="legendOpen.set($any($event.target).open)">
+      <summary>Leyenda</summary>
+      <p class="legend-title">Profundidad (color)</p>
+      <ul class="legend-list">
+        @for (item of legend(); track item.key) {
+          <li>
+            <span
+              class="swatch"
+              [class.dashed]="item.dashed"
+              [style.background-color]="item.color"
+              [style.border-color]="item.color"
+              aria-hidden="true"
+            ></span>
+            {{ item.label }}
+          </li>
+        }
+      </ul>
+      <p class="legend-size">
+        Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
+        con el radio mínimo y borde discontinuo.
+        @if (heatOn()) {
+          Mapa de calor: más intenso donde hay más eventos y mayor magnitud; sin magnitud pesa lo mínimo.
+        }
+        @if (platesOn()) {
+          Línea discontinua roja: límites de placas tectónicas.
+        }
+      </p>
+    </details>
     @if (noEvents(); as ne) {
       @if (!popupDismissed()) {
         <app-no-events-popup [text]="ne" (dismissed)="popupDismissed.set(true)" />
@@ -50,32 +77,4 @@
 
   <p class="attributions">{{ attributions().join(' · ') }}</p>
   <p class="map-note">La tabla situada debajo del mapa es la alternativa accesible con los mismos datos.</p>
-
-  <div class="legend" aria-label="Leyenda del mapa">
-    <p class="legend-title">Profundidad (color)</p>
-    <ul class="legend-list">
-      @for (item of legend(); track item.key) {
-        <li>
-          <span
-            class="swatch"
-            [class.dashed]="item.dashed"
-            [style.background-color]="item.color"
-            [style.border-color]="item.color"
-            aria-hidden="true"
-          ></span>
-          {{ item.label }}
-        </li>
-      }
-    </ul>
-    <p class="legend-size">
-      Tamaño: el radio del círculo crece con la magnitud. ND (magnitud o profundidad sin dato) se dibuja
-      con el radio mínimo y borde discontinuo.
-      @if (heatOn()) {
-        Mapa de calor: más intenso donde hay más eventos y mayor magnitud; sin magnitud pesa lo mínimo.
-      }
-      @if (platesOn()) {
-        Línea discontinua roja: límites de placas tectónicas.
-      }
-    </p>
-  </div>
 </section>

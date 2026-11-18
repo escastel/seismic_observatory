@@ -3,15 +3,15 @@ import type { FeatureCollection } from 'geojson';
 import { ObservatoryService } from './data/observatory.service';
 import { FiltersComponent } from './filters/filters.component';
 import { MapComponent } from './map/map.component';
-import { StatusComponent } from './status/status.component';
+import { StatusBarComponent } from './status-bar/status-bar.component';
 import { TableComponent } from './table/table.component';
 import { ChartsComponent } from './charts/charts.component';
-import { SummaryComponent } from './summary/summary.component';
 import { EventCardComponent } from './event-card/event-card.component';
 import { LogoComponent } from './brand/logo.component';
 import { ThemeService } from './theme/theme.service';
 import type { MapEvent, Mode, QueryFilters } from './lib/api-types';
 import { buildCountryCatalog } from './lib/countries';
+import { filterChips } from './lib/filter-chips';
 import { noEventsText, type NoEventsText } from './lib/alerts';
 
 @Component({
@@ -20,10 +20,9 @@ import { noEventsText, type NoEventsText } from './lib/alerts';
   imports: [
     FiltersComponent,
     MapComponent,
-    StatusComponent,
+    StatusBarComponent,
     TableComponent,
     ChartsComponent,
-    SummaryComponent,
     EventCardComponent,
     LogoComponent,
   ],
@@ -42,6 +41,13 @@ export class AppComponent implements OnInit {
   protected readonly events = computed(() => this.service.reading()?.events ?? []);
   protected readonly metadata = computed(() => this.service.reading()?.metadata ?? null);
   protected readonly mode = computed<Mode>(() => this.service.filters().mode);
+
+  /** Chips for the filters of the last correct reading (the applied ones, not the form's). */
+  protected readonly chips = computed(() => {
+    const filters = this.service.reading()?.filters ?? this.service.filters();
+    const name = filters.countryId === null ? null : (this.countries().find((c) => c.id === filters.countryId)?.name ?? null);
+    return filterChips(filters, name);
+  });
 
   /** Conditions of the filter when the last correct reading has no events (any filter, any mode). */
   protected readonly noEvents = computed<NoEventsText | null>(() => {

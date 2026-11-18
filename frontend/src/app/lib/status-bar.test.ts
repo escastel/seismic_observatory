@@ -133,3 +133,33 @@ describe('buildStatusBar details', () => {
     expect(excluded).not.toBe(included);
   });
 });
+
+describe('compact bar values (the full text moves to detail and «Detalles»)', () => {
+  const metric = (bar: ReturnType<typeof buildStatusBar>, id: string) => bar.metrics.find((m) => m.id === id)!;
+
+  it('shows the default period as «Últimas 24 h» and keeps the range in the detail', () => {
+    const m = metric(buildStatusBar(stats(), okStatus, reading()), 'period');
+    expect(m.value).toBe('Últimas 24 h');
+    expect(m.detail).toContain('2026-11-01 00:00:00 UTC');
+  });
+
+  it('shows an explicit period as a short range', () => {
+    const custom = stats({ period: { start: T0, end: T0 + 3_600_000, defaultApplied: false } });
+    expect(metric(buildStatusBar(custom, okStatus, reading()), 'period').value).toBe('11-01 00:00 → 11-01 01:00');
+  });
+
+  it('shows only the time of the last ingestion and keeps the date in the detail', () => {
+    const m = metric(buildStatusBar(stats(), okStatus, reading()), 'lastIngestion');
+    expect(m.value).toBe('23:59:00');
+    expect(m.detail).toContain('2026-10-31');
+  });
+
+  it('shows the two unvalued counts as «a · b»', () => {
+    expect(metric(buildStatusBar(stats(), okStatus, reading()), 'unvalued').value).toBe('7 · 0');
+  });
+
+  it('keeps ND untouched without statistics', () => {
+    const bar = buildStatusBar(null, null, null);
+    expect(metric(bar, 'period').value).toBe('ND');
+  });
+});

@@ -58,6 +58,10 @@ export class MapComponent implements OnDestroy {
   readonly noEvents = input<NoEventsText | null>(null);
   readonly eventSelected = output<MapEvent>();
   protected readonly popupDismissed = signal(false);
+  /** The legend starts folded on narrow screens, open on wide ones. */
+  protected readonly legendOpen = signal(
+    typeof window === 'undefined' || !window.matchMedia ? true : !window.matchMedia('(max-width: 760px)').matches,
+  );
 
   private readonly themeService = inject(ThemeService);
   protected readonly currentTheme = computed<Theme>(() => this.theme() ?? this.themeService.theme());
