@@ -24,7 +24,7 @@ Fecha: 2026-11-17. Chrome headless (Puppeteer, instalado fuera del repositorio) 
 - W13: repetir V1 a V15 de la 007.
 - W14: peso inicial medido con red lenta (la medición hecha no es fiable y no se cita).
 - W15: Netlify y túnel reales (el despliegue pide confirmación explícita).
-- W16: identidad (logotipo aprobado por la usuaria) y contraste medido de los colores de profundidad.
+- W16: identidad (logotipo aprobado por la persona autora) y contraste medido de los colores de profundidad.
 
 ## Pruebas unitarias
 

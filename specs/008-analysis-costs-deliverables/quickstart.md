@@ -19,7 +19,7 @@ tocar `.env`. Compose: `docker compose -f compose.yaml -f compose.dev.yaml`.
 | V9 | Matrices | Abrir todos los enlaces de las matrices §11, §12, §13 | 0 enlaces rotos; 11 pruebas con estado y hueco |
 | V10 | Coherencia de `report.md` | Comprobar índice, enlaces y cifras repetidas | Enlaces resuelven; cifras iguales entre secciones |
 | V11 | Higiene | `git ls-files` frente a patrones de `node_modules`, secretos, volúmenes, datos | 0 hallazgos o hallazgo documentado |
-| V12 | Huecos de la usuaria | Revisar los procedimientos de Linux (002, 003, 005, 006) y otro dispositivo | Cada hueco tiene procedimiento y ruta de evidencia, no figura como superado |
+| V12 | Huecos de la persona autora | Revisar los procedimientos de Linux (002, 003, 005, 006) y otro dispositivo | Cada hueco tiene procedimiento y ruta de evidencia, no figura como superado |
 
 Las pruebas pytest de los scripts de medición se ejecutan una sola vez, sin concurrencia con
 `tests/db`.

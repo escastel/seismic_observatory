@@ -36,7 +36,7 @@ Estados: **SUPERADA** (evidencia completa), **PARCIAL** (evidencia de parte del 
 
 ## Pendientes, no comprobados y observaciones
 
-- La prueba en Linux queda fuera de alcance por decisión de la usuaria. Albania con 2025 completo, la reproducción sin eventos (X2, X3) y el cierre y reapertura del túnel real en Netlify (X16) se cerraron después de este índice; ver [x2-x3-no-events.md](x2-x3-no-events.md) y [x16-netlify.md](x16-netlify.md).
+- La prueba en Linux queda fuera de alcance por decisión de la persona autora. Albania con 2025 completo, la reproducción sin eventos (X2, X3) y el cierre y reapertura del túnel real en Netlify (X16) se cerraron después de este índice; ver [x2-x3-no-events.md](x2-x3-no-events.md) y [x16-netlify.md](x16-netlify.md).
 - **No repetidas**: V13 (sin solapes y tiempo de espera; la 009 lo midió con el ciclo del temporizador) y V2 (evento nuevo sin recargar; no se esperó a un evento nuevo de USGS).
 - **No comprobado**: anuncio con un lector de pantalla real (X12, X13).
 - **Expectativa no cumplida**: el peso inicial crece unos 17 kB frente a la 009 (X15).

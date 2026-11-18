@@ -35,7 +35,7 @@ Docker Desktop (motor 29.1.3) · **Compose**: `docker compose up --build -d` des
 
 ## Limitaciones declaradas
 
-- Medidas hechas en un solo equipo, sin repetir en Linux (la usuaria alterna entre ambos; lo
+- Medidas hechas en un solo equipo, sin repetir en Linux (la persona autora alterna entre ambos; lo
   hecho aquí es el flujo de Docker, que es el mismo, pero no se ha ejecutado en el equipo Linux).
 - Durante la verificación, una prueba de la spec 004
   (`tests/unit/test_synthetic_cases.py::…[model_constraint_violation]`) fallaba en el equipo Windows

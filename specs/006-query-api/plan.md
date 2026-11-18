@@ -1,6 +1,6 @@
 # Implementation Plan: API de consulta conforme al contrato
 
-**Branch**: `006-query-api` | **Date**: 2026-11-16 | **Spec**: [spec.md](spec.md)
+**Branch**: `006-query-api` | **Date**: 2026-11-16 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/006-query-api/spec.md`
 

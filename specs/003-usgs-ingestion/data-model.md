@@ -1,6 +1,6 @@
 # Data Model: Ingesta desde USGS
 
-**Fecha**: 2026-11-15 · **Spec**: [spec.md](spec.md) · **Decisiones**: [research.md](research.md)
+**Fecha**: 2026-11-15 · **Spec**: `spec.md` · **Decisiones**: [research.md](research.md)
 
 Esta funcionalidad **no cambia el modelo** de la spec 002
 ([data-model.md](../002-platform-data-model/data-model.md)). Define qué escribe la ingesta en

@@ -1,6 +1,6 @@
 # Research: Consumidor y calidad de los datos
 
-**Fecha**: 2026-11-16 · **Spec**: [spec.md](spec.md)
+**Fecha**: 2026-11-16 · **Spec**: `spec.md`
 
 Sin marcadores NEEDS CLARIFICATION. Las decisiones de la sesión de clarificación (rechazo por el
 modelo, reprocesado y sintéticos) están ya en la especificación. **Verificado** el 2026-11-16 en

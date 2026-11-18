@@ -8,7 +8,7 @@ El contrato HTTP sigue siendo `specs/006-query-api/contracts/api.md`; este docum
 reproducción sin eventos ni inicio: `start = end`, `hourly.items` vacío. Ningún otro campo cambia.
 
 ## 1. Orden de la página
-Cabecera → zona de avisos → barra de estado → filtros → mapa (selector de capas y leyenda dentro) → análisis → tabla; pie de página con atribuciones. Botón de tema flotante fijo arriba a la derecha (movido desde abajo a petición de la usuaria), por encima de todo salvo la ficha abierta.
+Cabecera → zona de avisos → barra de estado → filtros → mapa (selector de capas y leyenda dentro) → análisis → tabla; pie de página con atribuciones. Botón de tema flotante fijo arriba a la derecha (movido desde abajo a petición de la persona autora), por encima de todo salvo la ficha abierta.
 
 ## 2. Cabecera
 Logotipo + «**Seismic** Observatory» (`Seismic` en el color de acento del logotipo; `Observatory` en blanco en oscuro y en el color de texto en claro). Sin «BIG DATA · PROYECTO DE AULA» ni «Este panel nunca consulta USGS». A la derecha, la insignia «Datos al día»/estado (compacta).

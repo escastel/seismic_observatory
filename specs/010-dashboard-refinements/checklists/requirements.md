@@ -2,7 +2,7 @@
 
 **Purpose**: Validar la completitud y calidad de la especificación antes de planificar
 **Created**: 2026-11-18
-**Feature**: [spec.md](../spec.md)
+**Feature**: `spec.md`
 
 ## Content Quality
 
@@ -32,6 +32,6 @@
 ## Notes
 
 - Las referencias a la API (006), al túnel y a `GET /api/estadisticas` vienen del contrato y de la constitución; la causa del fallo se cita como evidencia del arreglo, no como diseño nuevo.
-- Sin marcadores de aclaración: la usuaria aprobó el mockup, los colores de los avisos, el orden de la página y las decisiones del mapa.
+- Sin marcadores de aclaración: la persona autora aprobó el mockup, los colores de los avisos, el orden de la página y las decisiones del mapa.
 - Los tonos exactos de los avisos y los detalles finos del mockup se resuelven en el plan, con contraste verificado.
 - Listo para `/speckit-plan` (se puede saltar `/speckit-clarify`).

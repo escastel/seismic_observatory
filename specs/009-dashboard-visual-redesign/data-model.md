@@ -58,4 +58,4 @@ No existe tarjeta de «magnitud máxima».
 | texto | solo como texto (interpolación), nunca HTML |
 
 ## Brand
-`name` = «seismicobservatory»; `logo` = «S» con onda sísmica (SVG, `currentColor`); `palette` = tokens por tema; `font` = pila del sistema. Provisional hasta que la usuaria apruebe el logotipo.
+`name` = «seismicobservatory»; `logo` = «S» con onda sísmica (SVG, `currentColor`); `palette` = tokens por tema; `font` = pila del sistema. Provisional hasta que la persona autora apruebe el logotipo.

@@ -6,7 +6,7 @@
 - Motor: Docker 29.1.3 (Docker Desktop (containerized)), Compose 2.40.3-desktop.1; recursos del motor: 12 CPU, 7.6 GiB
 
 Antes de V1 se recreó el volumen con `docker compose down -v`, con confirmación expresa de la
-usuaria (T041). Los diez arranques desde cero de V1 se miden aparte en
+persona autora (T041). Los diez arranques desde cero de V1 se miden aparte en
 [cold-starts.md](cold-starts.md) (T055).
 
 ## Resumen
@@ -14,7 +14,7 @@ usuaria (T041). Los diez arranques desde cero de V1 se miden aparte en
 | Escenario | Esperado | Observado | Resultado |
 |---|---|---|---|
 | V1 | Cinco servicios `healthy` en menos de 3 min con las imágenes construidas; ningún `tunnel` | Cinco servicios `healthy` 21 s después de `down -v`; `tunnel` no arranca sin `--profile tunnel` | SUPERADA |
-| V2 | Solo `api` publica puerto, en `127.0.0.1:8000`; 5432, 9092 y 8000 no responden desde otro dispositivo | Solo `api 127.0.0.1:8000->8000/tcp`; desde la IP de red local del propio equipo, 5432, 9092, 29092 y 8000 cerrados | SUPERADA en el equipo; la prueba desde otro dispositivo se descartó el 2026-11-17 a petición de la usuaria por no ser necesaria para el enunciado (§9 exige exponer solo la API, y lo garantiza la publicación de puertos de `compose.yaml`) |
+| V2 | Solo `api` publica puerto, en `127.0.0.1:8000`; 5432, 9092 y 8000 no responden desde otro dispositivo | Solo `api 127.0.0.1:8000->8000/tcp`; desde la IP de red local del propio equipo, 5432, 9092, 29092 y 8000 cerrados | SUPERADA en el equipo; la prueba desde otro dispositivo se descartó el 2026-11-17 a petición de la persona autora por no ser necesaria para el enunciado (§9 exige exponer solo la API, y lo garantiza la publicación de puertos de `compose.yaml`) |
 | V8 | Mismo recuento tras reiniciar; el productor no republica; todo `publish_state` aparece en `message_log` | 193 eventos antes y después; «Published 0» tras reiniciar; 0 eventos publicados sin mensaje registrado | SUPERADA |
 | V9 | Reintentos con espera creciente, recuperación sin reinicio manual, `/api/salud` degradado durante la caída | Esperas de 1, 2, 4, 8 y 16 s en el productor; recuperación sola; `degraded` durante la caída y `ok` después | SUPERADA |
 | V10 | Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN`, la URL HTTPS responde en `/api/salud` | Con `ngrok/ngrok:3.18.4-alpine` el agente es rechazado (ERR_NGROK_121); con `3.39.13-alpine`, HTTPS responde 200 | SUPERADA tras cambiar la imagen |
@@ -84,7 +84,7 @@ localhost:29092 cerrado    IP-LAN:29092 cerrado
 localhost:8000 abierto     IP-LAN:8000 cerrado
 ```
 
-La API solo responde en `127.0.0.1`. La comprobación desde otro dispositivo de la red no se hizo y se descartó el 2026-11-17 a petición de la usuaria
+La API solo responde en `127.0.0.1`. La comprobación desde otro dispositivo de la red no se hizo y se descartó el 2026-11-17 a petición de la persona autora
 (no es necesaria para el enunciado): esta parte del escenario no se da por observada.
 
 ## V8. Persistencia tras reinicio

@@ -5,7 +5,7 @@ description: "Task list for feature 010: dashboard layout, alerts, no-events han
 
 # Tasks: Ajustes de diseño, distribución y filtrado del panel
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md), [data-model.md](data-model.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md), [data-model.md](data-model.md),
 [contracts/ui-contract.md](contracts/ui-contract.md), [quickstart.md](quickstart.md); mockup aprobado en `references/mockup/`
 
 **Tests**: incluidas (principio IX, FR-029). Vitest para la lógica pura nueva en `frontend/src/app/lib/*.test.ts` (resultados de funciones, nunca la presencia de texto en el código) y pytest para la

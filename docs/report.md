@@ -491,7 +491,7 @@ Paso a paso en el [README](../README.md#demostración-de-la-defensa).
 ## API de consulta
 
 Esta sección documenta la API conforme al contrato (spec 006). Cierra el principio VIII de la
-constitución: `resources/observatorio-sismico/CONTRATO-API.md` es la fuente de verdad y prevalece sobre
+constitución: `CONTRATO-API.md` del material del enunciado (no versionado en este repositorio) es la fuente de verdad y prevalece sobre
 la API heredada de la spec 001, que se ajustó sin reescribirla desde cero. Contrato HTTP completo en
 [specs/006-query-api/contracts/api.md](../specs/006-query-api/contracts/api.md) y ejemplos de consulta en el
 [README](../README.md#6-consultar-la-api). Evidencia en [docs/evidence/006/](evidence/006/README.md).
@@ -647,7 +647,7 @@ Pruebas de lógica pura: `npm test` en `frontend/`, 8 ficheros y 106 pruebas en 
 ### Límites
 
 - La prueba desde un móvil con datos móviles (cerrar y reabrir el túnel con el sitio de Netlify) se hizo el 2026-11-17 (`docs/evidence/007/`, M1 a M3). El túnel ngrok real y el sitio de Netlify (`seismicobservatoryecr.netlify.app`) ya se probaron: carga, reproducción y cierre y reapertura del túnel (`docs/evidence/007/`, sección «Prueba desde Netlify»).
-- La prueba en Linux queda fuera de alcance por decisión de la usuaria (no es requisito del enunciado).
+- La prueba en Linux queda fuera de alcance por decisión de la persona autora (no es requisito del enunciado).
 - **Simulador de contrato**: se usó en V3, V5, V11, V12 y V13 porque el sistema real no puede producir esos
   casos (nulos, coordenadas no válidas, 503, respuesta no JSON) sin insertar datos sintéticos en `core`, lo
   que prohíbe la spec 006. Esos mismos casos de la API están en [docs/evidence/006/](evidence/006/README.md).
@@ -675,7 +675,7 @@ Evidencia en [docs/evidence/009/](evidence/009/README.md); cifras del 2026-11-17
 - **Ficha del evento**: diálogo accesible (foco inicial en «Cerrar», Escape, retorno del foco) que se abre desde un círculo, un grupo o
   el botón «Ver ficha» de la tabla; todo el texto es texto, nunca HTML.
 - **Movimiento**: sin animaciones ni transiciones con `prefers-reduced-motion: reduce`.
-- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, aprobado por la usuaria el 2026-11-17.
+- **Identidad**: nombre «seismicobservatory» y logotipo «S» con onda sísmica, aprobado por la persona autora el 2026-11-17.
 
 ### Fuentes y licencias
 
@@ -711,7 +711,7 @@ de página lo declara. Bibliotecas nuevas, con versión exacta: `chart.js` 4.6.1
 - Los datos reales no estaban truncados; «Muestra: N de TOTAL» se comprobó en el navegador con un periodo truncado simulado (2.500 eventos): «Muestra: 1000 de 2500» y, al cargar todo, «Todos los eventos del periodo».
 - Los casos de datos anómalos se simularon alterando respuestas en el navegador; la base de datos no recibió datos sintéticos.
 - El contraste de los círculos se midió contra la superficie del panel, no contra cada tesela del mapa.
-- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; la prueba en Linux queda fuera de alcance por decisión de la usuaria.
+- No se repitieron V2 (evento nuevo sin recargar) ni V8 (filtros inválidos) de la 007; la prueba en Linux queda fuera de alcance por decisión de la persona autora.
 
 ## Ajustes del panel (spec 010)
 
@@ -800,7 +800,7 @@ Salida de datos: 1 GB al mes (215 MB usados al empezar). Conexiones a endpoints:
 
 - Accesibilidad (axe-core, WCAG A y AA): 2 violaciones graves en la vista cerrada (`color-contrast`, `nested-interactive`) y una crítica más con una operación abierta (`select-name`), todas en la interfaz de Swagger UI 5.17.14. Se aceptan como excepciones de una librería de terceros con integridad fijada; no se cumple al 100 % AA. Swagger UI no tiene tema oscuro.
 - La documentación pasó la prueba de la «persona sin contexto» (obtiene la petición correcta en segundos), que anotó mejoras posibles: el esquema de la respuesta 200 está vacío (solo ejemplo) y no se indica si `min_mag=5` incluye 5,0.
-- Linux: fuera de alcance por decisión de la usuaria (no es requisito del enunciado); consta la comprobación de la spec 008 (G3).
+- Linux: fuera de alcance por decisión de la persona autora (no es requisito del enunciado); consta la comprobación de la spec 008 (G3).
 
 ## Análisis y conclusiones (spec 008)
 
@@ -1035,7 +1035,7 @@ medición. Fuente de todo: [evidence/008/cost-measurements.md](evidence/008/cost
 
 ### Partidas de coste (supuestos)
 
-Valores de la usuaria: portátil de 675 € comprado hace 4 años y amortizado en 6 de vida total, 200 h de desarrollo, 15 €/h,
+Valores de la persona autora: portátil de 675 € comprado hace 4 años y amortizado en 6 de vida total, 200 h de desarrollo, 15 €/h,
 2 h/mes de mantenimiento y 0,23 €/kWh. Siguen siendo supuestos del autor la potencia (35 W, no medida), el funcionamiento 24/7, el
 coste del almacenamiento y la tasa de descuento (10 %). Detalle en [evidence/008/cost-table.md](evidence/008/cost-table.md).
 
@@ -1067,7 +1067,7 @@ GB de ngrok en unos 11 días. En una defensa de unas horas no se alcanza, pero u
 ### ROI
 
 El observatorio no genera ingresos. El único beneficio definido es **el tiempo manual evitado**: sin el panel habría que descargar y filtrar a
-mano el catálogo de USGS para obtener una vista equivalente. Definición de la usuaria: 2 horas por consulta, una por día laborable (260 al año),
+mano el catálogo de USGS para obtener una vista equivalente. Definición de la persona autora: 2 horas por consulta, una por día laborable (260 al año),
 a 15 €/h → **7.800 €/año**. Es un coste de oportunidad del tiempo propio, no un ahorro de caja, y se apoya en dos estimaciones **no medidas** (las
 2 horas y la frecuencia diaria).
 
@@ -1121,9 +1121,9 @@ figura como superada si su evidencia tiene resultado esperado y observado ejecut
 | 10 | Reabrir el túnel | superada | [007](evidence/007/README.md) T2 y M3 (móvil) | — |
 | 11 | Reproducción histórica | superada | [005](evidence/005/README.md), [006 V9 y V10](evidence/006/v10-isolation.md), [007](evidence/007/README.md) V9 y V10 | Linux (G3) |
 
-Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pruebas de la usuaria** ([user-gaps.md](evidence/008/user-gaps.md)): el 2026-11-17 se probó el panel desde un móvil con datos móviles (G4, cerrar y reabrir el túnel con el sitio
+Todas se ejecutaron en el equipo Windows 11 descrito en cada evidencia. **Pruebas de la persona autora** ([user-gaps.md](evidence/008/user-gaps.md)): el 2026-11-17 se probó el panel desde un móvil con datos móviles (G4, cerrar y reabrir el túnel con el sitio
 de Netlify, [capturas](evidence/007/README.md)) y en un equipo Linux se levantó el stack (cinco servicios `healthy`) y pasó la suite completa (886 pruebas, [linux-g3.md](evidence/008/linux-g3.md)); la latencia
-en Linux no fue concluyente (0 eventos). La tarea T057 de la 002 (arranque por una persona ajena) se dio por superada según lo informado: 2,5 min y sin dudas. Por no ser requisito del enunciado, y a petición de la usuaria, no se hicieron
+en Linux no fue concluyente (0 eventos). La tarea T057 de la 002 (arranque por una persona ajena) se dio por superada según lo informado: 2,5 min y sin dudas. Por no ser requisito del enunciado, y a petición de la persona autora, no se hicieron
 los puertos cerrados desde otro dispositivo, la comprobación de propiedad de ficheros de 003 T050 ni los escenarios con el sistema real de las specs 005 y 006 en Linux.
 
 ### Entregables de §12
@@ -1138,7 +1138,7 @@ los puertos cerrados desde otro dispositivo, la comprobación de propiedad de fi
 | Análisis con tres conclusiones y capturas | «Análisis y conclusiones (spec 008)» y [capturas](evidence/008/C1-2025-m4.png) |
 | Informe de complejidad, mediciones, costes y mejoras | «Complejidad y rendimiento (spec 008)», «Costes, escalado y mejoras (spec 008)» y [evaluacion-financiera.md](evaluacion-financiera.md) |
 | Evidencias de aceptación y reproducción | `docs/evidence/002` a `008` |
-| Explicación individual | [guion-explicacion.md](guion-explicacion.md): solo apoyo; la explicación y la decisión técnica propia las redacta y defiende la usuaria |
+| Explicación individual | Oral, durante la defensa: el flujo completo y una decisión técnica propia; no se entrega documento |
 | Sin `node_modules`, credenciales ni datos grandes en Git | [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md) |
 
 ### Criterios de §13
@@ -1153,7 +1153,7 @@ los puertos cerrados desde otro dispositivo, la comprobación de propiedad de fi
 
 ### Higiene del repositorio
 
-Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB (`db/seeds/historical_2026.jsonl`) estaba en una rama local de respaldo que no estaba en el remoto; la rama se borró el 2026-11-17 con confirmación de la usuaria. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
+Sin `node_modules`, `.env`, claves, volúmenes ni datos descargados en los 508 ficheros versionados. Hallazgo: un blob de 98 MB (`db/seeds/historical_2026.jsonl`) estaba en una rama local de respaldo que no estaba en el remoto; la rama se borró el 2026-11-17 con confirmación de la persona autora. Detalle: [evidence/008/repository-hygiene.md](evidence/008/repository-hygiene.md).
 
 ## Modelo conceptual
 

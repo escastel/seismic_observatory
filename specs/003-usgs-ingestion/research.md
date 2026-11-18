@@ -1,6 +1,6 @@
 # Research: Ingesta desde USGS
 
-**Fecha**: 2026-11-15 · **Spec**: [spec.md](spec.md)
+**Fecha**: 2026-11-15 · **Spec**: `spec.md`
 
 No quedaban marcadores NEEDS CLARIFICATION. Este documento fija las decisiones técnicas. Las
 marcadas como **verificado** se comprobaron el 2026-11-15 con peticiones de solo lectura a los
@@ -192,7 +192,7 @@ código de la spec 002.
   funcionando otra vez. No requiere cambios en el modelo. El índice parcial de la spec 002 sobre
   las consultas correctas al feed sirve esta consulta.
 - **Alternativas**: tabla de huecos pendientes (cambio de modelo); recuperación automática
-  (descartada por la usuaria el 2026-11-15: el enunciado solo pide explicarla).
+  (descartada por la persona autora el 2026-11-15: el enunciado solo pide explicarla).
 
 ## R11. Purga de originales
 

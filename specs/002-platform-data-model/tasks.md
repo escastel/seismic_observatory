@@ -7,7 +7,7 @@ description: "Task list for feature 002: platform and data model"
 
 **Input**: Design documents from `/specs/002-platform-data-model/`
 
-**Prerequisites**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Prerequisites**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/database.md](contracts/database.md),
 [contracts/runtime.md](contracts/runtime.md), [quickstart.md](quickstart.md)
 
@@ -26,7 +26,7 @@ de offset de [research.md](research.md) §R20, que se corrigen en T037.
 ## Format: `[ID] [P?] [Story] Description`
 
 - **[P]**: puede hacerse en paralelo (ficheros distintos, sin dependencias pendientes)
-- **[Story]**: historia de usuario de [spec.md](spec.md) a la que pertenece
+- **[Story]**: historia de usuario de `spec.md` a la que pertenece
 
 ---
 
@@ -56,7 +56,7 @@ todas las historias
 - [X] T010 Crear `db/sql/apply.sh` (recibe el nombre de la base; se conecta con las variables estándar `PGHOST`, `PGPORT`, `PGUSER` y `PGPASSWORD` si están definidas, de modo que sirve tanto dentro del contenedor de PostgreSQL como desde el contenedor de pruebas; ejecuta con `psql -v ON_ERROR_STOP=1` los ficheros existentes de `db/sql/` en orden numérico pasando `catalog_path`, `writer_password` y `reader_password`; los ficheros de plantilla, que son `040_event_tables.sql` y `060_indexes.sql`, se ejecutan una vez con `-v schema=core` y otra con `-v schema=replay`; no contiene SQL propio) y `db/init/00-init.sh` (llama a `apply.sh "$POSTGRES_DB"`); ambos con permiso de ejecución y `set -euo pipefail`
 - [X] T011 Reescribir solo el servicio `postgres` de `compose.yaml`: imagen `postgres:16.4`, sin `ports`, volumen `postgres_data`, montajes de solo lectura `./db/init:/docker-entrypoint-initdb.d`, `./db/sql:/sql` y `./frontend/public/datos/paises.geojson:/catalog/paises.geojson`, variables `DB_WRITER_PASSWORD` y `DB_READER_PASSWORD`, `restart: unless-stopped` y comprobación de salud que conecte por TCP (`-h 127.0.0.1`) y ejecute `SELECT 1 FROM core.dim_country LIMIT 1`
 - [X] T012 Crear `tests/Dockerfile` (base `python:3.11.10-slim-bookworm`, paquete `postgresql-client`, dependencias de `tests/requirements.txt`) y `compose.dev.yaml` con el servicio `tests` (misma red, depende de `postgres` sano, monta el repositorio en solo lectura salvo `docs/evidence/`, recibe las credenciales del propietario y además `DB_WRITER_PASSWORD` y `DB_READER_PASSWORD`)
-- [X] T013 Recrear el volumen de la base: `docker compose down -v` y `docker compose up -d postgres`, y esperar a que esté sano. **Requiere confirmación de la usuaria**: borra la base local, y es imprescindible porque `postgres:16.4` no arranca sobre el directorio de datos de PostgreSQL 15 que existe ahora
+- [X] T013 Recrear el volumen de la base: `docker compose down -v` y `docker compose up -d postgres`, y esperar a que esté sano. **Requiere confirmación de la persona autora**: borra la base local, y es imprescindible porque `postgres:16.4` no arranca sobre el directorio de datos de PostgreSQL 15 que existe ahora
 - [X] T014 Crear `tests/db/conftest.py`: fixture de sesión que elimina y crea la base `observatory_test` y le aplica `db/sql/apply.sh`; fixture por prueba que vacía las tablas de eventos de `core` y `replay`; fixtures de conexión como propietario, `observatory_writer` y `observatory_reader` con `search_path` configurable
 - [X] T015 Crear `tests/db/test_dimensions.py`: 177 países, exactamente 5 con `iso_a3` nulo, ninguna columna obligatoria vacía; insertar un `country_id` repetido falla por la clave primaria; `dim_date` con 49.673 filas, mínimo 1900-01-01, máximo 2035-12-31 y sin huecos; y ejecutar `docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/db/test_dimensions.py` hasta que pase
 
@@ -120,7 +120,7 @@ accesible desde el propio equipo y un evento real recorriendo el sistema sobre e
 - [X] T038 [US1] Adaptar la API al modelo nuevo sin añadir endpoints: quitar `ngrok` de `api/app/main.py`; `api/app/db.py` usa `common/db.py` con el rol `observatory_reader`; `api/app/queries.py` consulta `event_current` con `LEFT JOIN dim_country`; `api/app/schemas.py` admite `mag`, `country` y `country_id` nulos; `GET /api/salud` responde con estado degradado si la base no está disponible; `CORS` toma los orígenes de `common/settings.py`
 - [X] T039 [US1] Actualizar o retirar las pruebas que la adaptación deja obsoletas: `tests/unit/test_statistics_filters.py`, `tests/unit/test_spatial.py`, `tests/contract/test_api_contract.py`, `tests/integration/test_producer_state.py`, `tests/integration/test_version_history.py` y `tests/test_e2e_real.py`; conservar solo las que comprueban comportamiento y pasan en el contenedor `tests`. `tests/integration/benchmark_scaling.py`, `tests/integration/load_test.py` y `tests/integration/test_load_test.py` no se tocan: se revisan en la spec 008
 - [X] T040 [US1] Reescribir en `README.md` los apartados de requisitos y versiones, creación de `.env`, arranque, comprobación de estado y logs, activación del túnel con `--profile tunnel`, ejecución de pruebas, parada, qué se conserva al reiniciar, cómo recrear la base con `docker compose down -v`, la decisión de no exponer Kafka ni PostgreSQL al equipo (un único listener interno) y la carpeta `data/` como ubicación de los originales fuera de Git; órdenes en `bash`
-- [X] T041 [US1] Validar V1, V2, V8, V9 y V10 de [quickstart.md](quickstart.md) con el sistema real y guardar resultado esperado, observado y salida en `docs/evidence/002/startup.md`. **Requiere confirmación de la usuaria**: recrea la base local con `docker compose down -v`. Comprobar aquí la sintaxis del agente de ngrok para el dominio reservado y corregir `compose.yaml` si hace falta
+- [X] T041 [US1] Validar V1, V2, V8, V9 y V10 de [quickstart.md](quickstart.md) con el sistema real y guardar resultado esperado, observado y salida en `docs/evidence/002/startup.md`. **Requiere confirmación de la persona autora**: recrea la base local con `docker compose down -v`. Comprobar aquí la sintaxis del agente de ngrok para el dominio reservado y corregir `compose.yaml` si hace falta
 - [X] T042 [US1] Ejecutar V12 (ningún fichero versionado mayor de 5 MB salvo el catálogo, ninguna credencial, ningún `node_modules`) y `docker image inspect` para confirmar que ninguna imagen contiene `db/seeds`; guardar la salida en `docs/evidence/002/repository-hygiene.txt`
 
 **Checkpoint**: MVP. Cinco servicios sanos y un evento real de USGS visible en `GET /api/eventos`
@@ -191,7 +191,7 @@ cada rechazo o exclusión conserva su motivo y los mensajes recibidos se pueden 
 
 ## Phase 8: Polish & Cross-Cutting Concerns
 
-- [X] T055 Crear `tests/startup/cold_start.sh`, que construye las imágenes una vez y después repite diez veces `docker compose down -v` y `docker compose up -d` midiendo el tiempo hasta que los cinco servicios están sanos, y guardar el resultado en `docs/evidence/002/cold-starts.md` (SC-002). **Requiere confirmación de la usuaria**: borra la base local en cada iteración
+- [X] T055 Crear `tests/startup/cold_start.sh`, que construye las imágenes una vez y después repite diez veces `docker compose down -v` y `docker compose up -d` midiendo el tiempo hasta que los cinco servicios están sanos, y guardar el resultado en `docs/evidence/002/cold-starts.md` (SC-002). **Requiere confirmación de la persona autora**: borra la base local en cada iteración
 - [X] T056 Recorrer V1 a V12 de [quickstart.md](quickstart.md) y completar `docs/evidence/002/README.md` con una tabla de escenario, resultado esperado, resultado observado y enlace a la evidencia; no marcar ninguno como superado sin haberlo ejecutado
 - [x] T057 [P] Pedir a una persona ajena al proyecto que levante el sistema siguiendo solo `README.md` y anotar el tiempo y las dudas en `docs/evidence/002/README.md` (SC-001); corregir el README con lo que falle
 - [X] T058 Revisar el cumplimiento de la constitución v2.1.0 (principios I, II, III, V, VI, IX e idioma), actualizar `specs/002-platform-data-model/checklists/requirements.md` y confirmar que `git status` no muestra ficheros de datos, `.env` ni credenciales antes de cualquier commit

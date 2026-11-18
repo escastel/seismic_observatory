@@ -1,6 +1,6 @@
 # Implementation Plan: Panel Angular conforme al enunciado
 
-**Branch**: `007-angular-dashboard` | **Date**: 2026-11-16 | **Spec**: [spec.md](spec.md)
+**Branch**: `007-angular-dashboard` | **Date**: 2026-11-16 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/007-angular-dashboard/spec.md`
 

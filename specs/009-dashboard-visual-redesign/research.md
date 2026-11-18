@@ -41,7 +41,7 @@ confirmar queda marcado como **riesgo** con su alternativa.
 | Mapa de calor | `leaflet.heat` (+ `@types/leaflet.heat` 0.2.5) | 0.2.0 | BSD-2-Clause | Mínima (≈ 3 kB), estándar; la 1.0.x existe pero 0.2.0 es la que acompañan los tipos |
 
 - Las tres se importan **de forma diferida** (`import()`) cuando se usan, para no cargar peso inicial.
-- **Alternativas descartadas**: ECharts (más pesada), `ng2-charts` (envoltorio adicional), SVG propio (más trabajo sin ventaja), un globo 3D (excluido por la usuaria).
+- **Alternativas descartadas**: ECharts (más pesada), `ng2-charts` (envoltorio adicional), SVG propio (más trabajo sin ventaja), un globo 3D (excluido por la persona autora).
 
 ## R5. Tema claro y oscuro
 
@@ -74,7 +74,7 @@ confirmar queda marcado como **riesgo** con su alternativa.
 - Nombre «seismicobservatory»; logotipo: una «S» con una decoración de onda sísmica (línea de sismograma que atraviesa la letra), en SVG de un solo color (`currentColor`) con variante de
   acento. Propuesta en `references/logo-proposal.svg` para su aprobación (FR-018: provisional hasta entonces).
 - Tipografía: pila del sistema (`system-ui`) para el texto y una monoespaciada del sistema para cifras; no se cargan fuentes externas (sin peticiones ni peso extra). **Alternativa**: una fuente
-  propia autoalojada con licencia abierta si la usuaria lo pide.
+  propia autoalojada con licencia abierta si la persona autora lo pide.
 - Paleta: tokens oscuros y claros (fondo, superficie, texto, acento, estados), profundidad: amarillo, naranja y morado de la referencia, ajustados para contraste en ambos temas.
 
 ## R10. Qué no cambia (comprobación de no regresión)

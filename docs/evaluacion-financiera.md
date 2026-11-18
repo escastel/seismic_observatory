@@ -14,7 +14,7 @@ veredicto. Lo que sigue los sustituye por costes y un beneficio con origen decla
 
 | Concepto | Cálculo | Importe | Tipo |
 |---|---|---:|---|
-| Desarrollo | 200 h × 15 €/h (horas y tarifa de la usuaria) | 3.000 € (una vez) | supuesto |
+| Desarrollo | 200 h × 15 €/h (horas y tarifa de la persona autora) | 3.000 € (una vez) | supuesto |
 | Hardware | portátil de 675 € a 6 años de vida | 112,50 €/año | supuesto |
 | Electricidad | 35 W × 8.760 h × 0,23 €/kWh | 70,52 €/año | supuesto (la potencia no está medida) |
 | Mantenimiento | 2 h/mes × 15 €/h | 360 €/año | supuesto |
@@ -28,7 +28,7 @@ El observatorio no genera ingresos. El único beneficio que se define es **el ti
 que descargar y filtrar a mano el catálogo de USGS para obtener una vista equivalente (recuento por país, distribuciones y comparación
 con 2025).
 
-- **Definición (de la usuaria)**: 2 horas por consulta, una consulta por día laborable (260 al año), valoradas a 15 €/h
+- **Definición (de la persona autora)**: 2 horas por consulta, una consulta por día laborable (260 al año), valoradas a 15 €/h
   → **7.800 €/año**.
 - **Justificación y límite**: es un coste de oportunidad del tiempo propio, no un ahorro de caja, y descansa en dos estimaciones
   **no medidas** (las 2 horas y la frecuencia diaria). Para respaldarlo mejor, cronometrar una vez la consulta manual y anotar

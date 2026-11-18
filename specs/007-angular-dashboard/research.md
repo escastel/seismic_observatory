@@ -157,5 +157,5 @@ nueva).
 **Decisión**: los escenarios V1–V12 de [quickstart.md](quickstart.md) se ejecutan con el stack
 levantado (`verify-stack`) y un navegador real; cada uno guarda esperado, observado y una captura
 con los filtros visibles en `docs/evidence/007/`. «Cerrar el túnel» se simula parando la API o el
-túnel local; la prueba con Netlify real la hace la usuaria.
+túnel local; la prueba con Netlify real la hace la persona autora.
 **Por qué**: principio IX y spec FR-039.

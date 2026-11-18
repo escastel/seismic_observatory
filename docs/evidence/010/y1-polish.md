@@ -1,6 +1,6 @@
 # Retoques de legibilidad posteriores al merge (2026-11-18)
 
-Cuatro defectos señalados por la usuaria con capturas, corregidos y comprobados con Chrome y la API local (datos en [y1-polish-details.json](y1-polish-details.json)); axe-core (WCAG A y AA) sin violaciones en mapa, tabla y aviso emergente, en oscuro y claro.
+Cuatro defectos señalados por la persona autora con capturas, corregidos y comprobados con Chrome y la API local (datos en [y1-polish-details.json](y1-polish-details.json)); axe-core (WCAG A y AA) sin violaciones en mapa, tabla y aviso emergente, en oscuro y claro.
 
 | Defecto | Causa | Corrección | Observado |
 |---|---|---|---|

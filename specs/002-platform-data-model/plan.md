@@ -1,6 +1,6 @@
 # Implementation Plan: Plataforma y modelo de datos del observatorio
 
-**Branch**: `002-platform-data-model` | **Date**: 2026-11-14 | **Spec**: [spec.md](spec.md)
+**Branch**: `002-platform-data-model` | **Date**: 2026-11-14 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/002-platform-data-model/spec.md`
 

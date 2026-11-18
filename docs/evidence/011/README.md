@@ -25,7 +25,7 @@ Resultado de los escenarios Z1 a Z13 de la [guía de validación](../../../specs
 - Z9: el corte fue en 53 peticiones, no en 60 (ngrok aplica la ventana de forma aproximada). Tres respuestas 429 del inspector no se atribuyeron a ningún script. La primera política dio un 429 vacío de ngrok y se corrigió con `enforce: false`.
 - Z10: un solo dispositivo; no se esperó el refresco automático de 60 s; 8 respuestas `400` de las teselas de OpenStreetMap no se investigaron.
 - Z12 y Swagger UI: 2 violaciones graves y 1 crítica, aceptadas como excepciones de una librería de terceros con integridad fijada. Swagger UI no tiene tema oscuro.
-- Linux: fuera de alcance por decisión de la usuaria (no es requisito del enunciado).
+- Linux: fuera de alcance por decisión de la persona autora (no es requisito del enunciado).
 
 ## No comprobado
 

@@ -4,7 +4,7 @@
 
 | Comprobación | Esperado | Observado | Resultado |
 |---|---|---|---|
-| Enlaces relativos de `report.md`, `evaluacion-financiera.md`, `guion-explicacion.md` y las matrices de `docs/evidence/008/` (fuera de bloques de código) | todos resuelven | 267 enlaces, 0 rotos | superada |
+| Enlaces relativos de `report.md`, `evaluacion-financiera.md`, el guion de apoyo (retirado después del repositorio) y las matrices de `docs/evidence/008/` (fuera de bloques de código) | todos resuelven | 267 enlaces, 0 rotos | superada |
 | Índice del principio de `report.md` | cada entrada enlaza con un encabezado existente | 13 entradas, 0 anclas sin encabezado | superada |
 | Intro de `report.md` | describe el contenido actual | estaba desactualizada («solo la spec 002»); reescrita, con índice y nota sobre instantes de las cifras | corregida |
 | «unos 16.000 eventos» del histórico | cifra coherente con la carga real | el enunciado estima 16.000 y la carga real tiene 18.302; ahora se dice así en «Alcance» y en «Índices» | corregida |

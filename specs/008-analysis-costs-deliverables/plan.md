@@ -1,6 +1,6 @@
 # Implementation Plan: Análisis, rendimiento, costes y cierre de entregables
 
-**Branch**: `008-analysis-costs-deliverables` | **Date**: 2026-11-17 | **Spec**: [spec.md](spec.md)
+**Branch**: `008-analysis-costs-deliverables` | **Date**: 2026-11-17 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/008-analysis-costs-deliverables/spec.md`
 
@@ -30,7 +30,7 @@ nuevas en `core` ni `replay`.
 (entrada pequeña, salidas coherentes, el esquema `bench` no queda detrás). Nunca dos ejecuciones
 de `tests/db` a la vez (CLAUDE.md).
 
-**Target Platform**: Windows 11 + Docker Desktop (medido) y Linux (hueco para la usuaria).
+**Target Platform**: Windows 11 + Docker Desktop (medido) y Linux (hueco para la persona autora).
 
 **Project Type**: documentación + scripts de medición (sin servicio nuevo).
 

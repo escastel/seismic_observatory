@@ -57,7 +57,7 @@ No quedan incógnitas. Hallazgos y decisiones, comprobados el 2026-11-18 con el 
 - `ThemeService` guarda `preference: 'auto' | 'dark' | 'light'` (clave `seismic-theme` en `localStorage`, con `try/catch` en lectura y escritura) y expone `theme` = preferencia manual o, en `auto`, la del dispositivo (oscuro por defecto). Pone `data-theme` en `<html>` solo con preferencia manual.
 - `styles.css`: oscuro como base; claro bajo `@media (prefers-color-scheme: light) { :root:not([data-theme="dark"]) { … } }` y bajo `:root[data-theme="light"]`; así sin JavaScript el panel sigue al dispositivo.
 - Botón flotante (abajo a la derecha): `<button>` con `aria-label` «Cambiar a tema claro» o «Cambiar a tema oscuro», icono sol o luna (SVG), foco visible, transición solo con movimiento permitido. Cambia el tema de mapa y gráficos porque estos leen `theme()`.
-- **Alternativa descartada**: selector de tres opciones (dispositivo, claro, oscuro); la usuaria pidió un botón sol/luna.
+- **Alternativa descartada**: selector de tres opciones (dispositivo, claro, oscuro); la persona autora pidió un botón sol/luna.
 
 ## R7. Tolerancia a fallos de estadísticas (función pura)
 

@@ -5,7 +5,7 @@ description: "Task list for feature 005: accelerated replay of a historical sele
 
 # Tasks: Reproducción acelerada de una selección histórica
 
-**Input**: [plan.md](plan.md), [spec.md](spec.md), [research.md](research.md),
+**Input**: [plan.md](plan.md), `spec.md`, [research.md](research.md),
 [data-model.md](data-model.md), [contracts/replay-cli.md](contracts/replay-cli.md),
 [contracts/replay-message.md](contracts/replay-message.md),
 [contracts/synthetic-cases.md](contracts/synthetic-cases.md),

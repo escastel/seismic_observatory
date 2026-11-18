@@ -32,8 +32,8 @@ una Medición en la misma celda.
 
 ## Entrada de trazabilidad
 `eje` (§11 | §12 | §13), `elemento`, `destino` (spec, evidencia, fichero o sección), `estado`
-(superada con evidencia | parcial | pendiente de la usuaria), `hueco` (qué falta y cómo se
+(superada con evidencia | parcial | pendiente de la persona autora), `hueco` (qué falta y cómo se
 demuestra).
 
 ## Hueco
-`id`, `quien` (usuaria), `equipo` (Linux | otro dispositivo), `procedimiento`, `evidencia_esperada`.
+`id`, `quien` (persona autora), `equipo` (Linux | otro dispositivo), `procedimiento`, `evidencia_esperada`.

@@ -1,6 +1,6 @@
 # Implementation Plan: Ingesta desde USGS
 
-**Branch**: `003-usgs-ingestion` | **Date**: 2026-11-15 | **Spec**: [spec.md](spec.md)
+**Branch**: `003-usgs-ingestion` | **Date**: 2026-11-15 | **Spec**: `spec.md`
 
 **Input**: Feature specification from `/specs/003-usgs-ingestion/spec.md`
 

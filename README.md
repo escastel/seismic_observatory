@@ -77,7 +77,7 @@ curl -s http://127.0.0.1:8000/api/salud
 | Publicar la API con ngrok | `docker compose --profile tunnel up -d` ([apartado 5](#5-túnel-para-el-panel-publicado)) |
 | Cargar el histórico de 2025 | [Cargar el histórico](#cargar-el-histórico) |
 | Demostrar la reproducción acelerada | [Reproducción acelerada](#reproducción-acelerada) |
-| Preparar la defensa | [Guion de la defensa](#guion-de-la-defensa) |
+| Preparar la defensa | [Procedimiento de la defensa](#10-panel-angular-y-defensa-spec-007) |
 
 ## 🖼️ Capturas
 
@@ -96,26 +96,11 @@ curl -s http://127.0.0.1:8000/api/salud
 | Memoria: decisiones, calidad, modelo, análisis, costes | [docs/report.md](docs/report.md) |
 | Calidad de los datos | [docs/calidad.md](docs/calidad.md) |
 | Evaluación financiera | [docs/evaluacion-financiera.md](docs/evaluacion-financiera.md) |
-| Explicación del flujo y decisión técnica propia | [docs/guion-explicacion.md](docs/guion-explicacion.md) |
 | Evidencias de las pruebas (esperado y observado) | [docs/evidence/](docs/evidence/) |
 | SQL de creación, índices y consultas | [db/sql/](db/sql/) y [db/queries/](db/queries/) |
 | Código | [producer/](producer/) · [consumer/](consumer/) · [api/](api/) · [frontend/](frontend/) · [common/](common/) |
 | Política de tráfico del túnel (60 por minuto) | [tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) |
 | Especificaciones de cada funcionalidad | [specs/](specs/) |
-| Enunciado y material de partida | [resources/](resources/) |
-
-## 📑 Contenido
-
-1. [Objetivo académico](#1-objetivo-académico)
-2. [Arquitectura](#2-arquitectura)
-3. [Requisitos y versiones](#3-requisitos-y-versiones)
-4. [Puesta en marcha](#4-puesta-en-marcha)
-5. [Túnel para el panel publicado](#5-túnel-para-el-panel-publicado)
-6. [Consultar la API](#6-consultar-la-api)
-7. [Datos](#7-datos)
-8. [Pruebas](#8-pruebas)
-9. [Límites tecnológicos](#9-límites-tecnológicos)
-10. [Panel Angular y defensa](#10-panel-angular-y-defensa-spec-007)
 
 ---
 
@@ -309,136 +294,43 @@ dirección IP y el `Referer` del navegador. `/redoc` sigue desactivada. El túne
 
 ## 6. Consultar la API
 
+La referencia completa e interactiva está en **`/docs`** (Swagger UI, con «Probar»): en local
+<http://127.0.0.1:8000/docs> y por el túnel <https://modular-guidance-daybreak.ngrok-free.dev/docs>. El
+contrato escrito está en [specs/006-query-api/contracts/api.md](specs/006-query-api/contracts/api.md).
+
 Base: `http://127.0.0.1:8000/api` (o la URL del túnel del apartado 5, añadiendo la cabecera
 `-H "ngrok-skip-browser-warning: 1"`). Solo acepta `GET` y `OPTIONS`; cualquier otro método
-devuelve 405. Los tiempos son milisegundos Unix en UTC. Las fechas de entrada van en ISO 8601 con
-zona horaria (`2025-01-01T00:00:00Z`); sin zona devuelven 422. Un desfase como `+02:00` debe
-escribirse `%2B02:00` en la URL. El contrato completo está en
-[specs/006-query-api/contracts/api.md](specs/006-query-api/contracts/api.md).
+devuelve 405. Los tiempos son milisegundos Unix en UTC; las fechas de entrada van en ISO 8601 con
+zona horaria (`2025-01-01T00:00:00Z`) y, sin zona, devuelven 422.
 
-### Eventos
+| Endpoint | Qué devuelve | Ejemplo |
+|---|---|---|
+| `GET /api/eventos` | Eventos como GeoJSON, paginados (`limit` hasta 1.000 y `offset`), con un bloque `metadata`. Sin parámetros: últimas 24 horas. `start` es inclusivo y `end` exclusivo. | `curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&min_mag=4&country_id=ESP"` |
+| `GET /api/estadisticas` | Agregaciones sobre todo el conjunto filtrado: por hora UTC, por país, distribuciones de magnitud y profundidad y comparación con 2025. | `curl "http://127.0.0.1:8000/api/estadisticas?min_mag=4"` |
+| `GET /api/salud` | Estado del servicio y de las dos bases de datos (`ok` o `degraded`); responde siempre 200. | `curl "http://127.0.0.1:8000/api/salud"` |
 
-Sin parámetros devuelve las últimas 24 horas (ventana por defecto, `metadata.period.default_applied`
-en `true`), todas las magnitudes y hasta 1.000 eventos:
+Filtros comunes: `mode` (`live` o `replay`), `start`, `end`, `min_mag`, `country_id` y
+`exclude_synthetic`. Para recorrer todas las páginas de `/api/eventos` se repite la petición con
+`metadata.next_offset` como `offset` hasta que sea `null`.
 
-```bash
-curl "http://127.0.0.1:8000/api/eventos"
-```
-
-Con periodo, magnitud mínima y país. `start` es inclusivo y `end` exclusivo:
-
-```bash
-curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&min_mag=4&country_id=ESP"
-```
-
-Si solo se indica `end`, la ventana por defecto son las 24 horas anteriores a él.
-
-Paginación con `limit` (de 1 al máximo, 1.000 por defecto) y `offset` (0 o mayor). Para recorrer
-todos los resultados, se pide una página, se lee `metadata.next_offset` y se repite con ese valor
-como `offset`, con los mismos filtros, hasta que sea `null`. Si la primera página trajo 500
-eventos, la siguiente empieza en `offset=500`:
-
-```bash
-curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&limit=500&offset=0"
-curl "http://127.0.0.1:8000/api/eventos?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&limit=500&offset=500"
-```
-
-### Estadísticas
-
-Admiten los mismos filtros (`start`, `end`, `min_mag`, `country_id`) y `baseline_year` (2025 por
-defecto), que fija el año de referencia de la comparación. Se calculan sobre el conjunto completo
-del filtro, no sobre una página. Su `total` coincide con `metadata.total` de `/eventos` con los
-mismos filtros; `comparison.ratio` vale `"ND"` si la media diaria de referencia es 0.
-
-```bash
-curl "http://127.0.0.1:8000/api/estadisticas?start=2025-01-01T00:00:00Z&end=2025-02-01T00:00:00Z&min_mag=4&country_id=ESP&baseline_year=2025"
-curl "http://127.0.0.1:8000/api/estadisticas?min_mag=4&country_id=ESP"
-```
-
-La segunda orden, sin periodo, usa las últimas 24 horas, igual que `/eventos`.
-
-### Salud
-
-```bash
-curl "http://127.0.0.1:8000/api/salud"
-```
-
-Responde siempre 200 con `status` `ok` o `degraded`. Con `degraded`, `database` o
-`replay_database` valen `unavailable` y `last_ingestion` es `null`. No muestra credenciales ni
-datos de conexión.
-
-### Modo reproducción
-
-Con `mode=replay` se consulta el esquema de reproducción en lugar de los datos reales, y no se
-aplica la ventana de 24 horas por defecto. `exclude_synthetic=true` quita los casos sintéticos; solo
-tiene efecto en este modo:
+**Modo reproducción.** Con `mode=replay` se consulta el esquema de reproducción en lugar de los datos
+reales, sin la ventana de 24 horas por defecto; `metadata.label` es `"REPRODUCCIÓN"` y ninguna
+respuesta mezcla los dos esquemas. `exclude_synthetic=true` quita los casos sintéticos.
 
 ```bash
 curl "http://127.0.0.1:8000/api/eventos?mode=replay&exclude_synthetic=true&limit=5"
-curl "http://127.0.0.1:8000/api/estadisticas?mode=replay&exclude_synthetic=true"
 ```
 
-En la respuesta, `metadata.mode` es `"replay"`, `metadata.label` es `"REPRODUCCIÓN"` y
-`metadata.last_replayed_at` indica la última reproducción (milisegundos, o `null`). Cada `feature`
-añade `properties.replayed_at` (milisegundos) y `properties.synthetic` (booleano).
-`metadata.last_ingestion` sigue siendo la última consulta correcta a USGS. Ninguna respuesta
-mezcla los dos esquemas.
+**Errores.** Siempre JSON, nunca `features: []` con 200 por un fallo:
 
-### Errores
+| Código | Cuándo | Cuerpo |
+|---|---|---|
+| 422 | Parámetro inválido | `{"error": "invalid_parameters", "detail": [{"param": "...", "message": "..."}]}` |
+| 503 | Base de datos no disponible; se recupera sola al volver la base | `{"error": "database_unavailable", "detail": "..."}` |
+| 500 | Error inesperado | `{"error": "internal_error", "detail": "..."}` |
+| 429 | Más de 60 peticiones por minuto por visitante (solo por el túnel) | `{"error": "too_many_requests", "message": "..."}` |
 
-Todos los errores devuelven JSON. Con `curl -i` se ve el código de estado:
-
-```bash
-curl -i "http://127.0.0.1:8000/api/eventos?mode=x&start=2025-01-01T00:00:00"
-```
-
-Parámetro inválido, HTTP 422. Aquí `mode` no es `live` ni `replay`, y `start` no lleva zona horaria:
-
-```json
-{"error": "invalid_parameters", "detail": [{"param": "mode", "message": "..."}, {"param": "start", "message": "..."}]}
-```
-
-Base de datos no disponible, pool sin abrir o tiempo agotado, HTTP 503:
-
-```json
-{"error": "database_unavailable", "detail": "..."}
-```
-
-La API no devuelve `features: []` con 200 por un fallo. Un error inesperado devuelve 500 con
-`{"error": "internal_error", "detail": "..."}`. Tras un 503, la API no necesita reiniciarse: en
-cuanto la base vuelve, las consultas funcionan y `/salud` pasa a `ok`.
-
-### Leer `metadata`
-
-| Campo | Significado |
-|---|---|
-| `generated` | Instante en que se generó la respuesta (ms). |
-| `last_ingestion` | Última consulta correcta a USGS (ms). Indica la frescura de los datos. |
-| `mode` | `live` o `replay`. |
-| `count` | Eventos en esta página. |
-| `total` | Eventos que cumplen los filtros, en todas las páginas. |
-| `limit`, `offset` | Página pedida. |
-| `truncated` | `true` si `offset + count < total`: quedan eventos por pedir. |
-| `next_offset` | `offset` de la página siguiente, o `null` si no quedan. |
-| `period` | Periodo efectivo de la consulta; `default_applied: true` si se aplicó la ventana de 24 horas. |
-| `null_magnitude` | Eventos con magnitud nula que cumplen el resto de filtros; `excluded: true` si hay `min_mag`, porque entonces no están en `features`. |
-| `quarantined` | Filas de cuarentena no sintéticas del modo; `invalid_geometry` es el subconjunto por geometría. |
-
-`generated` es cuándo respondió la API; `last_ingestion` es cuándo fue la última ingesta correcta.
-Una respuesta recién generada con un `last_ingestion` antiguo significa que USGS no se ha consultado
-con éxito desde hace tiempo. Para convertir un valor en fecha:
-
-```bash
-date -u -d @$((1793113140000/1000))
-```
-
-Los parámetros desconocidos se ignoran sin error. Por ejemplo, `format=geojson` no cambia nada: la
-respuesta sigue siendo un `FeatureCollection`. Esto significa que un parámetro mal escrito produce
-el resultado por defecto, no un aviso.
-
-Ya no existen los nombres de la API anterior: `date_from`, `min_magnitude`, `country`, `format`,
-`/estadisticas/paises`, `/estadisticas/timeline` y `/health`. Sus equivalentes son `start` y `end`,
-`min_mag`, `country_id`, la respuesta `FeatureCollection` por defecto, `/estadisticas` y `/salud`.
+`metadata.last_ingestion` es la última consulta correcta a USGS y mide la frescura de los datos.
 
 ## 7. Datos
 
@@ -650,55 +542,6 @@ Notas:
   [docs/evidence/005/](docs/evidence/005/README.md); explicación y resultados medidos en
   [docs/report.md](docs/report.md#reproducción-histórica).
 
-### Calidad de los datos
-
-El consumidor aplica reglas explícitas, cada una con un código estable
-([catálogo de reglas](specs/004-consumer-quality/contracts/rules-catalog.md)). Solo va a
-cuarentena lo que no puede tratarse (JSON ilegible, sin identificador, tiempo o versión,
-geometría que no es un punto, coordenadas imposibles, o una versión que el modelo rechaza), con
-**todos** los motivos y el mensaje original. La magnitud, la profundidad y el tipo de magnitud
-ausentes se guardan nulos, nunca como cero; las anomalías (profundidad negativa, valores fuera
-de rango, tiempo futuro…) se señalan en `quality_flags` sin rechazar el evento. El país se
-obtiene por punto en polígono; sin polígono queda nulo («Sin país asignado»).
-
-Los recuentos de cada regla se obtienen de lo almacenado, con el denominador explícito:
-
-```bash
-docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -f /queries/quality.sql'
-```
-
-El análisis completo, por dimensión, está en el apartado «Calidad de los datos» de
-[docs/report.md](docs/report.md).
-
-**Reprocesar la cuarentena** con las reglas vigentes (por ejemplo, tras retirar una regla):
-
-```bash
-docker compose run --rm quality-reprocess --dry-run     # solo lista lo que haría
-docker compose run --rm quality-reprocess
-```
-
-Es idempotente y no borra nada: cada fila de cuarentena queda marcada con la fecha y el
-resultado (`recovered_*` o `still_rejected`), y el registro de mensajes conserva el resultado
-original junto al del reprocesado.
-
-**Casos de prueba dañados a propósito.** Se inyectan en el sistema real, separados de los datos
-reales (prefijo `synthetic-` y marca `synthetic`), que las consultas de calidad excluyen:
-
-```bash
-docker compose -f compose.yaml -f compose.dev.yaml run --rm \
-  -e KAFKA_BOOTSTRAP_SERVERS=kafka:9092 -e KAFKA_TOPIC_LIVE=earthquakes.live \
-  -e KAFKA_TOPIC_CATALOG=earthquakes.catalog -e KAFKA_TOPIC_REPLAY=earthquakes.replay \
-  tests python -m tests.synthetic.inject --list      # sin --list los publica; repetirlo no duplica nada
-```
-
-**Base creada antes de la spec 004.** Los ficheros de `db/sql/` solo se ejecutan con el volumen
-vacío. Para añadir a una base existente las columnas de reprocesado sin recrearla:
-
-```bash
-MSYS_NO_PATHCONV=1 docker compose exec -T postgres sh -c \
-  'export PGUSER="$POSTGRES_USER"; /sql/apply.sh "$POSTGRES_DB" 041_consumer_quality.sql'
-```
-
 ## 8. Pruebas
 
 Las pruebas se ejecutan en un contenedor dentro de la red de Compose, contra una base temporal
@@ -795,7 +638,7 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
 6. **Compilar y publicar en Netlify.** `netlify.toml` ya define la base `frontend`, el comando
    `npm run build` y la publicación de `dist/observatorio/browser`. Netlify compila desde el
    repositorio, así que la URL de `config.json` debe estar en la rama que se despliega (la URL no es
-   secreta; el authtoken sí, y no debe estar nunca). El despliegue lo hace la usuaria.
+   secreta; el authtoken sí, y no debe estar nunca). El despliegue lo hace la persona autora.
 
 7. **Comprobar desde otro dispositivo.** Abrir la URL de Netlify en un móvil con datos, fuera de la
    red del equipo. Debe cargar el mapa y la tabla, y mostrar el estado de frescura con la hora de la
@@ -804,16 +647,6 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
 8. **Si cambia la URL del túnel.** La URL queda compilada en el panel: no basta con reiniciar. Actualizar
    `apiUrl` en `config.json`, repetir `npm run build` y publicar de nuevo en Netlify. Si cambia el
    origen de Netlify, actualizar `CORS_ORIGINS` y recrear la API (paso 4).
-
-### Guion de la defensa
-
-| Momento | Qué hacer | Qué debe verse |
-|---|---|---|
-| Cerrar y reabrir el túnel | Parar el servicio `tunnel` (`docker compose --profile tunnel stop tunnel`) y volver a arrancarlo | Con el túnel cerrado: aviso de backend inaccesible con la última lectura y su hora, sin perder los eventos ya cargados. Al reabrirlo, vuelve a «Datos al día» en el siguiente refresco, sin recargar la página |
-| Reproducción | Cambiar a modo «Reproducción» y elegir un periodo del histórico (ver [demostración](#demostración-de-la-defensa)) | «REPRODUCCIÓN» en estado, mapa, tabla y gráficos, con la última reproducción. Al volver a «Real», los totales reales no cambian |
-| Nulos como ND | Buscar en la tabla un evento sin magnitud o sin profundidad | «ND», nunca 0 ni un hueco. El 0 real sigue mostrándose como 0 |
-| Evento marítimo | Buscar un evento en el mar (por ejemplo, un lugar «Hawaii» sin país) | «Sin país asignado» en la ficha, en la tabla y en el gráfico por país; no aparece en el selector de país |
-| Truncado | Seleccionar 2025 completo (18.302 eventos) | Aviso de respuesta truncada, «Mostrando 1000 de 18302», «Cargar más» para avanzar, y estadísticas con el total |
 
 Estado de las comprobaciones y lo que queda pendiente (túnel ngrok real y Netlify real):
 [docs/evidence/007/README.md](docs/evidence/007/README.md).

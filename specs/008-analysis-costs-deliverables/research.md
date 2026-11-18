@@ -44,7 +44,7 @@ No quedan incógnitas sin resolver. Decisiones:
   la primera tarea tras mirar `api/`.
 
 ## R6. Costes
-- **Decisión**: tabla por partida con columna «Medida/Supuesto»: hardware (portátil de la usuaria,
+- **Decisión**: tabla por partida con columna «Medida/Supuesto»: hardware (portátil de la persona autora,
   amortización lineal), electricidad (potencia supuesta × horas × tarifa con fecha), almacenamiento
   (tamaño medido de la base y de Kafka), transferencia (bytes medidos de la API × peticiones cada
   60 s), mantenimiento y desarrollo (horas supuestas × tarifa supuesta). Límites de Netlify y ngrok
@@ -57,9 +57,9 @@ No quedan incógnitas sin resolver. Decisiones:
 
 ## R7. Trazabilidad
 - **Decisión**: una tabla por eje (§11, §12, §13) dentro de `docs/report.md`, con estado
-  `superada con evidencia` / `parcial` / `pendiente (usuaria)`. Se construye leyendo los
+  `superada con evidencia` / `parcial` / `pendiente (persona autora)`. Se construye leyendo los
   `README.md` de `docs/evidence/002..007`; los textos del enunciado se leen de
-  `C:\Users\Casa\Downloads\resources` (el enunciado no se versiona).
+  la carpeta local `resources` (el enunciado no se versiona).
 
 ## R8. Higiene
 - **Decisión**: `git ls-files` filtrado por patrones (`node_modules`, `.env`, `*.bak`, `*.orig`, datos

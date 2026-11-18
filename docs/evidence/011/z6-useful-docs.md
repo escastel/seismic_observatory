@@ -1,6 +1,6 @@
 # 011 · Documentación comprensible (T012: Z6)
 
-Una «persona sin contexto» (agente Sonnet nuevo, sin acceso al repositorio) recibió solo `GET /api/openapi.json` y el HTML de `/docs`, guardados aparte, y debía obtener los eventos de magnitud ≥ 5 de las últimas 24 horas. Duración del agente: **≈ 7 s** (2 lecturas).
+Una «persona sin contexto» (un agente de IA sin contexto, sin acceso al repositorio) recibió solo `GET /api/openapi.json` y el HTML de `/docs`, guardados aparte, y debía obtener los eventos de magnitud ≥ 5 de las últimas 24 horas. Duración del agente: **≈ 7 s** (2 lecturas).
 
 | Esperado | Observado |
 |---|---|
