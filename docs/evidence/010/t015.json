@@ -1,0 +1,33 @@
+[
+  {
+    "name": "albania-2025",
+    "apiTotal": 3,
+    "apiPeriod": {
+      "start": 1735689600000,
+      "end": 1767225600000,
+      "default_applied": false
+    },
+    "map": "3 eventos dibujados · 0 omitidos por coordenadas no válidas",
+    "popup": null,
+    "alerts": [],
+    "bar": "3 events",
+    "tableRows": 3
+  },
+  {
+    "name": "replay-empty",
+    "apiTotal": 0,
+    "apiPeriod": {
+      "start": 1795006085615,
+      "end": 1795006085615,
+      "default_applied": false
+    },
+    "map": "0 eventos dibujados · 0 omitidos por coordenadas no válidas REPRODUCCIÓN",
+    "popup": "No hay eventos registrados con las condiciones del filtro",
+    "alerts": [
+      "Información: Modo reproducción: los datos mostrados son una reproducción, no datos en vivo.",
+      "Información: No hay eventos registrados con las condiciones del filtro"
+    ],
+    "bar": "0 events",
+    "tableRows": 0
+  }
+]

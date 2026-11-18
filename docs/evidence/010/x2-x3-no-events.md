@@ -1,4 +1,4 @@
-# X2 y X3. Filtro sin eventos (T015, parcial)
+# X2 y X3. Filtro sin eventos (T015)
 
 Sistema real: API local reconstruida con la corrección, panel con `ng serve` y Chrome (Puppeteer), 1440×900. Datos crudos en [x2-x3.json](x2-x3.json); capturas `x2-*.png`, `x3-*.png` y [x2-1-albania-popup-map.png](x2-1-albania-popup-map.png).
 
@@ -13,4 +13,11 @@ Sistema real: API local reconstruida con la corrección, panel con `ng serve` y 
 
 **Defecto encontrado y corregido durante la prueba**: el emergente estaba en el DOM pero tapado por los paneles de Leaflet (z-index 400–1000); se subió su `z-index` a 1100 y se verificó en la captura.
 
-**Pendiente (no ejecutado en la interfaz)**: Albania con 2025 completo y reproducción sin eventos. La API de ambos casos está cubierta por `tests/query_api/test_statistics.py`.
+## Casos añadidos al cerrar T015 (API real, [t015.json](t015.json))
+
+| Escenario | Esperado | Observado |
+|---|---|---|
+| Albania con 2025 completo | coincide con la API (`/api/estadisticas`: 3) | 3 eventos dibujados, barra 3, 3 filas, sin emergente ni avisos |
+| Reproducción sin eventos (magnitud mínima 9,9) | 0 eventos, emergente y aviso de información; la API devuelve `period.start == period.end` numéricos | 0 eventos dibujados con «REPRODUCCIÓN»; emergente «No hay eventos registrados con las condiciones del filtro»; avisos de reproducción y de sin eventos; la API devuelve `start == end` (1795006085615) |
+
+Capturas: `t015-albania-2025.png` y `t015-replay-empty.png`.
