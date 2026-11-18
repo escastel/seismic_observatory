@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mockup · Seismic Observatory</title>
+<style>
+  :root {
+    --bg:#0b1320; --surface:#111c2e; --surface2:#16243a; --border:#25364f; --text:#e8eef6; --muted:#9fb0c6;
+    --accent:#f2b134; --ok:#3ecf8e; --warn:#f2b134; --err:#ff6b6b; --map:#13202f; --land:#1b2a3d; --coast:#3a4f6b;
+    --d1:#f2c14e; --d2:#ee7b4d; --d3:#a56be0; --plate:#ff6b6b;
+    --heat:linear-gradient(90deg,#ffe066,#ffb347,#ff7a3d,#e03b2e,#8b0f1c);
+    color-scheme: dark;
+  }
+  html[data-theme="light"] {
+    --bg:#eef3f8; --surface:#ffffff; --surface2:#f4f7fb; --border:#d3dde9; --text:#14283d; --muted:#51647a;
+    --accent:#c77c00; --ok:#0f8a5f; --warn:#9a6200; --err:#c0302f; --map:#dfe9f2; --land:#f6f4ee; --coast:#9aaabc;
+    --d1:#c98400; --d2:#d2471f; --d3:#7a3fb0; --plate:#d6453d; color-scheme: light;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--text); font:15px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif; }
+  .wrap { max-width:1440px; margin:0 auto; padding:14px 20px 40px; display:grid; gap:12px; }
+  header.top { display:flex; align-items:center; gap:12px; padding:4px 2px; }
+  header.top svg { width:40px; height:40px; flex:none; }
+  .brand { font-size:1.5rem; font-weight:700; letter-spacing:.2px; }
+  .brand .s { color:var(--accent); }
+  .grow { flex:1; }
+  .pill { display:inline-flex; align-items:center; gap:8px; padding:6px 12px; border-radius:999px; background:var(--surface); border:1px solid var(--border); font-size:.85rem; }
+  .dot { width:9px; height:9px; border-radius:50%; background:var(--ok); box-shadow:0 0 0 3px color-mix(in srgb,var(--ok) 25%,transparent); }
+  /* status bar */
+  .statusbar { background:var(--surface); border:1px solid var(--border); border-radius:12px; display:grid; grid-template-columns:repeat(5,1fr) auto; align-items:stretch; }
+  .metric { padding:8px 14px; border-right:1px solid var(--border); min-width:0; }
+  .metric small { display:block; color:var(--muted); font-size:.72rem; text-transform:uppercase; letter-spacing:.06em; }
+  .metric b { font-size:1.15rem; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .metric .sub { color:var(--muted); font-size:.75rem; display:block; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .okt { color:var(--ok); }
+  .more { align-self:center; margin:0 10px; }
+  button, .btn { font:inherit; color:var(--text); background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 12px; cursor:pointer; }
+  .btn.primary { background:var(--accent); color:#10151d; border-color:transparent; font-weight:600; }
+  .details { display:none; background:var(--surface); border:1px dashed var(--border); border-radius:12px; padding:10px 14px; color:var(--muted); font-size:.85rem; grid-template-columns:repeat(4,1fr); gap:8px 16px; }
+  body.show-details .details { display:grid; }
+  .details b { color:var(--text); display:block; }
+  /* filters one line */
+  .filters { display:flex; flex-wrap:wrap; align-items:end; gap:10px 12px; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:10px 14px; }
+  .filters label { display:grid; gap:3px; font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.05em; }
+  .filters input, .filters select { font:inherit; color:var(--text); background:var(--surface2); border:1px solid var(--border); border-radius:8px; padding:7px 9px; min-width:0; }
+  .seg { display:inline-flex; border:1px solid var(--border); border-radius:8px; overflow:hidden; }
+  .seg span { padding:7px 12px; background:var(--surface2); }
+  .seg span.on { background:var(--accent); color:#10151d; font-weight:600; }
+  .filters .actions { margin-left:auto; display:flex; gap:8px; }
+  .chips { display:flex; gap:6px; flex-wrap:wrap; color:var(--muted); font-size:.8rem; align-items:center; }
+  .chip { background:var(--surface2); border:1px solid var(--border); border-radius:999px; padding:2px 10px; }
+  /* map */
+  .mapbox { position:relative; height:62vh; min-height:430px; border-radius:14px; overflow:hidden; border:1px solid var(--border); background:var(--map); }
+  .mapbox svg.world { position:absolute; inset:0; width:100%; height:100%; }
+  .land { fill:var(--land); stroke:var(--coast); stroke-width:1; }
+  .plate { fill:none; stroke:var(--plate); stroke-width:1.6; stroke-dasharray:6 4; opacity:.9; }
+  .ctl { position:absolute; background:color-mix(in srgb,var(--surface) 92%,transparent); border:1px solid var(--border); border-radius:12px; padding:10px 12px; backdrop-filter:blur(6px); font-size:.85rem; }
+  .layers { top:12px; right:12px; width:210px; }
+  .layers h4, .legend h4 { margin:0 0 6px; font-size:.72rem; color:var(--muted); text-transform:uppercase; letter-spacing:.06em; }
+  .layers label { display:flex; gap:8px; align-items:center; padding:2px 0; }
+  .layers hr { border:0; border-top:1px solid var(--border); margin:8px 0; }
+  .legend { left:12px; bottom:12px; width:230px; }
+  .legend ul { list-style:none; margin:0; padding:0; display:grid; gap:3px; }
+  .sw { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:8px; vertical-align:-1px; }
+  .samp { left:12px; top:12px; display:inline-flex; gap:8px; align-items:center; padding:6px 12px; }
+  .zoom { left:12px; top:56px; padding:0; display:grid; }
+  .zoom span { width:32px; height:32px; display:grid; place-items:center; font-size:1.2rem; }
+  .zoom span + span { border-top:1px solid var(--border); }
+  .ev { position:absolute; border-radius:50%; transform:translate(-50%,-50%); }
+  .cl { position:absolute; transform:translate(-50%,-50%); border-radius:50%; display:grid; place-items:center; font-weight:700; color:#10151d; }
+  .cl::before { content:""; position:absolute; inset:-7px; border-radius:50%; border:2px solid currentColor; opacity:.35; }
+  .heatbar { height:10px; border-radius:6px; background:var(--heat); margin:6px 0 2px; }
+  .empty-note { position:absolute; left:50%; top:46%; transform:translate(-50%,-50%); max-width:420px; text-align:center; padding:18px 22px; display:none; }
+  body.no-events .empty-note { display:block; }
+  body.no-events .ev, body.no-events .cl { display:none; }
+  .empty-note b { display:block; font-size:1.05rem; margin-bottom:4px; }
+  /* analysis */
+  h2 { margin:10px 2px 0; font-size:1.05rem; }
+  .grid { display:grid; grid-template-columns:repeat(2,1fr); gap:12px; }
+  .card { background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:12px 14px; }
+  .card h3 { margin:0 0 2px; font-size:.95rem; } .card p { margin:0 0 8px; color:var(--muted); font-size:.78rem; }
+  .bars { display:grid; gap:5px; }
+  .bar { display:grid; grid-template-columns:120px 1fr 54px; gap:8px; align-items:center; font-size:.8rem; }
+  .bar i { display:block; height:12px; border-radius:6px; background:linear-gradient(90deg,var(--d1),var(--d2)); }
+  table { width:100%; border-collapse:collapse; font-size:.82rem; }
+  th, td { text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
+  th { color:var(--muted); font-weight:600; }
+  .note { color:var(--muted); font-size:.8rem; padding:0 2px; }
+  @media (max-width: 760px) {
+    .wrap { padding:10px 10px 30px; }
+    .brand { font-size:1.2rem; } header.top svg { width:32px; height:32px; }
+    .statusbar { grid-template-columns:repeat(3,1fr) auto; } .metric { padding:6px 10px; } .metric b { font-size:1rem; } .metric .sub { display:none; }
+    .metric:nth-child(n+4):nth-child(-n+5) { display:none; } .metric:nth-child(3) { border-right:0; }
+    .more { margin:0 8px; padding:6px 10px; }
+    .filters { display:none; } .filters-mobile { display:flex !important; }
+    .layers { width:170px; } .legend { display:none; }
+    .grid { grid-template-columns:1fr; } .details { grid-template-columns:1fr 1fr; }
+    .mapbox { height:56vh; min-height:340px; }
+  }
+  .filters-mobile { display:none; gap:8px; align-items:center; background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:8px 10px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="top">
+    <svg viewBox="0 0 64 64" role="img" aria-label="Logotipo"><rect x="2" y="2" width="60" height="60" rx="14" fill="#0f1b2b"/><path d="M43 19.5C43 14.5 37.5 12 32 12C25.5 12 21 15.2 21 20.4C21 25.6 25.6 27.6 32 29.8C38.6 32.1 43 34.4 43 40C43 45.6 38.2 52 31.5 52C25.4 52 21 49.2 21 44" fill="none" stroke="#f2b134" stroke-width="5.2" stroke-linecap="round" stroke-linejoin="round"/><path d="M5 32H17L21 25L26 40L31 22L36 42L40 29L44 32H59" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" opacity=".92"/></svg>
+    <div class="brand"><span class="s">Seismic</span> Observatory</div>
+    <div class="grow"></div>
+    <span class="pill"><span class="dot"></span> Datos al día</span>
+  </header>
+
+  <!-- UNA sola barra: sustituye al «Estado del panel» grande y a las cinco tarjetas -->
+  <section class="statusbar" aria-label="Estado y resumen">
+    <div class="metric"><small>Eventos</small><b>203</b><span class="sub">de 203 · unidad: eventos</span></div>
+    <div class="metric"><small>Última ingesta</small><b>14:02 UTC</b><span class="sub">consulta correcta a USGS</span></div>
+    <div class="metric"><small>Estado</small><b class="okt">● Al día</b><span class="sub">lectura del panel 14:02:18</span></div>
+    <div class="metric"><small>Periodo (UTC)</small><b>Últimas 24 h</b><span class="sub">17-nov 14:02 → ahora</span></div>
+    <div class="metric"><small>Sin valor</small><b>0 · 0</b><span class="sub">magnitud · profundidad</span></div>
+    <button class="more" onclick="document.body.classList.toggle('show-details')">Detalles ▾</button>
+  </section>
+  <section class="details" aria-label="Detalles del sistema">
+    <div><b>Última lectura correcta del panel</b>2026-11-18 14:02:18 UTC</div>
+    <div><b>Generación de la respuesta (API)</b>2026-11-18 14:02:17 UTC</div>
+    <div><b>Última ingesta (USGS)</b>2026-11-18 14:02:05 UTC</div>
+    <div><b>Eventos en cuarentena</b>2 (geometría no válida: 0)</div>
+  </section>
+
+  <!-- Filtros en una sola línea -->
+  <section class="filters" aria-label="Filtros">
+    <div class="seg" role="group" aria-label="Modo de datos"><span class="on">Real</span><span>Reproducción</span></div>
+    <label>Desde (UTC)<input type="text" value="dd/mm/aaaa --:--" size="15"></label>
+    <label>Hasta (UTC)<input type="text" value="dd/mm/aaaa --:--" size="15"></label>
+    <label>Magnitud mín.<input type="text" value="" placeholder="4,0" size="6"></label>
+    <label>País<select><option>Todos los países</option></select></label>
+    <div class="actions"><button class="btn primary">Aplicar</button><button class="btn">Restablecer</button></div>
+  </section>
+  <div class="filters-mobile"><button class="btn">⚙ Filtros</button><span class="chip">Real</span><span class="chip">24 h</span></div>
+  <div class="chips">Filtros aplicados: <span class="chip">Real</span><span class="chip">Últimas 24 h</span><span class="chip">Todos los países</span><span class="chip">Sin mínimo de magnitud</span></div>
+
+  <!-- MAPA: lo primero que se ve -->
+  <section class="mapbox" aria-label="Mapa interactivo">
+    <svg class="world" viewBox="0 0 1000 520" preserveAspectRatio="none" aria-hidden="true">
+      <path class="land" d="M70 90 L190 70 L290 95 L300 150 L260 200 L230 250 L170 230 L120 180 Z"/>
+      <path class="land" d="M240 270 L300 270 L330 330 L310 420 L270 470 L255 380 Z"/>
+      <path class="land" d="M440 95 L520 80 L570 110 L560 150 L500 165 L450 150 Z"/>
+      <path class="land" d="M460 185 L560 180 L590 260 L560 360 L510 400 L470 320 L450 240 Z"/>
+      <path class="land" d="M580 80 L760 70 L880 110 L860 190 L780 230 L700 240 L640 190 L600 150 Z"/>
+      <path class="land" d="M740 340 L850 330 L880 400 L800 440 L745 410 Z"/>
+      <path class="plate" d="M40 130 C120 160 180 140 250 200 S330 300 300 420"/>
+      <path class="plate" d="M420 60 C470 160 520 250 470 420"/>
+      <path class="plate" d="M600 250 C700 220 780 250 880 215"/>
+      <path class="plate" d="M700 310 C760 330 840 300 940 360"/>
+    </svg>
+
+    <!-- agrupación visual: burbujas con color y tamaño según el recuento, anillo y cifra -->
+    <div class="cl" style="left:12%;top:24%;width:54px;height:54px;background:#ee7b4d;color:#ee7b4d"><span style="color:#10151d">58</span></div>
+    <div class="cl" style="left:17%;top:46%;width:64px;height:64px;background:#e03b2e;color:#e03b2e"><span style="color:#fff">94</span></div>
+    <div class="cl" style="left:28%;top:62%;width:34px;height:34px;background:#f2c14e;color:#f2c14e"><span>6</span></div>
+    <div class="cl" style="left:70%;top:36%;width:30px;height:30px;background:#f2c14e;color:#f2c14e"><span>3</span></div>
+    <div class="cl" style="left:78%;top:64%;width:40px;height:40px;background:#ffb347;color:#ffb347"><span>9</span></div>
+    <div class="cl" style="left:93%;top:50%;width:26px;height:26px;background:#f2c14e;color:#f2c14e"><span>2</span></div>
+    <!-- sueltos: mismo lenguaje (brillo), color por profundidad -->
+    <div class="ev" style="left:46%;top:36%;width:22px;height:22px;background:var(--d2);box-shadow:0 0 0 4px color-mix(in srgb,var(--d2) 30%,transparent),0 0 14px var(--d2)"></div>
+    <div class="ev" style="left:42%;top:44%;width:14px;height:14px;background:var(--d1);box-shadow:0 0 0 4px color-mix(in srgb,var(--d1) 30%,transparent),0 0 12px var(--d1)"></div>
+    <div class="ev" style="left:56%;top:42%;width:16px;height:16px;background:var(--d1);box-shadow:0 0 0 4px color-mix(in srgb,var(--d1) 30%,transparent),0 0 12px var(--d1)"></div>
+    <div class="ev" style="left:86%;top:76%;width:18px;height:18px;background:var(--d3);box-shadow:0 0 0 4px color-mix(in srgb,var(--d3) 30%,transparent),0 0 14px var(--d3)"></div>
+
+    <div class="ctl samp"><span class="dot" style="background:var(--accent);box-shadow:none"></span> Muestra: 203 de 203 · agrupado</div>
+    <div class="ctl zoom"><span>+</span><span>−</span></div>
+    <div class="ctl layers">
+      <h4>Mapa base</h4>
+      <label><input type="radio" name="b" checked> Simple</label>
+      <label><input type="radio" name="b"> Satélite</label>
+      <hr>
+      <h4>Capas</h4>
+      <label><input type="checkbox" checked> Límites de placas</label>
+      <label><input type="checkbox"> Mapa de calor</label>
+      <label><input type="checkbox" checked> Agrupar eventos</label>
+    </div>
+    <div class="ctl legend">
+      <h4>Profundidad (color)</h4>
+      <ul>
+        <li><span class="sw" style="background:var(--d1)"></span>Superficial &lt; 70 km</li>
+        <li><span class="sw" style="background:var(--d2)"></span>Intermedia 70–300 km</li>
+        <li><span class="sw" style="background:var(--d3)"></span>Profunda ≥ 300 km</li>
+        <li><span class="sw" style="background:transparent;border:2px dashed var(--muted)"></span>ND (sin dato)</li>
+      </ul>
+      <h4 style="margin-top:8px">Tamaño = magnitud · Grupos = nº de eventos</h4>
+      <div class="heatbar"></div>
+      <div style="display:flex;justify-content:space-between;color:var(--muted);font-size:.72rem"><span>Menos eventos</span><span>Más (calor)</span></div>
+    </div>
+    <div class="ctl empty-note" role="status"><b>No hay eventos sísmicos ahora mismo en Albania</b>Con estos filtros no hay eventos en las últimas 24 h. Prueba a ampliar el periodo (por ejemplo, el último mes).</div>
+  </section>
+
+  <p class="note">La tabla de debajo es la alternativa accesible al mapa. Las cifras de arriba salen de la API, no de los puntos dibujados.</p>
+
+  <h2>Análisis del periodo</h2>
+  <section class="grid">
+    <div class="card"><h3>Eventos por hora UTC</h3><p>Últimas 24 h · sin filtros · unidad: eventos</p><div class="bars">
+      <div class="bar"><span>11-17 15:00</span><i style="width:70%"></i><b>9</b></div><div class="bar"><span>11-17 16:00</span><i style="width:45%"></i><b>6</b></div><div class="bar"><span>11-17 17:00</span><i style="width:90%"></i><b>12</b></div></div></div>
+    <div class="card"><h3>Eventos por país</h3><p>Incluye «Sin país asignado»</p><div class="bars">
+      <div class="bar"><span>Estados Unidos</span><i style="width:95%"></i><b>131</b></div><div class="bar"><span>Sin país asignado</span><i style="width:26%"></i><b>32</b></div><div class="bar"><span>México</span><i style="width:2%"></i><b>1</b></div></div></div>
+    <div class="card"><h3>Distribución de magnitud</h3><p>Sin valor: 0 (ND)</p><div class="bars">
+      <div class="bar"><span>0–1</span><i style="width:30%"></i><b>40</b></div><div class="bar"><span>1–2</span><i style="width:52%"></i><b>68</b></div><div class="bar"><span>4–5</span><i style="width:9%"></i><b>11</b></div></div></div>
+    <div class="card"><h3>Distribución de profundidad</h3><p>Sin valor: 0 (ND)</p><div class="bars">
+      <div class="bar"><span>0–70 km</span><i style="width:90%"></i><b>149</b></div><div class="bar"><span>70–300 km</span><i style="width:12%"></i><b>17</b></div><div class="bar"><span>≥ 300 km</span><i style="width:1%"></i><b>0</b></div></div></div>
+  </section>
+
+  <h2>Eventos sísmicos</h2>
+  <section class="card"><table><thead><tr><th>Id</th><th>Hora (UTC)</th><th>Magnitud</th><th>Profundidad</th><th>Lugar</th><th>País</th><th></th></tr></thead>
+    <tbody><tr><td>us7000rlt6</td><td>2026-11-17 23:52</td><td>4,3 mb</td><td>45,7 km</td><td>175 km SSE de Vilyuchinsk</td><td>Sin país asignado</td><td>Ver ficha</td></tr>
+    <tr><td>ak2026wvts</td><td>2026-11-17 20:36</td><td>2,0 ml</td><td>117,3 km</td><td>60 km W de Happy Valley</td><td>Estados Unidos</td><td>Ver ficha</td></tr></tbody></table></section>
+</div>
+<script>
+  const q = new URLSearchParams(location.search);
+  if (q.get('theme')) document.documentElement.dataset.theme = q.get('theme');
+  if (q.get('empty')) document.body.classList.add("no-events");
+  if (q.get('details')) document.body.classList.add('show-details');
+</script>
+</body>
+</html>
