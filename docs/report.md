@@ -486,7 +486,7 @@ sintéticos son desarrollo de esta spec.
 
 ### Cómo ejecutar la demostración
 
-Paso a paso en el [README](../README.md#demostración-de-la-defensa).
+Paso a paso en el [README](../README.md#demostración-con-reproducción-acelerada).
 
 ## API de consulta
 
@@ -583,7 +583,7 @@ reproducción identificada y conteos reales idénticos antes y después de repro
 Este apartado cierra el panel de la spec 007. El panel lee solo la API de la spec 006 y sustituye al de
 la entrega inicial, que leía un formato anterior de la API. La evidencia está en
 [docs/evidence/007/](evidence/007/README.md) y el procedimiento de la defensa en el
-[README](../README.md#10-panel-angular-y-defensa-spec-007).
+[README](../README.md#10-panel-angular-y-publicación-en-netlify).
 
 ### Qué muestra el panel
 

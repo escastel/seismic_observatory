@@ -16,7 +16,11 @@
 
 </div>
 
-## 🔗 Enlaces
+Proyecto académico de Sistemas de Big Data. Recoge los terremotos que publica USGS, los valida, los cruza con
+un catálogo de países y los sirve por una API que consulta un panel con mapa, gráficos y tabla. Responde a la
+pregunta: **¿dónde se está registrando actividad sísmica y cómo se compara con un periodo histórico equivalente?**
+
+## 🔗 Instancia de demostración
 
 | Qué | Dónde | Notas |
 |---|---|---|
@@ -26,12 +30,12 @@
 | 📄 Contrato OpenAPI | <https://modular-guidance-daybreak.ngrok-free.dev/api/openapi.json> | Solo lectura: `GET` |
 
 > [!IMPORTANT]
-> **El backend corre en un equipo local** (Docker Compose) y se publica con un túnel de ngrok. Si el equipo o el túnel
-> están apagados, el panel de Netlify sigue cargando pero muestra un aviso de «backend inaccesible» con la última lectura, y los
-> enlaces de ngrok no responden. Es el comportamiento previsto por el enunciado, no un fallo.
+> **El backend se ejecuta en un equipo local** con Docker Compose y se publica con un túnel de ngrok; Netlify solo
+> sirve el panel. Si el equipo o el túnel están apagados, el panel sigue cargando pero muestra un aviso de «backend
+> inaccesible» con la última lectura, y los enlaces de ngrok no responden: es una limitación de diseño, no un fallo.
 >
 > La primera visita a un dominio gratuito de ngrok desde un navegador muestra una página intermedia: pulsa **«Visit Site»**.
-> Hay un límite de **60 peticiones por minuto por visitante** (respuesta 429).
+> La API del túnel admite **60 peticiones por minuto por visitante** (respuesta 429).
 
 ## 🧭 Cómo funciona
 
@@ -76,8 +80,8 @@ curl -s http://127.0.0.1:8000/api/salud
 | Ver la documentación de la API en local | Abrir <http://127.0.0.1:8000/docs> |
 | Publicar la API con ngrok | `docker compose --profile tunnel up -d` ([apartado 5](#5-túnel-para-el-panel-publicado)) |
 | Cargar el histórico de 2025 | [Cargar el histórico](#cargar-el-histórico) |
-| Demostrar la reproducción acelerada | [Reproducción acelerada](#reproducción-acelerada) |
-| Preparar la defensa | [Procedimiento de la defensa](#10-panel-angular-y-defensa-spec-007) |
+| Ver la reproducción acelerada | [Demostración con reproducción acelerada](#demostración-con-reproducción-acelerada) |
+| Publicar el panel en Netlify | [Apartado 10](#10-panel-angular-y-publicación-en-netlify) |
 
 ## 🖼️ Capturas
 
@@ -89,29 +93,26 @@ curl -s http://127.0.0.1:8000/api/salud
 |---|
 | <img src="docs/img/api-docs.png" alt="Swagger UI con los tres endpoints de la API" width="620"> |
 
-## 🗂️ Dónde está cada cosa
+## 🗂️ Qué hay en el repositorio
 
-| Entregable | Ubicación |
+| Qué | Dónde |
 |---|---|
-| Memoria: decisiones, calidad, modelo, análisis, costes | [docs/report.md](docs/report.md) |
+| Memoria: decisiones, fuentes, calidad, modelo de datos, análisis, rendimiento y costes | [docs/report.md](docs/report.md) |
+| Modelo [conceptual](docs/report.md#modelo-conceptual), [lógico](docs/report.md#modelo-lógico) y [físico](docs/report.md#modelo-físico), [diccionario de datos](docs/report.md#diccionario-de-datos) e [índices](docs/report.md#índices) | [docs/report.md](docs/report.md) |
 | Calidad de los datos | [docs/calidad.md](docs/calidad.md) |
 | Evaluación financiera | [docs/evaluacion-financiera.md](docs/evaluacion-financiera.md) |
 | Evidencias de las pruebas (esperado y observado) | [docs/evidence/](docs/evidence/) |
 | SQL de creación, índices y consultas | [db/sql/](db/sql/) y [db/queries/](db/queries/) |
 | Código | [producer/](producer/) · [consumer/](consumer/) · [api/](api/) · [frontend/](frontend/) · [common/](common/) |
+| Pruebas | [tests/](tests/) |
 | Política de tráfico del túnel (60 por minuto) | [tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) |
-| Especificaciones de cada funcionalidad | [specs/](specs/) |
 
 ---
 
-Sistema local y reproducible de streaming ETL que ingiere, valida, enriquece y sirve los
-terremotos del feed GeoJSON de USGS: productor → Kafka → consumidor → PostgreSQL → API FastAPI,
-consultada por un panel Angular/Leaflet publicado en Netlify a través de un túnel ngrok.
+## 1. Qué demuestra el proyecto
 
-## 1. Objetivo académico
-
-El sistema demuestra un pipeline de datos con semántica **al menos una vez**, idempotente y
-versionado, con calidad auditable e integración espacial:
+Un pipeline de datos con semántica **al menos una vez**, idempotente y versionado, con calidad auditable e
+integración espacial:
 
 - Los eventos originales se publican en Kafka antes de procesarse.
 - El consumidor nunca descarta en silencio un evento inválido: lo guarda en cuarentena con el
@@ -137,21 +138,22 @@ versionado, con calidad auditable e integración espacial:
 
 El túnel ngrok es un sexto servicio opcional, `tunnel`, que solo arranca con
 `--profile tunnel` (apartado 5). El panel Angular no es un contenedor: se publica en Netlify
-desde `frontend/`. Desde la spec 009 tiene tema claro u oscuro según el dispositivo, mapa con fondos Simple y Satélite (desde la spec 010 se retiró Relieve) y capas opcionales (calor, agrupación y límites de placas), barra de estado, avisos por gravedad, botón de tema, gráficos con tabla y ficha de evento; detalle y licencias en [docs/report.md](docs/report.md#panel-rediseñado-spec-009) y [ajustes de la spec 010](docs/report.md#ajustes-del-panel-spec-010).
+desde `frontend/`. Tiene tema claro u oscuro según el dispositivo, mapa con fondos Simple y Satélite,
+capas opcionales (calor, agrupación y límites de placas), barra de estado, avisos por gravedad,
+gráficos con tabla equivalente y ficha de evento. El detalle está en [docs/report.md](docs/report.md).
 
-El modelo de datos, sus decisiones y el diccionario están en
-[specs/002-platform-data-model/data-model.md](specs/002-platform-data-model/data-model.md) y en
-[docs/report.md](docs/report.md); la interfaz que usan los servicios, en
-[contracts/database.md](specs/002-platform-data-model/contracts/database.md).
+El modelo de datos, sus decisiones y el diccionario de datos están en [docs/report.md](docs/report.md#modelo-conceptual);
+el SQL que lo crea, en [db/sql/](db/sql/).
 
 ### Red y superficie expuesta
 
 Solo la API publica un puerto, y únicamente en el propio equipo (`127.0.0.1:8000`). Kafka tiene
-un único listener interno (`kafka:9092`) y PostgreSQL no publica ninguno: nada fuera de la red de
-Compose puede escribir en el broker ni en la base. Es una decisión deliberada: la API es la única
-pieza que llega a Internet, a través del túnel, y se conecta con un rol de solo lectura
-(`observatory_reader`). Las herramientas que necesitan Kafka o PostgreSQL se ejecutan dentro de
-la red con `docker compose exec` o con el servicio de pruebas de `compose.dev.yaml`.
+un único listener interno (`kafka:9092`), sin acceso desde el equipo anfitrión, y PostgreSQL no
+publica ninguno: nada fuera de la red de Compose puede escribir en el broker ni en la base. Es una
+decisión deliberada: la API es la única pieza que llega a Internet, a través del túnel, y se
+conecta con un rol de solo lectura (`observatory_reader`). No hay rutas de administración ni de
+métricas. Las herramientas que necesitan Kafka o PostgreSQL se ejecutan dentro de la red con
+`docker compose exec` o con el servicio de pruebas de `compose.dev.yaml`.
 
 ### Entrega y versiones
 
@@ -175,6 +177,7 @@ el panel muestra «Sin país asignado»; nunca se imputa el país más cercano.
 - Docker Engine 26 o posterior con Docker Compose v2 (en Windows y macOS, Docker Desktop).
 - Unos 3 GB libres para las imágenes y 8 GB de RAM.
 - Git. En Windows, las órdenes de este documento se escriben para Git Bash.
+- Para el panel en desarrollo: Node 22.12 o 24.
 
 Imágenes fijadas: `postgres:16.4`, `confluentinc/cp-kafka:7.7.1`,
 `python:3.11.10-slim-bookworm` (base de productor, consumidor y API) y
@@ -192,9 +195,7 @@ cp .env.example .env
 Editar `.env` y sustituir cada `CHANGE_ME_LOCALLY` por una contraseña local: `POSTGRES_PASSWORD`
 (propietario de la base), `DB_WRITER_PASSWORD` (productor y consumidor) y `DB_READER_PASSWORD`
 (API). Poner en `CORS_ORIGINS` el origen exacto del sitio de Netlify. `.env` está en
-`.gitignore`: no se versiona nunca. La lista completa de variables está en
-[contracts/runtime.md](specs/002-platform-data-model/contracts/runtime.md) y, para la ingesta,
-en [contracts/runtime.md de la spec 003](specs/003-usgs-ingestion/contracts/runtime.md).
+`.gitignore`: no se versiona nunca. Todas las variables están comentadas en `.env.example`.
 
 ### Arrancar
 
@@ -259,10 +260,8 @@ docker compose up -d
 
 ## 5. Túnel para el panel publicado
 
-> **Este proyecto:** dominio de ngrok `modular-guidance-daybreak.ngrok-free.dev` (`NGROK_DOMAIN`) y panel en Netlify
-> `seismicobservatoryecr.netlify.app`, que debe figurar en `CORS_ORIGINS`. El panel lee la URL de la API de `frontend/public/config.json`.
-
-Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` (dominio reservado) en `.env`:
+El panel de Netlify consulta la API a través de un túnel de ngrok. Se necesita una cuenta de ngrok y un
+dominio reservado. Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` en `.env`:
 
 ```bash
 docker compose --profile tunnel up -d
@@ -278,7 +277,14 @@ docker compose --profile tunnel stop tunnel
 
 Sin `--profile tunnel` el servicio no arranca, y los cinco obligatorios funcionan igual.
 
-### Documentación interactiva de la API (spec 011)
+**Alternativa: ngrok como agente en el equipo.** Publica el puerto de la API (`127.0.0.1:8000`) y ejecuta
+`ngrok http 8000 --domain=TU-DOMINIO.ngrok-free.app`. El authtoken **nunca** va en Git ni en el
+frontend: se guarda en la configuración local de ngrok o en `.env`.
+
+La instancia de demostración usa el dominio `modular-guidance-daybreak.ngrok-free.dev` y el panel
+`seismicobservatoryecr.netlify.app`, que debe figurar en `CORS_ORIGINS`.
+
+### Documentación interactiva de la API
 
 La API sirve una documentación interactiva (Swagger UI) en `/docs`, con «Probar» para los tres
 endpoints de datos, y la raíz `/` redirige a ella:
@@ -288,15 +294,15 @@ endpoints de datos, y la raíz `/` redirige a ella:
   intermedia: pulsa «Visit Site»; «Probar» ya envía `ngrok-skip-browser-warning`).
 
 La página carga Swagger UI desde `cdn.jsdelivr.net` (versión exacta con integridad), que ve la
-dirección IP y el `Referer` del navegador. `/redoc` sigue desactivada. El túnel aplica un límite de
+dirección IP y el `Referer` del navegador. `/redoc` está desactivada. El túnel aplica un límite de
 **60 peticiones por minuto por visitante** (respuesta 429) definido en
 [tunnel/traffic-policy.yml](tunnel/traffic-policy.yml) y montado en el servicio `tunnel`.
 
 ## 6. Consultar la API
 
 La referencia completa e interactiva está en **`/docs`** (Swagger UI, con «Probar»): en local
-<http://127.0.0.1:8000/docs> y por el túnel <https://modular-guidance-daybreak.ngrok-free.dev/docs>. El
-contrato escrito está en [specs/006-query-api/contracts/api.md](specs/006-query-api/contracts/api.md).
+<http://127.0.0.1:8000/docs> y por el túnel <https://modular-guidance-daybreak.ngrok-free.dev/docs>.
+Más contexto en el apartado «API de consulta» de [docs/report.md](docs/report.md#api-de-consulta).
 
 Base: `http://127.0.0.1:8000/api` (o la URL del túnel del apartado 5, añadiendo la cabecera
 `-H "ngrok-skip-browser-warning: 1"`). Solo acepta `GET` y `OPTIONS`; cualquier otro método
@@ -342,12 +348,13 @@ curl "http://127.0.0.1:8000/api/eventos?mode=replay&exclude_synthetic=true&limit
 - `frontend/public/datos/paises.geojson`: catálogo Natural Earth de 177 países, del que salen
   `core.dim_country` y el cruce espacial del consumidor.
 
-Ninguna imagen contiene conjuntos de datos: se montan al ejecutar.
+Ninguna imagen contiene conjuntos de datos: se montan al ejecutar. Las fuentes y su procedencia están
+descritas en [docs/report.md](docs/report.md#fuentes-y-extracción).
 
 ### Cargar el histórico
 
-El histórico obligatorio (2025, mundial, magnitud ≥ 4, tipo terremoto) se carga a mano, una
-vez, con el sistema arrancado:
+El histórico (2025, mundial, magnitud ≥ 4, tipo terremoto) se carga a mano, una vez, con el sistema
+arrancado:
 
 ```bash
 docker compose run --rm catalog-loader
@@ -374,7 +381,7 @@ Diferencia:             0
 Repetir la orden no descarga de nuevo los meses ya completos ni publica nada dos veces. Para
 actualizar la instantánea con las revisiones posteriores de USGS, añadir `--refresh`.
 
-Otras opciones (ver [contracts/catalog-loader.md](specs/003-usgs-ingestion/contracts/catalog-loader.md)):
+Otras opciones (todas con `docker compose run --rm catalog-loader --help`):
 
 ```bash
 # Ampliación con 2026 hasta una fecha, con el mismo filtro
@@ -433,17 +440,17 @@ docker compose run --rm replay start --start 2025-01-01 --end 2025-04-01 --min-m
 
 Los mensajes van a `earthquakes.replay` y el consumidor los escribe en el esquema `replay`, que
 no puede modificar los datos reales de `core`. La selección sale de lo ya descargado en
-`data/usgs/catalog/`; no se consulta a USGS. El procedimiento completo de la demostración de la
-defensa (pausar, reanudar, detener, repetir y comprobar el aislamiento) está en
-[Demostración de la defensa](#demostración-de-la-defensa).
+`data/usgs/catalog/`; no se consulta a USGS. El procedimiento completo (pausar, reanudar,
+detener, repetir y comprobar el aislamiento) está en
+[Demostración con reproducción acelerada](#demostración-con-reproducción-acelerada).
 
-### Demostración de la defensa
+### Demostración con reproducción acelerada
 
-Sirve para enseñar el sistema con actividad aunque no ocurra ningún terremoto durante la defensa: se
+Sirve para ver el sistema con actividad aunque no ocurra ningún terremoto en ese momento: se
 reproduce a velocidad acelerada una selección del histórico ya descargado, por el mismo camino que los
 datos reales (Kafka → consumidor → PostgreSQL), pero en el esquema `replay`, sin tocar `core`. No
-consulta a USGS. Los datos reproducidos se reconocen desde la base por estar en el esquema `replay` y
-tener `replayed_at`; el etiquetado «REPRODUCCIÓN» en la API y el panel llega con las specs 006 y 007.
+consulta a USGS. Los datos reproducidos se reconocen por estar en el esquema `replay` y tener
+`replayed_at`; la API y el panel los etiquetan como «REPRODUCCIÓN».
 
 **Requisitos**: el stack levantado y sano (`docker compose up --build -d`) y el catálogo de 2025 con
 magnitud ≥ 4 descargado y registrado (`docker compose run --rm catalog-loader`, apartado
@@ -493,7 +500,7 @@ docker compose run --rm replay resume    # sigue por el siguiente evento, sin sa
 docker compose run --rm replay stop      # termina; lo ya publicado se conserva
 ```
 
-**5. Enseñar lo reproducido en la base** (cuando el consumidor esté al día):
+**5. Ver lo reproducido en la base** (cuando el consumidor esté al día):
 
 ```bash
 docker compose exec -T postgres sh -c 'psql -U "$POSTGRES_USER" -d "$POSTGRES_DB" -c "SELECT count(*), min(replayed_at), max(replayed_at) FROM replay.event_current"'
@@ -537,10 +544,8 @@ Notas:
   terminar, el resultado es el mismo que sin reinicio.
 - Si se crea un consumidor con un grupo nuevo, empieza por el principio del topic de reproducción
   (retención de 168 h) y repuebla `replay` con reproducciones anteriores; no afecta a `core`.
-- Procedimiento detallado y evidencia de cada escenario en
-  [specs/005-historical-replay/quickstart.md](specs/005-historical-replay/quickstart.md) y
-  [docs/evidence/005/](docs/evidence/005/README.md); explicación y resultados medidos en
-  [docs/report.md](docs/report.md#reproducción-histórica).
+- La evidencia de cada escenario está en [docs/evidence/005/](docs/evidence/005/README.md); la
+  explicación y los resultados medidos, en [docs/report.md](docs/report.md#reproducción-histórica).
 
 ## 8. Pruebas
 
@@ -550,14 +555,16 @@ Las pruebas se ejecutan en un contenedor dentro de la red de Compose, contra una
 ```bash
 docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/db -v
 docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/unit tests/contract -v
+docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/query_api -v
 docker compose -f compose.yaml -f compose.dev.yaml run --rm tests pytest tests/unit/test_replay_*.py -v
 ```
 
-`tests/db` cubre la secuencia de duplicados y revisiones de la FAQ 12, nulos y rangos,
-idempotencia con 1.000 pasadas, privilegios, aislamiento de la reproducción y procedencia. Los
-escenarios de validación con el sistema real están en
-[specs/002-platform-data-model/quickstart.md](specs/002-platform-data-model/quickstart.md), y
-sus resultados en [docs/evidence/002/](docs/evidence/002/).
+Las suites `tests/db` y `tests/query_api` comparten la base `observatory_test`: no se ejecutan a la vez.
+`tests/db` cubre la secuencia de duplicados y revisiones, nulos y rangos, idempotencia con 1.000 pasadas,
+privilegios, aislamiento de la reproducción y procedencia; `tests/query_api` comprueba el contrato de la
+API (códigos, cabeceras, CORS y documentación). El panel tiene sus propias pruebas (`npm test` en
+`frontend/`, apartado 10). Los resultados esperados y observados de las pruebas con el sistema real están
+en [docs/evidence/](docs/evidence/).
 
 ## 9. Límites tecnológicos
 
@@ -565,12 +572,12 @@ El proyecto usa únicamente el stack aprobado: Python, Kafka, PostgreSQL, FastAP
 Compose, Angular y Leaflet. No usa PostGIS, Spark, Flink ni Kubernetes: el cruce espacial se
 hace en Python con GeoPandas.
 
-## 10. Panel Angular y defensa (spec 007)
+## 10. Panel Angular y publicación en Netlify
 
-El panel (`frontend/`) lee solo la API de la spec 006 y se publica en Netlify; el backend se queda en
-este equipo y se expone con un túnel. Su configuración está en `frontend/public/config.json`. El modo
-demo se ha retirado: el panel muestra solo datos de la API, en modo real o de reproducción, y la
-reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
+El panel (`frontend/`) lee solo la API y se publica en Netlify; el backend se queda en un equipo local
+y se expone con un túnel. Su configuración está en `frontend/public/config.json`. El panel muestra solo
+datos de la API, en modo real o de reproducción, y la reproducción lleva la etiqueta «REPRODUCCIÓN» en
+todas las vistas.
 
 ### Procedimiento
 
@@ -582,20 +589,19 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
    ```
 
 2. **Levantar el túnel.** Con `NGROK_AUTHTOKEN` y `NGROK_DOMAIN` en `.env`, el servicio opcional de
-   Compose sirve (ver [sección 5](#5-túnel-para-el-panel-publicado)):
+   Compose sirve (ver [apartado 5](#5-túnel-para-el-panel-publicado)):
 
    ```bash
    docker compose --profile tunnel up -d
    ```
 
-   Alternativa: ngrok como agente en este equipo, apuntando a la API:
+   Alternativa: ngrok como agente en el equipo, apuntando a la API:
 
    ```bash
    ngrok http 8000 --domain=TU-DOMINIO.ngrok-free.app
    ```
 
-   El authtoken **nunca** va en Git ni en el frontend: en el agente se guarda en la configuración
-   local de ngrok, fuera del repositorio. Comprobar el túnel desde fuera:
+   Comprobar el túnel desde fuera:
 
    ```bash
    curl -s "https://TU-DOMINIO.ngrok-free.app/api/salud" -H "ngrok-skip-browser-warning: 1"
@@ -621,7 +627,8 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
    ```
 
    Después, recrear la API para que lea el cambio: `docker compose up -d api`. `docker compose restart`
-   no vuelve a leer `.env`.
+   no vuelve a leer `.env`. CORS no es autenticación: la API es de solo lectura y no expone nada
+   que no sea público.
 
 5. **Instalar, probar y arrancar en local.** Node 22.12 o 24 (ver `engines` en `package.json`):
 
@@ -638,7 +645,7 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
 6. **Compilar y publicar en Netlify.** `netlify.toml` ya define la base `frontend`, el comando
    `npm run build` y la publicación de `dist/observatorio/browser`. Netlify compila desde el
    repositorio, así que la URL de `config.json` debe estar en la rama que se despliega (la URL no es
-   secreta; el authtoken sí, y no debe estar nunca). El despliegue lo hace la persona autora.
+   secreta; el authtoken sí, y no debe estar nunca).
 
 7. **Comprobar desde otro dispositivo.** Abrir la URL de Netlify en un móvil con datos, fuera de la
    red del equipo. Debe cargar el mapa y la tabla, y mostrar el estado de frescura con la hora de la
@@ -648,5 +655,6 @@ reproducción lleva la etiqueta «REPRODUCCIÓN» en todas las vistas.
    `apiUrl` en `config.json`, repetir `npm run build` y publicar de nuevo en Netlify. Si cambia el
    origen de Netlify, actualizar `CORS_ORIGINS` y recrear la API (paso 4).
 
-Estado de las comprobaciones y lo que queda pendiente (túnel ngrok real y Netlify real):
-[docs/evidence/007/README.md](docs/evidence/007/README.md).
+Con el túnel cerrado, el panel muestra un aviso de backend inaccesible con la última lectura y su hora,
+sin perder los eventos ya cargados; al reabrirlo, vuelve a «Datos al día» en el siguiente refresco, sin
+recargar la página.
