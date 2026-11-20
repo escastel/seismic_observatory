@@ -6,6 +6,7 @@
 
 [![Panel en Netlify](https://img.shields.io/badge/Panel-Netlify-00C7B7?logo=netlify&logoColor=white)](https://seismicobservatoryecr.netlify.app/)
 [![API en ngrok](https://img.shields.io/badge/API-ngrok-1F1E37?logo=ngrok&logoColor=white)](https://modular-guidance-daybreak.ngrok-free.dev/docs)
+[![Vídeo en YouTube](https://img.shields.io/badge/V%C3%ADdeo-YouTube-FF0000?logo=youtube&logoColor=white)](https://youtu.be/cmCGFibHajk)
 ![Docker Compose](https://img.shields.io/badge/Docker-Compose-2496ED?logo=docker&logoColor=white)
 ![Kafka](https://img.shields.io/badge/Apache-Kafka-231F20?logo=apachekafka&logoColor=white)
 ![PostgreSQL](https://img.shields.io/badge/PostgreSQL-16-4169E1?logo=postgresql&logoColor=white)
@@ -13,6 +14,10 @@
 ![Angular](https://img.shields.io/badge/Angular-20-DD0031?logo=angular&logoColor=white)
 
 <a href="https://seismicobservatoryecr.netlify.app/"><img src="docs/img/panel-light.png" alt="Panel del Observatorio Sísmico: barra de estado, filtros y mapa con los terremotos de las últimas 24 horas" width="820"></a>
+
+<a href="https://youtu.be/cmCGFibHajk"><img src="https://i.ytimg.com/vi/cmCGFibHajk/hqdefault.jpg" alt="Vídeo de defensa del Observatorio Sísmico en YouTube" width="360"></a>
+
+▶️ **[Ver el vídeo de defensa (5 min)](https://youtu.be/cmCGFibHajk)**
 
 </div>
 
@@ -24,6 +29,7 @@ pregunta: **¿dónde se está registrando actividad sísmica y cómo se compara 
 
 | Qué | Dónde | Notas |
 |---|---|---|
+| 🎬 **Vídeo de defensa** | <https://youtu.be/cmCGFibHajk> | Recorrido del sistema en unos 5 minutos |
 | 🗺️ **Panel** (mapa, gráficos y tabla) | <https://seismicobservatoryecr.netlify.app/> | Alojado en **Netlify**; siempre carga |
 | 📖 **Documentación interactiva de la API** (Swagger UI, con «Probar») | <https://modular-guidance-daybreak.ngrok-free.dev/docs> | Pasa por **ngrok**; la raíz del dominio redirige aquí |
 | 💓 Estado del servicio | <https://modular-guidance-daybreak.ngrok-free.dev/api/salud> | `ok` o `degraded` |
