@@ -15,8 +15,6 @@
 
 <a href="https://seismicobservatoryecr.netlify.app/"><img src="docs/img/panel-light.png" alt="Panel del Observatorio Sísmico: barra de estado, filtros y mapa con los terremotos de las últimas 24 horas" width="820"></a>
 
-<a href="https://youtu.be/cmCGFibHajk"><img src="https://i.ytimg.com/vi/cmCGFibHajk/hqdefault.jpg" alt="Vídeo de defensa del Observatorio Sísmico en YouTube" width="360"></a>
-
 ▶️ **[Ver el vídeo de defensa (5 min)](https://youtu.be/cmCGFibHajk)**
 
 </div>
